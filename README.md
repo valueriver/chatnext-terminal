@@ -2,6 +2,8 @@
 
 通过浏览器远程访问本地终端。
 
+![截图](https://r2.chatnext.ai/cc-link-release/screen.png)
+
 ## 使用方法
 
 ### 1. 部署Worker服务
