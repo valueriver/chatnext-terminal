@@ -1,0 +1,13 @@
+{
+  "name": "terminal",
+  "version": "1.0.0",
+  "description": "Node.js client for Terminal",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "node-pty": "^1.0.0",
+    "ws": "^8.14.0"
+  }
+}

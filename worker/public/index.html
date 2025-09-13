@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .xterm {
+            font-size: 14px !important;
+        }
+    </style>
+</head>
+<body class="m-0 p-0 bg-black font-mono h-screen flex flex-col">
+    <div id="app">
+        <!-- 状态栏 -->
+        <div class="px-5 py-2.5 bg-gray-800 text-green-400 shrink-0" :class="{ 'text-red-500': isOffline }">
+            {{ statusText }}
+        </div>
+        
+        <!-- 命令栏 -->
+        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 flex gap-3">
+            <button @click="sendCtrlC" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                Ctrl+C
+            </button>
+            <button @click="restartPty" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                重启PTY
+            </button>
+        </div>
+        
+        <!-- 终端 -->
+        <div id="terminal-container" class="flex-1 bg-black p-3"></div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const statusText = ref('连接中...');
+                const isOffline = ref(false);
+                const showActions = ref(false);
+                
+                let terminal = null;
+                let fitAddon = null;
+                let ws = null;
+                let sessionId = null;
+
+                const wsUrl = computed(() => 
+                    sessionId ? `wss://${location.host}/ws?session=${sessionId}` : null
+                );
+
+                const initTerminal = () => {
+                    terminal = new Terminal({
+                        cursorBlink: true,
+                        theme: {
+                            background: '#000000',
+                            foreground: '#ffffff',
+                            cursor: '#ffffff'
+                        },
+                        fontSize: 14,
+                        fontFamily: 'Courier New, monospace'
+                    });
+
+                    fitAddon = new FitAddon.FitAddon();
+                    terminal.loadAddon(fitAddon);
+                    terminal.open(document.getElementById('terminal-container'));
+                    fitAddon.fit();
+
+                    terminal.onData(function(data) {
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({
+                                type: 'data.input',
+                                to: 'desktop',
+                                data: { input: data }
+                            }));
+                        }
+                    });
+                };
+
+                const connect = () => {
+                    if (!wsUrl.value) return;
+                    
+                    ws = new WebSocket(wsUrl.value);
+
+                    ws.onopen = function() {
+                        statusText.value = '已连接，等待桌面端...';
+                        isOffline.value = false;
+                        
+                        ws.send(JSON.stringify({
+                            type: 'connection.devices',
+                            to: 'all',
+                            data: { deviceType: 'web', status: 'connected' }
+                        }));
+                    };
+
+                    ws.onmessage = function(event) {
+                        try {
+                            const message = JSON.parse(event.data);
+                            
+                            switch (message.type) {
+                                case 'data.output':
+                                    if (message.data && message.data.output) {
+                                        terminal.write(message.data.output);
+                                    }
+                                    break;
+                                    
+                                case 'system.init':
+                                    if (message.data && message.data.cols && message.data.rows) {
+                                        terminal.resize(message.data.cols, message.data.rows);
+                                        fitAddon.fit();
+                                    }
+                                    break;
+                                    
+                                case 'connection.devices':
+                                    if (message.data && message.data.devices) {
+                                        const desktopConnected = message.data.devices.desktop === 'connected';
+                                        if (desktopConnected) {
+                                            statusText.value = '已连接到桌面端';
+                                            isOffline.value = false;
+                                            showActions.value = true;
+                                            
+                                            // 桌面端连接后发送当前终端尺寸
+                                            if (terminal) {
+                                                ws.send(JSON.stringify({
+                                                    type: 'system.resize',
+                                                    to: 'desktop',
+                                                    data: { cols: terminal.cols, rows: terminal.rows }
+                                                }));
+                                            }
+                                        } else {
+                                            statusText.value = '等待桌面端连接...';
+                                            isOffline.value = true;
+                                            showActions.value = false;
+                                        }
+                                    }
+                                    break;
+                            }
+                        } catch (error) {
+                            console.error('处理消息失败:', error);
+                        }
+                    };
+
+                    ws.onclose = function() {
+                        statusText.value = '连接已断开，3秒后重连...';
+                        isOffline.value = true;
+                        showActions.value = false;
+                        setTimeout(connect, 3000);
+                    };
+
+                    ws.onerror = function(error) {
+                        console.error('WebSocket错误:', error);
+                        statusText.value = '连接错误';
+                        isOffline.value = true;
+                        showActions.value = false;
+                    };
+                };
+
+                const restartPty = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'system.command',
+                            to: 'desktop',
+                            data: { command: 'restart' }
+                        }));
+                        statusText.value = '正在重启终端...';
+                    }
+                };
+
+
+                const sendCtrlC = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'system.command',
+                            to: 'desktop',
+                            data: { command: 'ctrl_c' }
+                        }));
+                    }
+                };
+
+                onMounted(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    sessionId = urlParams.get('session');
+                    
+                    if (!sessionId || sessionId === 'default') {
+                        statusText.value = '无效的访问链接，请通过桌面应用程序生成的链接访问';
+                        isOffline.value = true;
+                        document.getElementById('terminal-container').style.display = 'none';
+                        return;
+                    }
+
+                    initTerminal();
+                    connect();
+
+                    window.addEventListener('resize', () => {
+                        fitAddon.fit();
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({
+                                type: 'system.resize',
+                                to: 'desktop',
+                                data: { cols: terminal.cols, rows: terminal.rows }
+                            }));
+                        }
+                    });
+
+                    window.addEventListener('beforeunload', () => {
+                        if (ws) ws.close();
+                    });
+                });
+
+                return {
+                    statusText,
+                    isOffline,
+                    showActions,
+                    restartPty,
+                    sendCtrlC
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
