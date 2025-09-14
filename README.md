@@ -45,5 +45,3 @@ npm start
 
 - Node.js 14+
 - 支持 macOS/Linux/Windows
-
-## 系统要求
