@@ -2,6 +2,9 @@
 
 基于 Cloudflare Workers 的远程终端工具，无需自建服务器，利用 Cloudflare 的免费额度即可运行。通过浏览器，你可以随时随地在手机或其他设备访问电脑上的 Claude Code、Codex、Gemini CLI 等 AI 工具。
 
+介绍网站：https://chatnext.ai/terminal
+联系微信：agentready
+
 ![截图](https://r2.chatnext.ai/cc-link-release/screen.png)
 
 ## 使用方法
@@ -42,3 +45,5 @@ npm start
 
 - Node.js 14+
 - 支持 macOS/Linux/Windows
+
+## 系统要求
