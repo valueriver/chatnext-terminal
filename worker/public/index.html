@@ -23,15 +23,27 @@
         </div>
         
         <!-- 命令栏 -->
-        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 flex gap-3">
-            <button @click="sendCtrlC" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 flex flex-wrap gap-2">
+            <button @click="sendEnter" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                回车
+            </button>
+            <button @click="sendArrowUp" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                ↑ 上
+            </button>
+            <button @click="sendArrowDown" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                ↓ 下
+            </button>
+            <button @click="sendEsc" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                Esc
+            </button>
+            <button @click="sendCtrlC" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Ctrl+C
             </button>
-            <button @click="restartPty" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+            <button @click="restartPty" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 重启PTY
             </button>
         </div>
-        
+
         <!-- 终端 -->
         <div id="terminal-container" class="flex-1 bg-black p-3"></div>
     </div>
@@ -182,6 +194,46 @@
                     }
                 };
 
+                const sendEnter = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: '\r' }
+                        }));
+                    }
+                };
+
+                const sendArrowUp = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: '\x1b[A' }
+                        }));
+                    }
+                };
+
+                const sendArrowDown = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: '\x1b[B' }
+                        }));
+                    }
+                };
+
+                const sendEsc = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: '\x1b' }
+                        }));
+                    }
+                };
+
                 onMounted(() => {
                     const urlParams = new URLSearchParams(window.location.search);
                     sessionId = urlParams.get('session');
@@ -217,7 +269,11 @@
                     isOffline,
                     showActions,
                     restartPty,
-                    sendCtrlC
+                    sendCtrlC,
+                    sendEnter,
+                    sendArrowUp,
+                    sendArrowDown,
+                    sendEsc
                 };
             }
         }).mount('#app');
