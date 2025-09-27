@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Web Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
@@ -12,6 +12,37 @@
     <style>
         .xterm {
             font-size: 14px !important;
+        }
+
+        /* 防止iOS Safari输入时放大 */
+        input {
+            font-size: 16px !important;
+            transform-origin: left top;
+            transform: scale(0.875);
+        }
+
+        /* 防止页面缩放和选择 */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 允许输入框内容选择 */
+        input {
+            -webkit-user-select: text;
+            -khtml-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* 防止iOS双击缩放 */
+        body {
+            touch-action: manipulation;
         }
     </style>
 </head>
