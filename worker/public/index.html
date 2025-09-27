@@ -31,8 +31,11 @@
             {{ statusText }}
         </div>
 
-        <!-- 输入框 - 固定在状态栏下方 -->
-        <div v-if="showActions" class="p-3 bg-gray-800 shrink-0 fixed top-16 left-0 right-0 z-10 border-t border-gray-600">
+        <!-- 终端容器 - 中间可滚动区域 -->
+        <div id="terminal-container" class="terminal-container bg-black p-3 fixed top-16 left-0 right-0" :class="{ 'bottom-32': showShortcuts, 'bottom-16': !showShortcuts }"></div>
+
+        <!-- 输入框 - 固定底部（快捷指令上方） -->
+        <div v-if="showActions" class="p-3 bg-gray-800 shrink-0 fixed left-0 right-0 z-10 border-t border-gray-600" :class="{ 'bottom-20': showShortcuts, 'bottom-0': !showShortcuts }">
             <div class="flex gap-2">
                 <button @click="sendSpace" class="px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm border border-gray-500 rounded" title="Send Space">
                     ↓
@@ -55,10 +58,7 @@
             </div>
         </div>
 
-        <!-- 终端容器 - 中间可滚动区域 -->
-        <div id="terminal-container" class="terminal-container bg-black p-3 fixed top-32 left-0 right-0" :class="{ 'bottom-20': showShortcuts, 'bottom-0': !showShortcuts }"></div>
-
-        <!-- 命令栏 - 固定底部 -->
+        <!-- 快捷指令面板 - 最底部 -->
         <div v-if="showActions && showShortcuts" class="p-3 bg-gray-900 shrink-0 fixed bottom-0 left-0 right-0 z-10 flex flex-wrap gap-2 border-t border-gray-700">
             <button @click="sendEnter" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Enter
