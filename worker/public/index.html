@@ -13,25 +13,37 @@
         .xterm {
             font-size: 14px !important;
         }
+
+        /* 使用小视口高度单位解决移动端问题 */
+        .h-svh {
+            height: 100svh;
+        }
+
+        .terminal-container {
+            height: calc(100svh - 130px); /* 减去顶部和底部固定元素的高度 */
+        }
     </style>
 </head>
-<body class="m-0 p-0 bg-black font-mono h-screen flex flex-col">
-    <div id="app">
-        <!-- 状态栏 -->
-        <div class="px-5 py-2.5 bg-gray-800 text-green-400 shrink-0" :class="{ 'text-red-500': isOffline }">
+<body class="m-0 p-0 bg-black font-mono h-svh flex flex-col">
+    <div id="app" class="h-svh flex flex-col">
+        <!-- 状态栏 - 固定顶部 -->
+        <div class="px-5 py-2.5 bg-gray-800 text-green-400 shrink-0 fixed top-0 left-0 right-0 z-10" :class="{ 'text-red-500': isOffline }">
             {{ statusText }}
         </div>
-        
-        <!-- 命令栏 -->
-        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 flex flex-wrap gap-2">
+
+        <!-- 终端容器 - 中间可滚动区域 -->
+        <div id="terminal-container" class="terminal-container bg-black p-3 fixed top-16 left-0 right-0 bottom-20"></div>
+
+        <!-- 命令栏 - 固定底部 -->
+        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 fixed bottom-0 left-0 right-0 z-10 flex flex-wrap gap-2 border-t border-gray-700">
             <button @click="sendEnter" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
-                回车
+                Enter
             </button>
             <button @click="sendArrowUp" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
-                ↑ 上
+                ↑ Up
             </button>
             <button @click="sendArrowDown" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
-                ↓ 下
+                ↓ Down
             </button>
             <button @click="sendEsc" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Esc
@@ -39,13 +51,13 @@
             <button @click="sendCtrlC" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Ctrl+C
             </button>
+            <button @click="sendCtrlV" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
+                Ctrl+V
+            </button>
             <button @click="restartPty" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
-                重启PTY
+                Restart
             </button>
         </div>
-
-        <!-- 终端 -->
-        <div id="terminal-container" class="flex-1 bg-black p-3"></div>
     </div>
 
     <script>
@@ -234,6 +246,29 @@
                     }
                 };
 
+                const sendCtrlV = async () => {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        if (ws && ws.readyState === WebSocket.OPEN && text) {
+                            ws.send(JSON.stringify({
+                                type: 'data.input',
+                                to: 'desktop',
+                                data: { input: text }
+                            }));
+                        }
+                    } catch (error) {
+                        console.error('无法读取剪贴板:', error);
+                        // 在不支持剪贴板API的情况下，发送Ctrl+V组合键
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({
+                                type: 'data.input',
+                                to: 'desktop',
+                                data: { input: '\x16' }
+                            }));
+                        }
+                    }
+                };
+
                 onMounted(() => {
                     const urlParams = new URLSearchParams(window.location.search);
                     sessionId = urlParams.get('session');
@@ -270,6 +305,7 @@
                     showActions,
                     restartPty,
                     sendCtrlC,
+                    sendCtrlV,
                     sendEnter,
                     sendArrowUp,
                     sendArrowDown,
