@@ -48,13 +48,16 @@
 </head>
 <body class="m-0 p-0 bg-black font-mono h-screen flex flex-col">
     <div id="app" class="h-screen flex flex-col">
-        <!-- 状态栏 -->
-        <div class="px-5 py-2.5 bg-gray-800 text-green-400 shrink-0" :class="{ 'text-red-500': isOffline }">
+        <!-- 状态栏 - 固定顶部 -->
+        <div class="px-5 py-2.5 bg-gray-800 text-green-400 shrink-0 fixed top-0 left-0 right-0 z-10" :class="{ 'text-red-500': isOffline }">
             {{ statusText }}
         </div>
 
-        <!-- 快捷指令面板 - 顶部 -->
-        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 flex flex-wrap gap-2">
+        <!-- 终端容器 - 中间区域 -->
+        <div id="terminal-container" class="bg-black p-3 fixed top-16 left-0 right-0" :class="{ 'bottom-32': showActions && showShortcuts, 'bottom-16': showActions && !showShortcuts, 'bottom-0': !showActions }"></div>
+
+        <!-- 快捷指令面板 - 输入框上方，可展开收起 -->
+        <div v-if="showActions && showShortcuts" class="p-3 bg-gray-900 shrink-0 fixed left-0 right-0 bottom-16 z-10 flex flex-wrap gap-2 border-t border-gray-700">
             <button @click="sendEnter" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Enter
             </button>
@@ -78,12 +81,12 @@
             </button>
         </div>
 
-        <!-- 终端容器 -->
-        <div id="terminal-container" class="flex-1 bg-black p-3"></div>
-
-        <!-- 输入框 - 底部 -->
-        <div v-if="showActions" class="p-3 bg-gray-800 shrink-0 border-t border-gray-600">
+        <!-- 输入框 - 固定底部 -->
+        <div v-if="showActions" class="p-3 bg-gray-800 shrink-0 fixed bottom-0 left-0 right-0 z-10 border-t border-gray-600">
             <div class="flex gap-2">
+                <button @click="toggleShortcuts" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm border border-green-500 rounded">
+                    {{ showShortcuts ? '▼' : '▲' }}
+                </button>
                 <input
                     v-model="inputText"
                     @keydown.enter="sendInput"
@@ -105,6 +108,7 @@
                 const statusText = ref('连接中...');
                 const isOffline = ref(false);
                 const showActions = ref(false);
+                const showShortcuts = ref(false);
                 const inputText = ref('');
                 
                 let terminal = null;
@@ -307,6 +311,10 @@
                     }
                 };
 
+                const toggleShortcuts = () => {
+                    showShortcuts.value = !showShortcuts.value;
+                };
+
                 onMounted(() => {
                     const urlParams = new URLSearchParams(window.location.search);
                     sessionId = urlParams.get('session');
@@ -341,6 +349,7 @@
                     statusText,
                     isOffline,
                     showActions,
+                    showShortcuts,
                     inputText,
                     restartPty,
                     sendCtrlC,
@@ -349,7 +358,8 @@
                     sendArrowDown,
                     sendEsc,
                     sendInput,
-                    sendSpace
+                    sendSpace,
+                    toggleShortcuts
                 };
             }
         }).mount('#app');
