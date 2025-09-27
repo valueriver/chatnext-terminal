@@ -31,11 +31,35 @@
             {{ statusText }}
         </div>
 
+        <!-- 输入框 - 固定在状态栏下方 -->
+        <div v-if="showActions" class="p-3 bg-gray-800 shrink-0 fixed top-16 left-0 right-0 z-10 border-t border-gray-600">
+            <div class="flex gap-2">
+                <button @click="sendSpace" class="px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm border border-gray-500 rounded" title="Send Space">
+                    ↓
+                </button>
+                <input
+                    v-model="inputText"
+                    @keydown.enter="sendInput"
+                    placeholder="Type command here..."
+                    class="flex-1 px-3 py-1 bg-gray-700 text-white text-sm border border-gray-600 rounded focus:outline-none focus:border-gray-400"
+                />
+                <button @click="sendInput" class="px-4 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm border border-blue-500 rounded">
+                    Send
+                </button>
+                <button @click="clearInput" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm border border-gray-500 rounded">
+                    Clear
+                </button>
+                <button @click="toggleShortcuts" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm border border-green-500 rounded">
+                    {{ showShortcuts ? '▲' : '▼' }}
+                </button>
+            </div>
+        </div>
+
         <!-- 终端容器 - 中间可滚动区域 -->
-        <div id="terminal-container" class="terminal-container bg-black p-3 fixed top-16 left-0 right-0 bottom-20"></div>
+        <div id="terminal-container" class="terminal-container bg-black p-3 fixed top-32 left-0 right-0" :class="{ 'bottom-20': showShortcuts, 'bottom-0': !showShortcuts }"></div>
 
         <!-- 命令栏 - 固定底部 -->
-        <div v-if="showActions" class="p-3 bg-gray-900 shrink-0 fixed bottom-0 left-0 right-0 z-10 flex flex-wrap gap-2 border-t border-gray-700">
+        <div v-if="showActions && showShortcuts" class="p-3 bg-gray-900 shrink-0 fixed bottom-0 left-0 right-0 z-10 flex flex-wrap gap-2 border-t border-gray-700">
             <button @click="sendEnter" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs border border-gray-600">
                 Enter
             </button>
@@ -68,6 +92,8 @@
                 const statusText = ref('连接中...');
                 const isOffline = ref(false);
                 const showActions = ref(false);
+                const showShortcuts = ref(false);
+                const inputText = ref('');
                 
                 let terminal = null;
                 let fitAddon = null;
@@ -269,6 +295,35 @@
                     }
                 };
 
+                const sendInput = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN && inputText.value.trim()) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: inputText.value }
+                        }));
+                        inputText.value = '';
+                    }
+                };
+
+                const clearInput = () => {
+                    inputText.value = '';
+                };
+
+                const sendSpace = () => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'data.input',
+                            to: 'desktop',
+                            data: { input: ' ' }
+                        }));
+                    }
+                };
+
+                const toggleShortcuts = () => {
+                    showShortcuts.value = !showShortcuts.value;
+                };
+
                 onMounted(() => {
                     const urlParams = new URLSearchParams(window.location.search);
                     sessionId = urlParams.get('session');
@@ -303,13 +358,19 @@
                     statusText,
                     isOffline,
                     showActions,
+                    showShortcuts,
+                    inputText,
                     restartPty,
                     sendCtrlC,
                     sendCtrlV,
                     sendEnter,
                     sendArrowUp,
                     sendArrowDown,
-                    sendEsc
+                    sendEsc,
+                    sendInput,
+                    clearInput,
+                    sendSpace,
+                    toggleShortcuts
                 };
             }
         }).mount('#app');
