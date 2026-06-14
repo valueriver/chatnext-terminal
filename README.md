@@ -1,6 +1,8 @@
 # Roam
 
-**在任意设备的浏览器里操控你的电脑** —— 终端 / 文件 / 屏幕，外加一个能直接动手的本机 AI 助手：执行 shell、控制鼠标键盘、用 CDP 驱动你登录态的 Chrome。
+**在手机上继续用你电脑里的 Claude Code / Codex** —— 把本机的终端 / 文件 / 屏幕带到任意设备的浏览器，随时接管你正跑着的 CC / Codex 会话。这是 Roam 的核心。
+
+> v2 起多了一个**可选**项：内置 AI 助手。不想用 CC/Codex 时，可以接任意 OpenAI 兼容模型（开源模型、coding plan、自建网关都行），让它直接 `shell` / 控制鼠标键盘 / 用 CDP 驱动你登录态的 Chrome —— 多给你一种选择，不替代主线。
 
 机器不暴露公网。本机代理主动连 Cloudflare Worker，Worker 只做中继、不存数据。远程网页只连 Worker。模型 API Key、对话历史、文件全部留在你自己的电脑上。
 
@@ -33,15 +35,20 @@ roam/
 
 ## 能力
 
-- **远程终端** —— 多会话、随处接管
+**核心 —— 把电脑里的终端搬到手机**
+
+- **远程终端** —— 多会话、随处接管；电脑上跑着的 Claude Code / Codex，手机上接着聊
 - **文件** —— 浏览、读取、上传、重命名、删除
 - **屏幕** —— 截图查看
-- **AI 对话** —— 内置助手跑在本机，可调工具直接动手：
-  - `shell` —— 执行任意命令
-  - `computer_*` —— 截图 / 鼠标 / 键盘 / 滚动 / 打开应用（控制桌面 GUI）
-  - `browser_cdp` —— 唯一的浏览器工具，直接发 Chrome DevTools Protocol：`Page.navigate` 跳转、`Runtime.evaluate` 跑 JS 操作 DOM/点击/填表/抓数据、`Input.*` 模拟输入、`Page.captureScreenshot` 截图
-- **双主题** —— 晴空（亮）/ 谧夜（暗）
-- 固定远程连接 session id
+- 固定远程连接 session id、双主题（晴空亮 / 谧夜暗）
+
+**可选 —— 内置 AI 助手（你也可以不用，继续走 CC/Codex）**
+
+接任意 OpenAI 兼容模型（开源模型 / coding plan / 自建），让它直接动手：
+
+- `shell` —— 执行任意命令
+- `computer_*` —— 截图 / 鼠标 / 键盘 / 滚动 / 打开应用（控制桌面 GUI）
+- `browser_cdp` —— 唯一的浏览器工具，直接发 Chrome DevTools Protocol：`Page.navigate` 跳转、`Runtime.evaluate` 跑 JS 操作 DOM/点击/填表/抓数据、`Input.*` 模拟输入、`Page.captureScreenshot` 截图
 
 ## 前置要求
 
@@ -106,9 +113,9 @@ npm start
 - 访问密码（如果配置了）
 - 本地 CDP 桥地址：`ws://127.0.0.1:9510/cdp?token=<SESSION_ID>`
 
-## 3. 配置模型（用 AI 对话）
+## 3.（可选）启用内置 AI 助手
 
-在远程网页里打开 **设置 → 模型设置**，填 API 地址、API Key、模型名（任意 OpenAI 兼容接口）。配置写到本机 `~/.roam/model.json`，**Key 只留在你的电脑上**，不进仓库、不过 Worker。
+主线用 CC/Codex 的话这步可跳过。想用内置助手：在远程网页打开 **设置 → 模型设置**，填 API 地址、API Key、模型名（任意 OpenAI 兼容接口 —— 开源模型、coding plan、自建网关都行）。配置写到本机 `~/.roam/model.json`，**Key 只留在你的电脑上**，不进仓库、不过 Worker。
 
 ## 4. （可选）接入浏览器控制
 
