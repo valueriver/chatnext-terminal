@@ -1,8 +1,8 @@
-import ws from './ws.js';
-import router from './router.js';
+import ws from './system/ws/index.js';
+import router from './system/ws/dispatch.js';
 
-import guard from './services/guard/index.js';
-import terminal from './services/terminal/index.js';
+import guard from './system/auth/index.js';
+import terminal from './apps/terminal/index.js';
 
 async function boot() {
     console.log('🚀 正在启动 Roam Server...');
