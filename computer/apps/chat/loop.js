@@ -8,7 +8,6 @@ const chat = async (messages, {
     apiUrl,
     apiKey,
     model,
-    temperature,
     onEvent = () => {},
     signal,
     maxRounds = 50,
@@ -21,7 +20,6 @@ const chat = async (messages, {
 
         const payload = { model, messages: workMessages };
         if (Array.isArray(tools) && tools.length) payload.tools = tools;
-        if (temperature != null) payload.temperature = temperature;
 
         const result = await callLlmStream(apiUrl, apiKey, payload, {
             signal,

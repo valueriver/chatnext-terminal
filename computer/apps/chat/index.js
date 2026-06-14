@@ -18,6 +18,28 @@ function reply(type, reqId, data) {
     ws.broadcast(type, { reqId, ...data });
 }
 
+async function listChatsWithLiveState() {
+    const conversations = await store.listChats();
+    const stale = [];
+    for (const item of conversations) {
+        if (item.state === 'running' && !controllers.has(item.id)) {
+            item.state = 'idle';
+            stale.push(item.id);
+        }
+    }
+    stale.forEach((id) => store.setState(id, 'idle').catch(() => {}));
+    return conversations;
+}
+
+async function pageWithLiveState(chatId, limit, before) {
+    const page = await store.getPage(chatId, limit, before);
+    if (page?.meta?.state === 'running' && !controllers.has(chatId)) {
+        page.meta.state = 'idle';
+        store.setState(chatId, 'idle').catch(() => {});
+    }
+    return page;
+}
+
 // 真正跑一轮对话：fire-and-forget，事件经 ws 流式推回。
 async function runSend(d) {
     const chatId = String(d.chatId || '').trim();
@@ -70,7 +92,6 @@ async function runSend(d) {
             apiUrl: config.apiUrl,
             apiKey: config.apiKey,
             model: config.model,
-            temperature: config.temperature,
             signal: controller.signal,
             onEvent: async (event) => {
                 if (event.type === 'message') {
@@ -111,7 +132,7 @@ async function handle(message) {
     try {
         switch (t) {
             case 'ai.list': {
-                reply('ai.list.result', d.reqId, { conversations: await store.listChats() });
+                reply('ai.list.result', d.reqId, { conversations: await listChatsWithLiveState() });
                 return true;
             }
             case 'ai.create': {
@@ -119,7 +140,7 @@ async function handle(message) {
                 return true;
             }
             case 'ai.get': {
-                const page = await store.getPage(d.chatId, d.limit || 50, d.before ?? null);
+                const page = await pageWithLiveState(d.chatId, d.limit || 50, d.before ?? null);
                 reply('ai.get.result', d.reqId, {
                     chatId: d.chatId,
                     conversation: page?.meta || null,
@@ -147,6 +168,7 @@ async function handle(message) {
                 const c = controllers.get(d.chatId);
                 if (c) { c.abort(); controllers.delete(d.chatId); }
                 await store.setState(d.chatId, 'idle');
+                emit('aborted', { chatId: d.chatId });
                 reply('ai.abort.result', d.reqId, { ok: true, chatId: d.chatId });
                 return true;
             }

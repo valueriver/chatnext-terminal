@@ -27,14 +27,6 @@ function pick(path) {
 <template>
     <div class="app-panel" :class="`align-${props.align}`">
         <button class="app-panel-btn" title="应用" @click.stop="toggle">
-            <span
-                class="app-panel-dot"
-                :class="{
-                    connected: ws.state === 'connected',
-                    pending: (ws.state === 'pending' || ws.isReconnecting) && !ws.connectionLost,
-                    offline: ws.connectionLost || (ws.state === 'offline' && !ws.isReconnecting)
-                }"
-            ></span>
             <span class="app-panel-grid" aria-hidden="true">
                 <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
             </span>
@@ -99,20 +91,8 @@ function pick(path) {
     border-radius: 999px;
     background: currentColor;
 }
-.app-panel-dot {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    box-shadow: 0 0 0 2px var(--color-bg-elev);
-}
-.app-panel-dot.connected,
 .app-panel-status-dot.connected { background: var(--win); }
-.app-panel-dot.pending,
 .app-panel-status-dot.pending { background: var(--fix); }
-.app-panel-dot.offline,
 .app-panel-status-dot.offline { background: var(--bad); }
 </style>
 

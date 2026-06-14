@@ -136,7 +136,11 @@ export const useChatStore = defineStore('chat', () => {
         ws.sendMsg({ type: 'ai.send', to: 'desktop', data: { chatId: currentId.value, content } });
     }
     function abort() {
-        if (currentId.value) ws.sendMsg({ type: 'ai.abort', to: 'desktop', data: { chatId: currentId.value } });
+        if (!currentId.value) return;
+        busy.value = false;
+        stream?.resetStreaming();
+        bumpStream();
+        ws.sendMsg({ type: 'ai.abort', to: 'desktop', data: { chatId: currentId.value } });
     }
 
     return {

@@ -1,9 +1,9 @@
 // 工具实现。函数名需与 tools.js 里的 function.name 对应。
-// shell + 浏览器（Chrome/AppleScript）+ 电脑（cliclick/osascript）。
+// shell + 浏览器（browser_cdp，经 browser-use 扩展走 CDP）+ 电脑（cliclick/osascript）。
 import { exec } from 'child_process';
 import os from 'os';
 import ws from '../../system/ws/index.js';
-import * as browser from './browser.js';
+import cdpBridge from './cdp-bridge.js';
 import * as computer from './computer.js';
 
 const TIMEOUT_DEFAULT_MS = 30 * 1000;
@@ -33,15 +33,12 @@ const shell = ({ command, cwd, timeout } = {}) => new Promise((resolve) => {
     });
 });
 
-// ───────── 浏览器（Google Chrome） ─────────
-const browser_status = async () => browser.status();
-const browser_open = async ({ url } = {}) => browser.open({ url });
-const browser_navigate = async ({ url } = {}) => browser.navigate({ url });
-const browser_tabs = async () => browser.tabs();
-const browser_activate_tab = async ({ window, tab } = {}) => browser.activateTab({ window, tab });
-const browser_close_tab = async ({ window, tab } = {}) => browser.closeTab({ window, tab });
-const browser_read = async ({ maxChars } = {}) => browser.read({ maxChars });
-const browser_eval = async ({ script } = {}) => browser.evaluate({ script });
+// ───────── 浏览器：唯一工具，直发 CDP（经 browser-use 扩展） ─────────
+// 默认作用于当前活动标签；绝大多数 DOM 操作用 Runtime.evaluate 跑 JS 即可。
+const browser_cdp = async ({ method, params, tabId } = {}) => {
+    if (!method) throw new Error('缺少 CDP method，例如 "Page.navigate"、"Runtime.evaluate"。');
+    return cdpBridge.cdp(method, params || {}, tabId);
+};
 
 // ───────── 电脑（键鼠/截图） ─────────
 const computer_status = async () => computer.status();
@@ -74,6 +71,6 @@ const open_app = async ({ name } = {}) => new Promise((resolve) => {
 
 export {
     shell,
-    browser_status, browser_open, browser_navigate, browser_tabs, browser_activate_tab, browser_close_tab, browser_read, browser_eval,
+    browser_cdp,
     computer_status, computer_type, computer_key, computer_click, computer_move, computer_scroll, computer_screenshot, open_app,
 };

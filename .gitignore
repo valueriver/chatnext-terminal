@@ -16,4 +16,4 @@ worker/wrangler.jsonc
 /database/
 
 # 本机 server 配置 — 复制 server/config.example.js 到 server/config.js 后填值
-server/config.js
+computer/config.js

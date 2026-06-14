@@ -19,65 +19,31 @@ const tools = [
         },
     },
 
-    // ───────── 浏览器（Google Chrome，经 AppleScript） ─────────
+    // ───────── 浏览器：唯一工具，直发 CDP（经 browser-use 扩展驱动本机 Chrome） ─────────
     {
         type: 'function',
         function: {
-            name: 'browser_status',
-            description: '查看 Chrome 是否运行、标签数量、当前活动标签的标题与网址。',
-            parameters: { type: 'object', properties: {} },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_open',
-            description: '在 Chrome 新标签页打开一个网址（会自动补 https://）。',
-            parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_navigate',
-            description: '把 Chrome 当前活动标签导航到指定网址。',
-            parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_tabs',
-            description: '列出 Chrome 所有窗口与标签（含 window/tab 序号、是否活动、标题、网址）。',
-            parameters: { type: 'object', properties: {} },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_activate_tab',
-            description: '切换到指定窗口/标签（序号来自 browser_tabs）。',
+            name: 'browser_cdp',
+            description: [
+                '通过 Chrome DevTools Protocol 操作本机 Chrome（经 browser-use 扩展）。这是唯一的浏览器工具：你直接发原始 CDP 方法，默认作用于当前活动标签页。',
+                '常用：',
+                '· Page.navigate {url} — 打开/跳转网址；',
+                '· Runtime.evaluate {expression, returnByValue:true, awaitPromise:true} — 跑 JS：读/改 DOM、点击元素、填表单、抓数据（绝大多数网页操作用它最省事）；',
+                '· Input.dispatchMouseEvent / Input.dispatchKeyEvent — 模拟鼠标键盘；',
+                '· Page.captureScreenshot {format:"jpeg"} — 截图（返回 base64）；',
+                '· DOM.* / Network.* 等其余 CDP 域按需使用。',
+                '需 Chrome 已安装并连上 browser-use 扩展；未连接会返回明确错误。',
+            ].join('\n'),
             parameters: {
                 type: 'object',
-                properties: { window: { type: 'number', description: '窗口序号，默认 1' }, tab: { type: 'number', description: '标签序号' } },
-                required: ['tab'],
+                properties: {
+                    method: { type: 'string', description: 'CDP 方法名，如 "Page.navigate"、"Runtime.evaluate"、"Input.dispatchMouseEvent"。' },
+                    params: { type: 'object', description: '该 CDP 方法的参数对象。' },
+                    tabId: { type: 'number', description: '可选，目标标签的 tabId；默认当前活动标签。' },
+                    summary: { type: 'string', description: '本次操作的一句话摘要，面向用户展示。' },
+                },
+                required: ['method', 'summary'],
             },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_read',
-            description: '读取 Chrome 当前活动标签的可见正文文本（document.body.innerText），用于理解页面内容。',
-            parameters: { type: 'object', properties: { maxChars: { type: 'number', description: '最多返回字符数，默认 8000' } } },
-        },
-    },
-    {
-        type: 'function',
-        function: {
-            name: 'browser_eval',
-            description: '在 Chrome 当前活动标签执行 JavaScript 并返回结果（字符串）。可用于点击元素、填表单、抓取数据等精确网页操作。需 Chrome 开启「允许 Apple 事件中的 JavaScript」。',
-            parameters: { type: 'object', properties: { script: { type: 'string', description: 'JavaScript 代码，返回值会转成字符串回传。' } }, required: ['script'] },
         },
     },
 

@@ -9,7 +9,7 @@ const theme = useThemeStore();
 const model = useModelStore();
 const ws = useWsStore();
 
-const form = reactive({ provider: 'custom', baseUrl: '', apiKey: '', model: '', temperature: 0.7 });
+const form = reactive({ baseUrl: '', apiKey: '', model: '' });
 const saved = ref(false);
 const saving = ref(false);
 
@@ -19,7 +19,6 @@ const keyMasked = computed(() => model.config.keyPreview || (model.config.hasKey
 const dirty = computed(() =>
     form.baseUrl !== (model.config.baseUrl || '') ||
     form.model !== (model.config.model || '') ||
-    Number(form.temperature) !== Number(model.config.temperature ?? 0.7) ||
     form.apiKey.trim().length > 0
 );
 
@@ -27,17 +26,7 @@ function syncFromServer() {
     const c = model.config;
     form.baseUrl = c.baseUrl || '';
     form.model = c.model || '';
-    form.temperature = c.temperature ?? 0.7;
     form.apiKey = ''; // 不回填明文，留空＝不改
-    const preset = model.presets.find((p) => p.id !== 'custom' && p.baseUrl === form.baseUrl);
-    form.provider = preset ? preset.id : 'custom';
-}
-
-function onProvider() {
-    const p = model.presets.find((x) => x.id === form.provider);
-    if (!p || p.id === 'custom') return;
-    form.baseUrl = p.baseUrl;
-    if (!form.model || model.presets.some((x) => x.model === form.model)) form.model = p.model;
 }
 
 async function load() {
@@ -51,7 +40,6 @@ async function save() {
     const patch = {
         baseUrl: String(form.baseUrl).trim(),
         model: String(form.model).trim(),
-        temperature: Number(form.temperature),
     };
     if (form.apiKey.trim()) patch.apiKey = form.apiKey.trim();
     await model.save(patch);
@@ -77,7 +65,6 @@ watch(() => ws.showActions, (v) => { if (v) load(); });
                     <div class="set-card">
                         <div class="set-row">
                             <span class="set-k">主题</span>
-                            <span class="set-v">晴空亮色 / 谧夜暗色</span>
                             <div class="switch">
                                 <button class="sw" :class="{ on: theme.theme === 'sky' }" @click="theme.setTheme('sky')">🌤 晴空</button>
                                 <button class="sw" :class="{ on: theme.theme === 'night' }" @click="theme.setTheme('night')">🌙 谧夜</button>
@@ -91,12 +78,6 @@ watch(() => ws.showActions, (v) => { if (v) load(); });
                     <div class="set-title">模型设置</div>
                     <div class="set-card">
                         <div class="set-row">
-                            <span class="set-k">服务商</span>
-                            <select class="set-input" v-model="form.provider" @change="onProvider" :disabled="!ws.showActions">
-                                <option v-for="p in model.presets" :key="p.id" :value="p.id">{{ p.name }}</option>
-                            </select>
-                        </div>
-                        <div class="set-row">
                             <span class="set-k">API 地址</span>
                             <input class="set-input" v-model="form.baseUrl" :disabled="!ws.showActions" placeholder="https://api.openai.com/v1" spellcheck="false" autocapitalize="off" />
                         </div>
@@ -107,10 +88,6 @@ watch(() => ws.showActions, (v) => { if (v) load(); });
                         <div class="set-row">
                             <span class="set-k">模型</span>
                             <input class="set-input" v-model="form.model" :disabled="!ws.showActions" placeholder="gpt-4o" spellcheck="false" autocapitalize="off" />
-                        </div>
-                        <div class="set-row">
-                            <span class="set-k">温度</span>
-                            <input class="set-input" v-model="form.temperature" :disabled="!ws.showActions" type="number" step="0.1" min="0" max="2" />
                         </div>
                     </div>
                     <div class="set-note">

@@ -5,7 +5,7 @@ import path from 'path';
 import { ROOT, ensureDir } from './store.js';
 
 const CONFIG_PATH = path.join(ROOT, 'model.json');
-const DEFAULTS = { baseUrl: '', apiKey: '', model: '', temperature: 0.7, system: '', contextTurns: 100 };
+const DEFAULTS = { baseUrl: '', apiKey: '', model: '', system: '', contextTurns: 100 };
 
 async function readConfig() {
     try {
@@ -50,7 +50,7 @@ async function getRunConfig() {
         err.code = 'model_settings_missing';
         throw err;
     }
-    return { apiUrl, apiKey: c.apiKey, model: c.model, temperature: c.temperature, system: c.system, contextTurns: c.contextTurns };
+    return { apiUrl, apiKey: c.apiKey, model: c.model, system: c.system, contextTurns: c.contextTurns };
 }
 
 // 给 UI 的安全视图：不含明文 key，只给是否设置 + 预览
@@ -59,7 +59,6 @@ function publicView(c) {
     return {
         baseUrl: c.baseUrl || '',
         model: c.model || '',
-        temperature: c.temperature ?? 0.7,
         system: c.system || '',
         contextTurns: c.contextTurns ?? 100,
         hasKey: Boolean(k),

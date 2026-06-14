@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useFilesStore } from '@/apps/files/store';
 import { useWsStore } from '@/system/stores/ws';
 import FilesToolbar from '@/apps/files/components/FilesToolbar.vue';
@@ -24,7 +24,14 @@ function onDrop(e) {
     if (list?.length) files.uploadFiles(list);
 }
 
-onMounted(() => { files.ensureLoaded(); });
+function loadWhenReady() {
+    if (ws.canUseActions) files.ensureLoaded();
+}
+
+onMounted(loadWhenReady);
+watch(() => ws.canUseActions, (ready, wasReady) => {
+    if (ready && !wasReady) files.ensureLoaded();
+});
 </script>
 
 <template>
