@@ -26,15 +26,15 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "TerminalSessionManager",
-				"name": "TERMINAL_SESSION_MANAGER"
+				"class_name": "RoamSession",
+				"name": "ROAM_SESSION"
 			}
 		]
 	},
 	"migrations": [
 		{
 			"tag": "v1",
-			"new_sqlite_classes": ["TerminalSessionManager"]
+			"new_sqlite_classes": ["RoamSession"]
 		}
 	],
 	"observability": {

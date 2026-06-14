@@ -4,7 +4,7 @@ function socketId() {
     return crypto.randomUUID();
 }
 
-export class TerminalSessionManager extends DurableObject {
+export class RoamSession extends DurableObject {
     constructor(ctx, env) {
         super(ctx, env);
         this.requiresPassword = true;
@@ -324,8 +324,8 @@ export default {
             if (!sessionId || sessionId === 'default') {
                 return new Response('Missing session', { status: 400 });
             }
-            const id = env.TERMINAL_SESSION_MANAGER.idFromName(sessionId);
-            const stub = env.TERMINAL_SESSION_MANAGER.get(id);
+            const id = env.ROAM_SESSION.idFromName(sessionId);
+            const stub = env.ROAM_SESSION.get(id);
             return stub.fetch(request);
         }
 
