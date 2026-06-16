@@ -11,6 +11,7 @@ const chat = async (messages, {
     onEvent = () => {},
     signal,
     maxRounds = 50,
+    toolResultMaxChars = 12000,
 } = {}) => {
     const workMessages = Array.isArray(messages) ? [...messages] : [];
     let round = 0;
@@ -30,7 +31,7 @@ const chat = async (messages, {
         if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
             workMessages.push(message);
             onEvent({ type: 'tool_calls', message });
-            const toolMessages = await runTools(message.tool_calls, { signal });
+            const toolMessages = await runTools(message.tool_calls, { signal, toolResultMaxChars });
             for (const tm of toolMessages) workMessages.push(tm);
             onEvent({ type: 'tool_results', messages: toolMessages });
             continue;

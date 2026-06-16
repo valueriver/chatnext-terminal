@@ -408,6 +408,9 @@ header, footer, section, button, [role="tab"] {
 }
 .set-input:focus { box-shadow: inset 0 0 0 2px var(--accent); }
 select.set-input { cursor: pointer; }
+.set-row-col { flex-direction: column; align-items: stretch; gap: 8px; }
+.set-row-col .set-k { width: auto; }
+.set-textarea { font-size: 13px; line-height: 1.6; resize: vertical; min-height: 96px; font-family: var(--mono); }
 
 /* —— 强调按钮（取自 aios .cta） —— */
 .cta {

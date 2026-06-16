@@ -6,6 +6,7 @@ import ws from '../../system/ws/index.js';
 import { chat } from './loop.js';
 import { buildSystemPrompt } from './prompt.js';
 import { getRunConfig, readConfig, writeConfig, publicView } from './config.js';
+import { maybeCompactBeforeRun } from './compactions.js';
 import * as store from './store.js';
 
 const controllers = new Map(); // chatId -> AbortController
@@ -50,7 +51,6 @@ async function runSend(d) {
     if (!existing) { emit('error', { chatId, content: '对话不存在' }); return; }
     if (!content) return;
 
-    // 同一对话有正在跑的，先中断
     if (controllers.has(chatId)) {
         controllers.get(chatId).abort();
         controllers.delete(chatId);
@@ -64,7 +64,6 @@ async function runSend(d) {
         return;
     }
 
-    // 持久化用户消息；首条消息顺手当标题
     const userMessage = { role: 'user', content };
     const extra = {};
     if (existing.messages.length === 0 || existing.title === '新对话') {
@@ -78,40 +77,52 @@ async function runSend(d) {
     const controller = new AbortController();
     controllers.set(chatId, controller);
 
-    const fresh = await store.readChat(chatId);
-    const turns = Math.max(1, Number(config.contextTurns) || 100);
-    const history = fresh.messages.slice(-turns * 4); // 粗略限长（每轮约含 user/assistant/tool 数条）
+    // 取历史：只取压缩点之后的消息
+    const latestCompaction = store.getLatestCompaction(chatId);
+    const afterId = Number(latestCompaction?.end_message_id || 0);
+    const rows = store.listMessagesRaw(chatId, { afterId });
+    const history = rows.map((r) => r.message);
+    const latestUsage = rows.length ? rows[rows.length - 1].usage : {};
     const modelMessages = [{ role: 'system', content: buildSystemPrompt(config) }, ...history];
 
-    // 延迟持久化：assistant(tool_calls) 等到对应 tool 结果一起落库；
-    // 这样中途 abort 不会留下「有 tool_calls 却没有 tool 响应」的悬挂消息（下次请求会被模型 API 拒绝）。
+    // 发送前尝试压缩
+    const emitFn = (ev) => emit(ev.type, { chatId, ...ev });
+    try {
+        await maybeCompactBeforeRun({ chatId, usage: latestUsage, settings: config, emit: emitFn, signal: controller.signal });
+    } catch (e) {
+        console.error('压缩失败(不影响对话):', e.message);
+    }
+
     let pendingAssistant = null;
+    let lastUsage = null;
 
     try {
         await chat(modelMessages, {
             apiUrl: config.apiUrl,
             apiKey: config.apiKey,
             model: config.model,
+            toolResultMaxChars: config.toolResultMaxChars,
             signal: controller.signal,
             onEvent: async (event) => {
                 if (event.type === 'message') {
                     emit('message', { chatId, content: event.content || '' });
                 } else if (event.type === 'tool_calls') {
-                    pendingAssistant = event.message || null; // 先不落库，等 tool_results 一起存
+                    pendingAssistant = event.message || null;
                     emit('tool_calls', { chatId, toolCalls: event.message?.tool_calls || [] });
                 } else if (event.type === 'tool_results') {
                     const msgs = event.messages || [];
                     const toPersist = [pendingAssistant, ...msgs].filter(Boolean);
                     pendingAssistant = null;
-                    if (toPersist.length) await store.appendMessages(chatId, toPersist);
+                    if (toPersist.length) await store.appendMessages(chatId, toPersist, { meta: { source: 'ai' } });
                     emit('tool_results', {
                         chatId,
                         results: msgs.map((m) => ({ toolCallId: m.tool_call_id || '', content: m.content ?? '' })),
                     });
                 } else if (event.type === 'usage') {
-                    emit('usage', { chatId, usage: event.usage || {} });
+                    lastUsage = event.usage || {};
+                    emit('usage', { chatId, usage: lastUsage });
                 } else if (event.type === 'done') {
-                    if (event.message) await store.appendMessages(chatId, [event.message]);
+                    if (event.message) await store.appendMessages(chatId, [event.message], { usage: event.usage || lastUsage || {} });
                     emit('done', { chatId });
                 }
             },

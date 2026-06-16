@@ -1,43 +1,8 @@
-// 多对话本地存储:node:sqlite 单库 ~/.roam/chats.db。
-// roam 一贯「数据留在本机」,对话只落地到用户 home 下,不进仓库、不过 Worker。
-// 用 SQLite 而非一对话一 JSON:DatabaseSync 调用同步,函数内读-改-写之间没有 await 间隙,
-// 并发请求天然串行、写入走事务,根除了「两次写交错把文件拼坏」那类损坏。
-// 字段精简:chats 只留 id/title/state/时间;messages 整条 AI message 存 JSON,顺序靠自增 id。
-import { DatabaseSync } from 'node:sqlite';
-import os from 'os';
-import path from 'path';
-import fs from 'fs';
+// 多对话本地存储:chats / messages / compactions 三表,落于共享库 roam.db。
+// roam 一贯「数据留在本机」,不进仓库、不过 Worker。库与建表归 system/core/db.js,
+// 本模块只做 chat 领域的读写。messages 整条 message 存 JSON,顺序靠自增 id。
 import { randomUUID } from 'node:crypto';
-
-const ROOT = path.join(os.homedir(), '.roam');
-const DB_PATH = path.join(ROOT, 'chats.db');
-
-let db = null;
-
-function getDb() {
-    if (db) return db;
-    fs.mkdirSync(ROOT, { recursive: true });
-    db = new DatabaseSync(DB_PATH);
-    db.exec('PRAGMA journal_mode = WAL');
-    db.exec('PRAGMA foreign_keys = ON');
-    db.exec(`
-        CREATE TABLE IF NOT EXISTS chats (
-            id         TEXT PRIMARY KEY,
-            title      TEXT NOT NULL DEFAULT '新对话',
-            state      TEXT NOT NULL DEFAULT 'idle',
-            created_at INTEGER NOT NULL,
-            updated_at INTEGER NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS messages (
-            id         INTEGER PRIMARY KEY AUTOINCREMENT,
-            chat_id    TEXT NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
-            message    TEXT NOT NULL,
-            created_at INTEGER NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_messages_chat ON messages(chat_id, id);
-    `);
-    return db;
-}
+import { getDb } from '../../system/core/db.js';
 
 // 兼容旧签名:有些调用点 await ensureDir()
 async function ensureDir() { getDb(); }
@@ -96,10 +61,16 @@ async function appendMessages(id, messages, extra = {}) {
     const chat = d.prepare('SELECT * FROM chats WHERE id = ?').get(id);
     if (!chat) throw new Error('对话不存在');
     const now = Date.now();
+    const meta = extra.meta ? JSON.stringify(extra.meta) : '{}';
+    const usage = extra.usage ? JSON.stringify(extra.usage) : '{}';
     d.exec('BEGIN');
+    let lastId = null;
     try {
-        const ins = d.prepare('INSERT INTO messages (chat_id, message, created_at) VALUES (?, ?, ?)');
-        for (const m of messages) ins.run(id, JSON.stringify(m), now);
+        const ins = d.prepare('INSERT INTO messages (chat_id, message, meta, usage, created_at) VALUES (?, ?, ?, ?, ?)');
+        for (const m of messages) {
+            const info = ins.run(id, JSON.stringify(m), meta, usage, now);
+            lastId = Number(info.lastInsertRowid);
+        }
         const title = extra.title != null ? String(extra.title) : chat.title;
         d.prepare('UPDATE chats SET title = ?, updated_at = ? WHERE id = ?').run(title, now, id);
         d.exec('COMMIT');
@@ -107,7 +78,27 @@ async function appendMessages(id, messages, extra = {}) {
         d.exec('ROLLBACK');
         throw e;
     }
-    return readChat(id);
+    return lastId;
+}
+
+function listMessagesRaw(chatId, { limit = 10000, afterId = 0 } = {}) {
+    const d = getDb();
+    return d.prepare('SELECT id, message, meta, usage FROM messages WHERE chat_id = ? AND id > ? ORDER BY id LIMIT ?')
+        .all(chatId, afterId, limit)
+        .map((r) => ({ id: r.id, message: JSON.parse(r.message), meta: JSON.parse(r.meta || '{}'), usage: JSON.parse(r.usage || '{}') }));
+}
+
+function getLatestCompaction(chatId) {
+    const d = getDb();
+    return d.prepare('SELECT * FROM compactions WHERE chat_id = ? ORDER BY id DESC LIMIT 1').get(chatId) || null;
+}
+
+function createCompaction({ chatId, startMessageId, endMessageId, summary, tokens }) {
+    const d = getDb();
+    const now = Date.now();
+    const info = d.prepare('INSERT INTO compactions (chat_id, start_message_id, end_message_id, summary, tokens, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+        .run(chatId, startMessageId, endMessageId, summary, tokens, now);
+    return Number(info.lastInsertRowid);
 }
 
 async function setState(id, state) {
@@ -151,4 +142,4 @@ async function getPage(id, limit = 50, before = null) {
     };
 }
 
-export { ROOT, ensureDir, createChat, readChat, getPage, listChats, appendMessages, setState, renameChat, deleteChat };
+export { ensureDir, createChat, readChat, getPage, listChats, appendMessages, setState, renameChat, deleteChat, listMessagesRaw, getLatestCompaction, createCompaction };

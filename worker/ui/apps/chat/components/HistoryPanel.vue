@@ -1,17 +1,10 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useChatStore } from '@/apps/chat/store';
 import { fmtTime } from '@/apps/chat/lib/format';
 
 const chat = useChatStore();
 const emit = defineEmits(['close', 'newChat']);
-const keyword = ref('');
-
-const filtered = computed(() => {
-    const kw = keyword.value.trim().toLowerCase();
-    if (!kw) return chat.conversations;
-    return chat.conversations.filter((item) => String(item.title || '').toLowerCase().includes(kw));
-});
 
 const groups = computed(() => {
     const now = new Date();
@@ -22,7 +15,7 @@ const groups = computed(() => {
         { label: '最近 7 天', items: [] },
         { label: '更早', items: [] },
     ];
-    for (const conversation of filtered.value) {
+    for (const conversation of chat.conversations) {
         const ts = Number(conversation.updatedAt || 0);
         if (ts >= today) buckets[0].items.push(conversation);
         else if (ts >= today - day * 6) buckets[1].items.push(conversation);
@@ -55,15 +48,11 @@ async function doDelete(conversation) {
                 <span>＋</span>
                 <b>新对话</b>
             </button>
-            <label class="hist-search">
-                <span>⌕</span>
-                <input v-model="keyword" type="text" placeholder="搜索" />
-            </label>
         </div>
 
         <div class="hist-list">
-            <div v-if="!filtered.length" class="hist-empty">
-                {{ keyword ? '没有匹配的对话' : '暂无对话记录' }}
+            <div v-if="!chat.conversations.length" class="hist-empty">
+                暂无对话记录
             </div>
             <template v-for="group in groups" :key="group.label">
                 <div class="hist-group">{{ group.label }}</div>
@@ -126,36 +115,6 @@ async function doDelete(conversation) {
 .hist-new:hover {
     background: color-mix(in srgb, var(--color-ink) 6%, transparent);
     color: var(--color-ink);
-}
-.hist-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 34px;
-    border-radius: 9px;
-    padding: 0 10px;
-    color: var(--color-muted);
-}
-.hist-search:focus-within {
-    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
-}
-.hist-search span {
-    width: 16px;
-    color: var(--color-faint);
-    font-size: 16px;
-    line-height: 1;
-}
-.hist-search input {
-    flex: 1;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--color-ink);
-    font-size: 13.5px;
-}
-.hist-search input::placeholder {
-    color: var(--color-faint);
 }
 .hist-list {
     flex: 1;

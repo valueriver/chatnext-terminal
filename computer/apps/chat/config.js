@@ -1,32 +1,53 @@
-// 模型配置：~/.roam/model.json。agent 运行时从这里取 apiUrl/apiKey/model。
-// 设置页（model.set）写入，agent（getRunConfig）读取，API Key 只留在本机。
+// 模型配置：存于 roam.db 的 settings 表（KV）。API Key 只留在本机。
+// 设置页（model.set）写入，agent（getRunConfig）读取。
+// 首次运行若检测到旧版 ~/.roam/model.json，自动迁移进 settings 后删除。
 import { promises as fsp } from 'fs';
 import path from 'path';
-import { ROOT, ensureDir } from './store.js';
+import { ROOT } from '../../system/core/db.js';
+import { getSettings, setSettings } from '../../system/settings/index.js';
 
-const CONFIG_PATH = path.join(ROOT, 'model.json');
-const DEFAULTS = { baseUrl: '', apiKey: '', model: '', system: '', contextTurns: 100 };
+const LEGACY_PATH = path.join(ROOT, 'model.json');
+let migrated = false;
+
+async function migrateLegacy() {
+    if (migrated) return;
+    migrated = true;
+    try {
+        const raw = await fsp.readFile(LEGACY_PATH, 'utf8');
+        const v = JSON.parse(raw);
+        if (v && typeof v === 'object') {
+            setSettings({
+                baseUrl: v.baseUrl ?? '',
+                apiKey: v.apiKey ?? '',
+                model: v.model ?? '',
+                system: v.system ?? '',
+                contextTurns: v.contextTurns != null ? String(v.contextTurns) : '100',
+            });
+            await fsp.rename(LEGACY_PATH, `${LEGACY_PATH}.bak`).catch(() => {});
+            console.log('已将 model.json 迁移到 roam.db settings');
+        }
+    } catch { /* 没有旧文件，正常 */ }
+}
 
 async function readConfig() {
-    try {
-        const v = JSON.parse(await fsp.readFile(CONFIG_PATH, 'utf8'));
-        return { ...DEFAULTS, ...(v && typeof v === 'object' ? v : {}) };
-    } catch {
-        return { ...DEFAULTS };
-    }
+    await migrateLegacy();
+    const s = getSettings();
+    return {
+        baseUrl: s.baseUrl || '',
+        apiKey: s.apiKey || '',
+        model: s.model || '',
+        system: s.system || '',
+        contextTurns: Number(s.contextTurns) || 100,
+        compressThreshold: Number(s.compressThreshold) || 12000,
+        toolResultMaxChars: Number(s.toolResultMaxChars) || 12000,
+        compactPrompt: s.compactPrompt || '',
+    };
 }
 
 async function writeConfig(patch = {}) {
-    await ensureDir();
-    const next = { ...(await readConfig()) };
-    for (const [k, v] of Object.entries(patch)) {
-        if (v === undefined) continue;
-        // 空 apiKey 视为「不改」，避免设置页回填掩码时把真 key 抹掉
-        if (k === 'apiKey' && !String(v).trim()) continue;
-        next[k] = v;
-    }
-    await fsp.writeFile(CONFIG_PATH, JSON.stringify(next, null, 2), 'utf8');
-    return next;
+    await migrateLegacy();
+    setSettings(patch);
+    return readConfig();
 }
 
 // baseUrl 末尾补成完整 completions 端点（已是完整端点则原样）
@@ -50,7 +71,7 @@ async function getRunConfig() {
         err.code = 'model_settings_missing';
         throw err;
     }
-    return { apiUrl, apiKey: c.apiKey, model: c.model, system: c.system, contextTurns: c.contextTurns };
+    return { apiUrl, apiKey: c.apiKey, model: c.model, system: c.system, contextTurns: c.contextTurns, compressThreshold: c.compressThreshold, toolResultMaxChars: c.toolResultMaxChars, compactPrompt: c.compactPrompt };
 }
 
 // 给 UI 的安全视图：不含明文 key，只给是否设置 + 预览
@@ -61,6 +82,9 @@ function publicView(c) {
         model: c.model || '',
         system: c.system || '',
         contextTurns: c.contextTurns ?? 100,
+        compressThreshold: c.compressThreshold ?? 12000,
+        toolResultMaxChars: c.toolResultMaxChars ?? 12000,
+        compactPrompt: c.compactPrompt || '',
         hasKey: Boolean(k),
         keyPreview: !k ? '' : (k.length <= 8 ? '已设置' : `${k.slice(0, 4)}····${k.slice(-4)}`),
     };

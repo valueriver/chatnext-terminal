@@ -115,7 +115,7 @@ npm start
 
 ## 3.（可选）启用内置 AI 助手
 
-主线用 CC/Codex 的话这步可跳过。想用内置助手：在远程网页打开 **设置 → 模型设置**，填 API 地址、API Key、模型名（任意 OpenAI 兼容接口 —— 开源模型、coding plan、自建网关都行）。配置写到本机 `~/.roam/model.json`，**Key 只留在你的电脑上**，不进仓库、不过 Worker。
+主线用 CC/Codex 的话这步可跳过。想用内置助手：在远程网页打开 **设置 → 模型设置**，填 API 地址、API Key、模型名（任意 OpenAI 兼容接口 —— 开源模型、coding plan、自建网关都行）。配置写到本机 `~/.roam/roam.db` 的 settings 表，**Key 只留在你的电脑上**，不进仓库、不过 Worker。
 
 ## 4. （可选）接入浏览器控制
 
@@ -221,7 +221,7 @@ nssm remove Roam confirm   # 卸载
 ## 安全边界
 
 - Worker 不保存终端输出、文件内容、对话或任何业务数据
-- 模型 API Key 存在本机 `~/.roam/model.json`，不进仓库、不过 Worker
+- 模型 API Key 存在本机 `~/.roam/roam.db`（settings 表），不进仓库、不过 Worker
 - CDP 桥只监听 `127.0.0.1`，并用 `SESSION_ID` 作 token 校验，挡掉本机其它进程乱连
 - `SESSION_PASSWORD` 用于远程网页访问校验
 - 不要把真实 `computer/config.js` 和 `worker/wrangler.jsonc` 提交到仓库（已在 `.gitignore`）

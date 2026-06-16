@@ -81,12 +81,21 @@ const callLlmStream = async (apiUrl, apiKey, payload, { signal, onMessage } = {}
     const state = { role: 'assistant', content: '', toolCalls: [], extra: {} };
     let usage = null;
 
+    const headers = { 'Content-Type': 'application/json' };
+    const url = String(apiUrl || '');
+    if (url.includes('anthropic.com')) {
+        headers['x-api-key'] = apiKey;
+        headers['anthropic-version'] = '2023-06-01';
+    } else if (url.includes('openrouter.ai')) {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+        headers['HTTP-Referer'] = 'https://roam.yanglong.yun';
+        headers['X-Title'] = 'roam';
+    } else {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+    }
     const res = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-        },
+        headers,
         body: JSON.stringify(streamPayload),
         signal,
     });
