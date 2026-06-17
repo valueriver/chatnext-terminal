@@ -8,7 +8,7 @@
 1. `chrome://extensions` → 打开「开发者模式」→「加载已解压的扩展程序」→ 选本目录。
 2. 点扩展图标,填一条 wss(把 `session`/`token` 写进 query,由对端校验):
    ```
-   wss://roam.yanglong.yun/ws?session=mac&token=xxxxxx&device=browser
+   wss://<your-worker-domain>/ws?session=mac&token=xxxxxx&device=browser
    ```
 3. 显示「已连接」(角标 `on`)即就绪。对端就能驱动**你这台机器、真实登录态的 Chrome**。
 

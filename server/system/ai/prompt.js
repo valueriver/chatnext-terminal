@@ -1,7 +1,33 @@
-// 系统提示。roam 的 AI 跑在用户本机，能直接操作这台电脑。
-// = 进化(AI 自我演化的人设/原则，最新生效，最高优先) + 身份 + 能力 + 记忆。
+// 系统提示 = 提示词注入的唯一处。
+// 进化(AI 自我演化的人设/原则，最新生效，最高优先) + 身份 + 能力 + 记忆。
+// 进化/记忆从 roam.db 同步读出后在此拼装。
 import os from 'os';
-import { latestEvolution, memoryContext } from './knowledge.js';
+import { getDb } from '../core/db.js';
+
+// 进化：每行一版系统提示词（AI 自我演化的人设/原则），最新生效。
+function latestEvolution() {
+    const row = getDb().prepare('SELECT content FROM evolution ORDER BY id DESC LIMIT 1').get();
+    return row?.content || '';
+}
+
+// 记忆：三层 tier —— full(必读全文) / starred(星标摘要) / stored(已存储，仅计数)。
+function memoryContext() {
+    const rows = getDb().prepare('SELECT title, summary, content, tier FROM memories ORDER BY id DESC LIMIT 200').all();
+    const full = rows.filter((m) => m.tier === 'full');
+    const starred = rows.filter((m) => m.tier === 'starred');
+    const stored = rows.filter((m) => m.tier !== 'full' && m.tier !== 'starred');
+    const lines = [];
+    if (full.length) {
+        lines.push('【必读记忆(全文)】');
+        for (const m of full) lines.push(`- ${m.title ? m.title + '：' : ''}${m.content || m.summary || ''}`);
+    }
+    if (starred.length) {
+        lines.push('【星标记忆(摘要)】');
+        for (const m of starred) lines.push(`- ${m.title ? m.title + '：' : ''}${m.summary || ''}`);
+    }
+    if (stored.length) lines.push(`【已存储记忆】另有 ${stored.length} 条已归档(需要时用 sql 查 memories 表)。`);
+    return lines.join('\n');
+}
 
 function buildSystemPrompt(config = {}) {
     const lines = [];

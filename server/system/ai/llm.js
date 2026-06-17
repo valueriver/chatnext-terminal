@@ -88,8 +88,8 @@ const callLlmStream = async (apiUrl, apiKey, payload, { signal, onMessage } = {}
         headers['anthropic-version'] = '2023-06-01';
     } else if (url.includes('openrouter.ai')) {
         headers['Authorization'] = `Bearer ${apiKey}`;
-        headers['HTTP-Referer'] = 'https://roam.yanglong.yun';
-        headers['X-Title'] = 'roam';
+        headers['HTTP-Referer'] = 'https://github.com/realuckyang/roam';
+        headers['X-Title'] = 'Roam';
     } else {
         headers['Authorization'] = `Bearer ${apiKey}`;
     }
