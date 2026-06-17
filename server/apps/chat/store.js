@@ -4,9 +4,6 @@
 import { randomUUID } from 'node:crypto';
 import { getDb } from '../../system/core/db.js';
 
-// 兼容旧签名:有些调用点 await ensureDir()
-async function ensureDir() { getDb(); }
-
 function rowToMeta(r, messageCount) {
     return {
         id: r.id,
@@ -142,4 +139,4 @@ async function getPage(id, limit = 50, before = null) {
     };
 }
 
-export { ensureDir, createChat, readChat, getPage, listChats, appendMessages, setState, renameChat, deleteChat, listMessagesRaw, getLatestCompaction, createCompaction };
+export { createChat, readChat, getPage, listChats, appendMessages, setState, renameChat, deleteChat, listMessagesRaw, getLatestCompaction, createCompaction };

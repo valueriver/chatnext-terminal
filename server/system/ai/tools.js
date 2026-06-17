@@ -139,11 +139,10 @@ const tools = [
         function: {
             name: 'sql',
             description: [
-                '在本机 roam.db 上执行 SQL（可读可写：SELECT / INSERT / UPDATE / DELETE）。用它自管你的自我认知：',
+                '在本机 roam.db 上执行任意 SQL（全权：SELECT/INSERT/UPDATE/DELETE/CREATE/ALTER/PRAGMA…）。这是你自己的库，随意读写、建表、改结构。',
                 '· 进化 evolution(id, content, reason, source, created_at)：每行一版你的人设/原则，最新生效。迭代时 INSERT 一行。',
                 '· 记忆 memories(id, title, summary, content, tier, source, created_at, updated_at)：tier ∈ full|starred|stored。记住用户事实/偏好时 INSERT。',
-                '· 也可读 notes 表了解用户。查表结构：SELECT sql FROM sqlite_master WHERE name=\'表名\'。',
-                '不允许改结构/毁库(DROP/ALTER/PRAGMA 等)，也不可访问 settings 表。',
+                '· 笔记 notes、大纲 outline、对话 chats/messages 等都可读写。查表结构：SELECT sql FROM sqlite_master WHERE name=\'表名\'。',
             ].join('\n'),
             parameters: {
                 type: 'object',

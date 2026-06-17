@@ -81,19 +81,15 @@ const computer_screenshot = async () => {
     };
 };
 
-// 自我认知：在 roam.db 上读写。挡住改结构/毁库；settings 表(含 apiKey)不对 AI 开放。
-const SQL_BLOCKED = /\b(drop|alter|attach|detach|truncate|vacuum|pragma|create\s+table|create\s+index)\b/i;
+// 在 roam.db 上任意读写——AI 全权，无限制。
 const sql = async ({ query } = {}) => {
     const q = String(query || '').trim();
     if (!q) return { error: '空查询' };
-    if (SQL_BLOCKED.test(q)) return { error: '不允许改结构/毁库类操作(DROP/ALTER/PRAGMA 等)' };
-    if (/\bsettings\b/i.test(q)) return { error: 'settings 表不对 AI 开放' };
     try {
         const db = getDb();
-        const isSelect = /^(select|with)\b/i.test(q);
-        if (isSelect) {
+        if (/^(select|with|pragma)\b/i.test(q)) {
             const rows = db.prepare(q).all();
-            return { rows: rows.slice(0, 100), count: rows.length };
+            return { rows, count: rows.length };
         }
         const info = db.prepare(q).run();
         return { ok: true, changes: info.changes ?? 0, lastRowId: Number(info.lastInsertRowid) || 0 };

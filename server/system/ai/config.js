@@ -1,36 +1,7 @@
-// 模型配置：存于 roam.db 的 settings 表（KV）。API Key 只留在本机。
-// 设置页（model.set）写入，agent（getRunConfig）读取。
-// 首次运行若检测到旧版 ~/.roam/model.json，自动迁移进 settings 后删除。
-import { promises as fsp } from 'fs';
-import path from 'path';
-import { ROOT } from '../core/db.js';
+// 模型配置：存于 roam.db 的 settings 表（KV）。设置页写入，agent 读取。
 import { getSettings, setSettings } from '../settings/index.js';
 
-const LEGACY_PATH = path.join(ROOT, 'model.json');
-let migrated = false;
-
-async function migrateLegacy() {
-    if (migrated) return;
-    migrated = true;
-    try {
-        const raw = await fsp.readFile(LEGACY_PATH, 'utf8');
-        const v = JSON.parse(raw);
-        if (v && typeof v === 'object') {
-            setSettings({
-                baseUrl: v.baseUrl ?? '',
-                apiKey: v.apiKey ?? '',
-                model: v.model ?? '',
-                system: v.system ?? '',
-                contextTurns: v.contextTurns != null ? String(v.contextTurns) : '100',
-            });
-            await fsp.rename(LEGACY_PATH, `${LEGACY_PATH}.bak`).catch(() => {});
-            console.log('已将 model.json 迁移到 roam.db settings');
-        }
-    } catch { /* 没有旧文件，正常 */ }
-}
-
-async function readConfig() {
-    await migrateLegacy();
+function readConfig() {
     const s = getSettings();
     return {
         baseUrl: s.baseUrl || '',
@@ -45,8 +16,7 @@ async function readConfig() {
     };
 }
 
-async function writeConfig(patch = {}) {
-    await migrateLegacy();
+function writeConfig(patch = {}) {
     setSettings(patch);
     return readConfig();
 }
