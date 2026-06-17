@@ -26,7 +26,7 @@ function expandAttachments(msg) {
 }
 
 function emit(kind, data) {
-    ws.broadcast('ai.event', { kind, ...data });
+    ws.broadcast('chat.event', { kind, ...data });
 }
 
 function reply(type, reqId, data) {
@@ -161,22 +161,22 @@ async function handle(message) {
     const d = message.data || {};
 
     // 子能力：快捷指令 / 附件
-    if (t.startsWith('shortcuts.')) return shortcuts.handle(message);
-    if (t.startsWith('attach.')) return attachments.handle(message);
+    if (t.startsWith('chat.shortcuts.')) return shortcuts.handle(message);
+    if (t.startsWith('chat.attach.')) return attachments.handle(message);
 
     try {
         switch (t) {
-            case 'ai.list': {
-                reply('ai.list.result', d.reqId, { conversations: await listChatsWithLiveState() });
+            case 'chat.list': {
+                reply('chat.list.result', d.reqId, { conversations: await listChatsWithLiveState() });
                 return true;
             }
-            case 'ai.create': {
-                reply('ai.create.result', d.reqId, { conversation: await store.createChat(d.title) });
+            case 'chat.create': {
+                reply('chat.create.result', d.reqId, { conversation: await store.createChat(d.title) });
                 return true;
             }
-            case 'ai.get': {
+            case 'chat.get': {
                 const page = await pageWithLiveState(d.chatId, d.limit || 50, d.before ?? null);
-                reply('ai.get.result', d.reqId, {
+                reply('chat.get.result', d.reqId, {
                     chatId: d.chatId,
                     conversation: page?.meta || null,
                     messages: page?.messages || [],
@@ -185,34 +185,34 @@ async function handle(message) {
                 });
                 return true;
             }
-            case 'ai.rename': {
-                reply('ai.rename.result', d.reqId, { conversation: await store.renameChat(d.chatId, d.title) });
+            case 'chat.rename': {
+                reply('chat.rename.result', d.reqId, { conversation: await store.renameChat(d.chatId, d.title) });
                 return true;
             }
-            case 'ai.delete': {
+            case 'chat.delete': {
                 if (controllers.has(d.chatId)) { controllers.get(d.chatId).abort(); controllers.delete(d.chatId); }
-                reply('ai.delete.result', d.reqId, { ok: await store.deleteChat(d.chatId), chatId: d.chatId });
+                reply('chat.delete.result', d.reqId, { ok: await store.deleteChat(d.chatId), chatId: d.chatId });
                 return true;
             }
-            case 'ai.send': {
+            case 'chat.send': {
                 // 不 await：让循环在后台跑，dispatch 立即返回，ai.abort 等消息能并发处理
-                runSend(d).catch((err) => console.error('ai.send 异常:', err?.message || err));
+                runSend(d).catch((err) => console.error('chat.send 异常:', err?.message || err));
                 return true;
             }
-            case 'ai.abort': {
+            case 'chat.abort': {
                 const c = controllers.get(d.chatId);
                 if (c) { c.abort(); controllers.delete(d.chatId); }
                 await store.setState(d.chatId, 'idle');
                 emit('aborted', { chatId: d.chatId });
-                reply('ai.abort.result', d.reqId, { ok: true, chatId: d.chatId });
+                reply('chat.abort.result', d.reqId, { ok: true, chatId: d.chatId });
                 return true;
             }
-            case 'model.get': {
-                reply('model.get.result', d.reqId, { config: publicView(await readConfig()) });
+            case 'chat.model.get': {
+                reply('chat.model.get.result', d.reqId, { config: publicView(await readConfig()) });
                 return true;
             }
-            case 'model.set': {
-                reply('model.set.result', d.reqId, { ok: true, config: publicView(await writeConfig(d.config || {})) });
+            case 'chat.model.set': {
+                reply('chat.model.set.result', d.reqId, { ok: true, config: publicView(await writeConfig(d.config || {})) });
                 return true;
             }
             default:
@@ -220,7 +220,7 @@ async function handle(message) {
         }
     } catch (err) {
         console.error(`ai 错误 [${t}]:`, err.message || err);
-        reply('ai.error', d.reqId, { ok: false, error: err.message || String(err), chatId: d.chatId });
+        reply('chat.error', d.reqId, { ok: false, error: err.message || String(err), chatId: d.chatId });
         return true;
     }
 }

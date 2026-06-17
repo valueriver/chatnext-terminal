@@ -11,16 +11,16 @@ async function handle(message) {
     const t = message.type;
     const d = message.data || {};
     try {
-        if (t === 'attach.upload') {
+        if (t === 'chat.attach.upload') {
             const saved = saveFile(d.dataUrl, d.name);
-            if (!saved) { reply('attach.upload.result', d.reqId, { ok: false, error: '无效文件' }); return true; }
-            reply('attach.upload.result', d.reqId, { ok: true, ...saved });
+            if (!saved) { reply('chat.attach.upload.result', d.reqId, { ok: false, error: '无效文件' }); return true; }
+            reply('chat.attach.upload.result', d.reqId, { ok: true, ...saved });
             return true;
         }
         return false;
     } catch (err) {
         console.error(`attach 错误 [${t}]:`, err.message || err);
-        reply('attach.error', d.reqId, { ok: false, error: err.message || String(err) });
+        reply('chat.attach.error', d.reqId, { ok: false, error: err.message || String(err) });
         return true;
     }
 }

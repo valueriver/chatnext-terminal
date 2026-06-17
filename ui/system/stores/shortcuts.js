@@ -33,18 +33,18 @@ export const useShortcutsStore = defineStore('shortcuts', () => {
 
     async function load() {
         bind();
-        const d = await request('shortcuts.list');
+        const d = await request('chat.shortcuts.list');
         if (d?.ok) items.value = d.items || [];
     }
     async function save({ id, text }) {
         bind();
-        const d = await request('shortcuts.save', { id, text });
+        const d = await request('chat.shortcuts.save', { id, text });
         await load();
         return d;
     }
     async function remove(id) {
         bind();
-        const d = await request('shortcuts.delete', { id });
+        const d = await request('chat.shortcuts.delete', { id });
         await load();
         return d;
     }
@@ -53,7 +53,7 @@ export const useShortcutsStore = defineStore('shortcuts', () => {
         // 乐观更新顺序，再落库
         const byId = new Map(items.value.map((s) => [s.id, s]));
         items.value = ids.map((id) => byId.get(id)).filter(Boolean);
-        await request('shortcuts.reorder', { ids });
+        await request('chat.shortcuts.reorder', { ids });
     }
 
     return { items, load, save, remove, reorder };

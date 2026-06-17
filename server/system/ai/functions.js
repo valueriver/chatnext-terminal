@@ -16,7 +16,7 @@ function stashScreenshot(dataUrl, screen, label = 'screenshot') {
         const saved = saveFile(dataUrl, `${label}-${Date.now()}.png`);
         path = saved?.path || '';
     } catch { /* 落盘失败不致命 */ }
-    try { ws.broadcast('ai.screenshot', { dataUrl, screen, at: Date.now() }); } catch {}
+    try { ws.broadcast('chat.screenshot', { dataUrl, screen, at: Date.now() }); } catch {}
     return path;
 }
 

@@ -20,7 +20,7 @@ export const SERVICES = [
     { prefixes: ['auth.'], handle: guard.handle, start: guard.start },
 
     // 应用（按面板顺序）
-    { prefixes: ['ai.', 'model.', 'shortcuts.', 'attach.'], handle: chat.handle }, // 对话（含快捷指令/附件）
+    { prefixes: ['chat.'], handle: chat.handle }, // 对话（含快捷指令/附件）
     { prefixes: ['notes.'], handle: notes.handle },
     { prefixes: ['outline.'], handle: outline.handle },
     { prefixes: ['tasks.'], handle: tasks.handle },

@@ -30,19 +30,19 @@ export const useModelStore = defineStore('model', () => {
     function bind() {
         if (bound) return;
         bound = true;
-        ws.onMessage('model.get.result', onResult);
-        ws.onMessage('model.set.result', onResult);
+        ws.onMessage('chat.model.get.result', onResult);
+        ws.onMessage('chat.model.set.result', onResult);
     }
 
     async function load() {
         bind();
-        const d = await request('model.get');
+        const d = await request('chat.model.get');
         if (d?.config) { config.value = d.config; loaded.value = true; }
         return config.value;
     }
     async function save(patch) {
         bind();
-        const d = await request('model.set', { config: patch });
+        const d = await request('chat.model.set', { config: patch });
         if (d?.config) { config.value = d.config; loaded.value = true; }
         return config.value;
     }

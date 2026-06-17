@@ -51,24 +51,24 @@ async function handle(message) {
     const d = message.data || {};
     try {
         switch (t) {
-            case 'shortcuts.list':
-                reply('shortcuts.list.result', d.reqId, { ok: true, ...listShortcuts() });
+            case 'chat.shortcuts.list':
+                reply('chat.shortcuts.list.result', d.reqId, { ok: true, ...listShortcuts() });
                 return true;
-            case 'shortcuts.save':
-                reply('shortcuts.save.result', d.reqId, { ok: true, ...saveShortcut(d) });
+            case 'chat.shortcuts.save':
+                reply('chat.shortcuts.save.result', d.reqId, { ok: true, ...saveShortcut(d) });
                 return true;
-            case 'shortcuts.delete':
-                reply('shortcuts.delete.result', d.reqId, { ...deleteShortcut(d.id) });
+            case 'chat.shortcuts.delete':
+                reply('chat.shortcuts.delete.result', d.reqId, { ...deleteShortcut(d.id) });
                 return true;
-            case 'shortcuts.reorder':
-                reply('shortcuts.reorder.result', d.reqId, { ...reorderShortcuts(d.ids) });
+            case 'chat.shortcuts.reorder':
+                reply('chat.shortcuts.reorder.result', d.reqId, { ...reorderShortcuts(d.ids) });
                 return true;
             default:
                 return false;
         }
     } catch (err) {
         console.error(`shortcuts 错误 [${t}]:`, err.message || err);
-        reply('shortcuts.error', d.reqId, { ok: false, error: err.message || String(err) });
+        reply('chat.shortcuts.error', d.reqId, { ok: false, error: err.message || String(err) });
         return true;
     }
 }

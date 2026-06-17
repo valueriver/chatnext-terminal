@@ -62,10 +62,10 @@ export const useChatStore = defineStore('chat', () => {
             refresh,
             bumpStream,
         });
-        ['ai.list.result', 'ai.create.result', 'ai.get.result', 'ai.rename.result', 'ai.delete.result', 'ai.abort.result', 'ai.error']
+        ['chat.list.result', 'chat.create.result', 'chat.get.result', 'chat.rename.result', 'chat.delete.result', 'chat.abort.result', 'chat.error']
             .forEach((t) => ws.onMessage(t, onResult));
-        ws.onMessage('ai.event', (msg) => stream.onEvent(msg.data || {}));
-        ws.onMessage('ai.screenshot', (msg) => {
+        ws.onMessage('chat.event', (msg) => stream.onEvent(msg.data || {}));
+        ws.onMessage('chat.screenshot', (msg) => {
             const d = msg.data || {};
             if (!d.dataUrl) return;
             pushRow({ type: 'shot', _key: mkKey('shot'), dataUrl: d.dataUrl, at: d.at });
@@ -74,13 +74,13 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     async function refresh() {
-        const d = await request('ai.list');
+        const d = await request('chat.list');
         if (d) { conversations.value = d.conversations || []; ready.value = true; }
     }
     async function openChat(id) {
         currentId.value = id;
         stream?.resetStreaming();
-        const d = await request('ai.get', { chatId: id, limit: PAGE });
+        const d = await request('chat.get', { chatId: id, limit: PAGE });
         messages.value = renderMessages(d?.messages || []);
         currentTitle.value = d?.conversation?.title || '';
         busy.value = d?.conversation?.state === 'running';
@@ -91,7 +91,7 @@ export const useChatStore = defineStore('chat', () => {
     async function loadOlder() {
         if (!currentId.value || !hasMore.value || loadingOlder.value) return 0;
         loadingOlder.value = true;
-        const d = await request('ai.get', { chatId: currentId.value, limit: PAGE, before: oldestIndex });
+        const d = await request('chat.get', { chatId: currentId.value, limit: PAGE, before: oldestIndex });
         loadingOlder.value = false;
         if (!d) return 0;
         const older = renderMessages(d.messages || []);
@@ -101,7 +101,7 @@ export const useChatStore = defineStore('chat', () => {
         return older.length;
     }
     async function newChat() {
-        const d = await request('ai.create', {});
+        const d = await request('chat.create', {});
         if (d?.conversation) {
             conversations.value.unshift({ id: d.conversation.id, title: d.conversation.title, updatedAt: d.conversation.updatedAt, messageCount: 0, state: 'idle' });
             currentId.value = d.conversation.id;
@@ -115,7 +115,7 @@ export const useChatStore = defineStore('chat', () => {
         return d?.conversation || null;
     }
     async function rename(id, title) {
-        const d = await request('ai.rename', { chatId: id, title });
+        const d = await request('chat.rename', { chatId: id, title });
         if (d?.conversation) {
             const c = conversations.value.find((x) => x.id === id);
             if (c) c.title = d.conversation.title;
@@ -123,7 +123,7 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
     async function remove(id) {
-        await request('ai.delete', { chatId: id });
+        await request('chat.delete', { chatId: id });
         conversations.value = conversations.value.filter((c) => c.id !== id);
         if (currentId.value === id) { currentId.value = ''; messages.value = []; currentTitle.value = ''; hasMore.value = false; oldestIndex = 0; }
     }
@@ -134,14 +134,14 @@ export const useChatStore = defineStore('chat', () => {
         if (!currentId.value) { const c = await newChat(); if (!c) return; }
         busy.value = true;
         viewSeq.value++; // 发送 → 强制滚到底
-        ws.sendMsg({ type: 'ai.send', to: 'desktop', data: { chatId: currentId.value, content, attachments: atts } });
+        ws.sendMsg({ type: 'chat.send', to: 'desktop', data: { chatId: currentId.value, content, attachments: atts } });
     }
     function abort() {
         if (!currentId.value) return;
         busy.value = false;
         stream?.resetStreaming();
         bumpStream();
-        ws.sendMsg({ type: 'ai.abort', to: 'desktop', data: { chatId: currentId.value } });
+        ws.sendMsg({ type: 'chat.abort', to: 'desktop', data: { chatId: currentId.value } });
     }
 
     return {

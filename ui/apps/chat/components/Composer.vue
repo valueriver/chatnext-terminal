@@ -52,7 +52,7 @@ const pending = new Map();
 function bindUpload() {
     if (bound) return;
     bound = true;
-    ws.onMessage('attach.upload.result', (msg) => {
+    ws.onMessage('chat.attach.upload.result', (msg) => {
         const d = msg.data || {};
         const r = d.reqId && pending.get(d.reqId);
         if (r) { pending.delete(d.reqId); r(d); }
@@ -64,7 +64,7 @@ function uploadOne(file) {
         reader.onload = () => {
             const reqId = `up${Date.now()}_${seq++}`;
             pending.set(reqId, resolve);
-            const ok = ws.sendMsg({ type: 'attach.upload', to: 'desktop', data: { name: file.name, dataUrl: String(reader.result), reqId } });
+            const ok = ws.sendMsg({ type: 'chat.attach.upload', to: 'desktop', data: { name: file.name, dataUrl: String(reader.result), reqId } });
             if (!ok) { pending.delete(reqId); resolve(null); return; }
             setTimeout(() => { if (pending.has(reqId)) { pending.delete(reqId); resolve(null); } }, 30000);
         };
