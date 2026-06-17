@@ -67,5 +67,14 @@ function shutdown() {
     return sessions.killAll();
 }
 
-export { handle, sendSnapshotTo, sendSnapshotAll, ensureDefault, shutdown };
-export default { handle, sendSnapshotTo, sendSnapshotAll, ensureDefault, shutdown };
+// 启动：建默认会话 + 订阅生命周期（授权某端→推快照；网页接入→推全部快照）
+async function start(ctx) {
+    await ensureDefault();
+    ctx.onGrant((clientId) => sendSnapshotTo(clientId));
+    ctx.onWebConnected(() => sendSnapshotAll());
+}
+
+function stop() { return shutdown(); }
+
+export { handle, start, stop };
+export default { handle, start, stop };

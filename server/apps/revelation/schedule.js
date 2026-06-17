@@ -23,10 +23,11 @@ async function tick() {
     }
 }
 
-function startSchedule() {
+function start() {
     if (timer) return;
     timer = setInterval(tick, 60 * 1000); // 每分钟检查一次
     console.log('🌅 启示已就绪（每天', upgradeTime(), '自我升级产出）');
 }
 
-export { startSchedule };
+export { start };
+export default { start };

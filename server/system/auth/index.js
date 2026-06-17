@@ -37,5 +37,11 @@ function handle(message) {
     }
 }
 
-export { handle, sendAuthMode, bindOnGrant };
-export default { handle, sendAuthMode, bindOnGrant };
+// 启动：把内部授权事件接到生命周期总线；网页接入时发当前 auth mode
+function start(ctx) {
+    bindOnGrant((clientId) => ctx.emitGrant(clientId));
+    ctx.onWebConnected(() => sendAuthMode());
+}
+
+export { handle, start };
+export default { handle, start };

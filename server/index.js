@@ -1,25 +1,31 @@
-// Roam 本机后端入口。职责：启动主服务 → 挂应用 → 开 WS 通道并分发。
+// Roam 本机后端入口。职责：启动各服务 → 开 WS 通道并分发。
 // 通道由配置驱动：配了 CLOUDFLARE_WORKER_URL 就连 Worker（relay），没配就本地直连（local）。
+// index 只做编排：不点名任何 app 的启动细节——各服务自己声明 start/stop（见 apps.js）。
 import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/core/env.js';
 import { generateSessionId } from './system/core/ids.js';
 import channel, { setTransport } from './channel.js';
-import { routeToApp } from './apps.js';
+import { routeToApp, startAll, stopAll } from './apps.js';
 import { createRelay } from './transport/relay.js';
 import { createLocal } from './transport/local.js';
 
-import cdpBridge from './system/browser/bridge.js';
-import guard from './system/auth/index.js';
-import terminal from './apps/terminal/index.js';
-import { startSchedule as startRevelation } from './apps/revelation/schedule.js';
+// 生命周期总线：服务在 start(ctx) 时订阅，index 在时机到了广播。
+const grantSubs = [];
+const webSubs = [];
+const ctx = {
+    onGrant(fn) { grantSubs.push(fn); },
+    emitGrant(clientId) { for (const f of grantSubs) f(clientId); },
+    onWebConnected(fn) { webSubs.push(fn); },
+    emitWebConnected() { for (const f of webSubs) f(); },
+};
 
-// 设备状态变更回调（网页端接入时刷新快照/认证态）
-let onDevicesChanged = () => {};
-
-// 收到消息：连接控制就地处理，其余按前缀分发到对应 app。
+// 收消息：连接控制就地处理，其余按前缀分发到对应 app。
 async function dispatch(message) {
     const t = message.type || '';
     if (t === 'connection.ping') { channel.send({ type: 'connection.pong', to: 'server', data: {} }); return; }
-    if (t === 'connection.devices') { onDevicesChanged(message.data?.devices); return; }
+    if (t === 'connection.devices') {
+        if (message.data?.devices?.web === 'connected') { console.log('🌐 网页端已接入当前会话'); ctx.emitWebConnected(); }
+        return;
+    }
     if (t === 'connection.ready') return;
     if (await routeToApp(message)) return;
     console.log('未识别的消息类型:', t);
@@ -28,23 +34,12 @@ async function dispatch(message) {
 async function boot() {
     console.log('🚀 正在启动 Roam Server...');
 
-    // 1. 启动主服务：本地 CDP 桥（给 browser-use 扩展连）
-    cdpBridge.start();
+    // 拉起所有服务（CDP 桥 / 终端 / 鉴权 / 启示…各自的 start，自己订阅生命周期）
+    await startAll(ctx);
 
-    // 2. 挂应用的生命周期回调
-    guard.bindOnGrant((clientId) => terminal.sendSnapshotTo(clientId));
-    onDevicesChanged = (devices) => {
-        if (devices?.web !== 'connected') return;
-        console.log('🌐 网页端已接入当前会话');
-        terminal.sendSnapshotAll();
-        guard.sendAuthMode();
-    };
-    await terminal.ensureDefault();
-    startRevelation(); // 每天到设定时间产出「启示」
-
-    // 3. 开 WS 通道：有远程配置走 relay，否则 local
+    // 开 WS 通道：有远程配置走 relay，否则 local
     const sessionId = SESSION_ID || generateSessionId();
-    const onReady = () => { guard.sendAuthMode(); terminal.sendSnapshotAll(); };
+    const onReady = () => ctx.emitWebConnected(); // 通道就绪 → 给网页推初始状态
     const transport = CLOUDFLARE_WORKER_URL
         ? createRelay({ sessionId, onMessage: dispatch, onReady })
         : createLocal({ sessionId, onMessage: dispatch, onReady });
@@ -53,7 +48,7 @@ async function boot() {
 
     process.on('SIGINT', () => {
         console.log('\n🛑 正在关闭 Roam Server...');
-        terminal.shutdown();
+        stopAll();
         transport.stop();
         process.exit(0);
     });
