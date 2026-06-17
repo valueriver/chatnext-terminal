@@ -3,7 +3,7 @@
 // index 只做编排：不点名任何 app 的启动细节——各服务自己声明 start/stop（见 apps.js）。
 import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/core/env.js';
 import { generateSessionId } from './system/core/ids.js';
-import channel, { setTransport } from './channel.js';
+import channel, { addTransport } from './channel.js';
 import { route, startAll, stopAll } from './registry.js';
 import { createRelay } from './transport/relay.js';
 import { createLocal } from './transport/local.js';
@@ -37,19 +37,23 @@ async function boot() {
     // 拉起所有服务（CDP 桥 / 终端 / 鉴权 / 启示…各自的 start，自己订阅生命周期）
     await startAll(ctx);
 
-    // 开 WS 通道：有远程配置走 relay，否则 local
+    // 开 WS 通道（1+1）：本地服务常驻；配了远程则额外叠加 relay。
     const sessionId = SESSION_ID || generateSessionId();
     const onReady = () => ctx.emitWebConnected(); // 通道就绪 → 给网页推初始状态
-    const transport = CLOUDFLARE_WORKER_URL
-        ? createRelay({ sessionId, onMessage: dispatch, onReady })
-        : createLocal({ sessionId, onMessage: dispatch, onReady });
-    setTransport(transport);
-    transport.start();
+    const transports = [];
+
+    const local = createLocal({ onMessage: dispatch });
+    transports.push(local); addTransport(local); local.start();
+
+    if (CLOUDFLARE_WORKER_URL) {
+        const relay = createRelay({ sessionId, onMessage: dispatch, onReady });
+        transports.push(relay); addTransport(relay); relay.start();
+    }
 
     process.on('SIGINT', () => {
         console.log('\n🛑 正在关闭 Roam Server...');
         stopAll();
-        transport.stop();
+        for (const t of transports) t.stop();
         process.exit(0);
     });
 }
