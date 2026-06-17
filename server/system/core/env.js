@@ -61,26 +61,24 @@ function resolveValue(key, sources) {
 const configValues = await loadConfigFile();
 const dotEnvValues = loadDotEnvFile();
 
+// 远程配置可选：配了就连 Worker（relay），没配就本地直连（local）。
 const CLOUDFLARE_WORKER_URL = String(resolveValue('CLOUDFLARE_WORKER_URL', [dotEnvValues, configValues]) || '').trim();
-if (!CLOUDFLARE_WORKER_URL) {
-    console.error('缺少 CLOUDFLARE_WORKER_URL 配置');
-    console.error('请在以下任一位置设置:');
-    console.error(`  - ${configPath}`);
-    console.error(`  - ${envPath}`);
-    console.error('  - 环境变量 CLOUDFLARE_WORKER_URL');
-    process.exit(1);
+let SERVER_URL = '';
+let WEB_URL = '';
+if (CLOUDFLARE_WORKER_URL) {
+    let parsed;
+    try {
+        parsed = new URL(CLOUDFLARE_WORKER_URL);
+    } catch {
+        console.error(`CLOUDFLARE_WORKER_URL 无效: ${CLOUDFLARE_WORKER_URL}`);
+        process.exit(1);
+    }
+    SERVER_URL = `${parsed.protocol === 'https:' ? 'wss:' : 'ws:'}//${parsed.host}`;
+    WEB_URL = parsed.origin;
 }
 
-let parsed;
-try {
-    parsed = new URL(CLOUDFLARE_WORKER_URL);
-} catch {
-    console.error(`CLOUDFLARE_WORKER_URL 无效: ${CLOUDFLARE_WORKER_URL}`);
-    process.exit(1);
-}
-
-const SERVER_URL = `${parsed.protocol === 'https:' ? 'wss:' : 'ws:'}//${parsed.host}`;
-const WEB_URL = parsed.origin;
+// 本地直连端口（local 模式监听）
+const LOCAL_PORT = String(resolveValue('LOCAL_PORT', [dotEnvValues, configValues]) || '9520').trim();
 const SESSION_ID = String(resolveValue('SESSION_ID', [dotEnvValues, configValues]) || '').trim();
 if (SESSION_ID === 'default') {
     console.error('SESSION_ID 不能设置为 default');
@@ -91,11 +89,12 @@ const DEBUG = String(resolveValue('DEBUG', [dotEnvValues, configValues]) || '0')
 // 本地 CDP 桥端口：只监听 127.0.0.1，给 browser-use 扩展连。
 const BROWSER_BRIDGE_PORT = String(resolveValue('BROWSER_BRIDGE_PORT', [dotEnvValues, configValues]) || '9510').trim();
 
-export { CLOUDFLARE_WORKER_URL, SERVER_URL, WEB_URL, SESSION_ID, SESSION_PASSWORD, DEBUG, BROWSER_BRIDGE_PORT };
+export { CLOUDFLARE_WORKER_URL, SERVER_URL, WEB_URL, LOCAL_PORT, SESSION_ID, SESSION_PASSWORD, DEBUG, BROWSER_BRIDGE_PORT };
 export default {
     CLOUDFLARE_WORKER_URL,
     SERVER_URL,
     WEB_URL,
+    LOCAL_PORT,
     SESSION_ID,
     SESSION_PASSWORD,
     DEBUG,

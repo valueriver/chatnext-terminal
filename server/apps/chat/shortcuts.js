@@ -1,6 +1,6 @@
 // 快捷指令：聊天输入框「+」面板里的常用语，点一下填进输入框。落本机 roam.db 的 shortcuts 表。
 // 设置页增删改 + 排序。WS：shortcuts.list / shortcuts.save / shortcuts.delete / shortcuts.reorder。
-import ws from '../../index.js';
+import ws from '../../channel.js';
 import { getDb } from '../../system/core/db.js';
 
 function reply(type, reqId, data) {

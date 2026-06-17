@@ -1,4 +1,4 @@
-import ws from '../../index.js';
+import ws from '../../channel.js';
 import { captureCompressed } from '../../system/core/screenshot.js';
 
 async function capture(reqId) {

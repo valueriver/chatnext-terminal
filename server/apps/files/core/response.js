@@ -1,4 +1,4 @@
-import ws from '../../../index.js';
+import ws from '../../../channel.js';
 
 function ok(reqId, payload = {}) {
     ws.broadcast('fs.result', { reqId, ok: true, ...payload });

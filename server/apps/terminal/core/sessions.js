@@ -2,7 +2,7 @@ import pty from 'node-pty';
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
-import ws from '../../../index.js';
+import ws from '../../../channel.js';
 import { generateTerminalId } from '../../../system/core/ids.js';
 import { getDefaultShell, ensureDirectory, getDefaultDirectory } from './shell.js';
 

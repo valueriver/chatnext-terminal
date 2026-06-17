@@ -1,4 +1,4 @@
-import ws from '../../index.js';
+import ws from '../../channel.js';
 import { SESSION_PASSWORD } from '../core/env.js';
 import nonces from './core/nonces.js';
 import challenge from './commands/challenge.js';

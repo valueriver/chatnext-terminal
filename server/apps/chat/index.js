@@ -2,7 +2,7 @@
 // - 多对话：ai.list / ai.create / ai.get / ai.rename / ai.delete
 // - 发送：ai.send（流式经 ws.broadcast('ai.event') 推回所有已认证网页端）/ ai.abort
 // - 模型配置：model.get / model.set（落地到 ~/.roam/model.json）
-import ws from '../../index.js';
+import ws from '../../channel.js';
 import { chat } from '../../system/ai/loop.js';
 import { buildSystemPrompt } from '../../system/ai/prompt.js';
 import { getRunConfig, readConfig, writeConfig, publicView } from '../../system/ai/config.js';

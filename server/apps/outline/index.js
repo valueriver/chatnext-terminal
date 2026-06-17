@@ -1,7 +1,7 @@
 // 大纲：树形无限嵌套（WorkFlowy 式），整理内心图景。邻接表落本机 roam.db 的 outline 表。
 // WS：outline.list / create / update / delete / indent / outdent / move / toggle。
 // 全树取出在前端组树；个人大纲规模小，足够。
-import ws from '../../index.js';
+import ws from '../../channel.js';
 import { getDb } from '../../system/core/db.js';
 
 function reply(type, reqId, data) {
