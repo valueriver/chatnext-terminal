@@ -9,8 +9,8 @@ import notes from '../../apps/notes/index.js';
 import evolution from '../../apps/evolution/index.js';
 import memories from '../../apps/memories/index.js';
 import revelation from '../../apps/revelation/index.js';
-import shortcuts from '../../apps/shortcuts/index.js';
-import attachments from '../../apps/attachments/index.js';
+import shortcuts from '../shortcuts/index.js';
+import attachments from '../attachments/index.js';
 import outline from '../../apps/outline/index.js';
 
 let onDevicesChanged = () => {};

@@ -3,8 +3,8 @@
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'node:crypto';
-import ws from '../../system/ws/index.js';
-import { ROOT } from '../../system/core/db.js';
+import ws from '../ws/index.js';
+import { ROOT } from '../core/db.js';
 
 const FILE_DIR = path.join(ROOT, 'files');
 

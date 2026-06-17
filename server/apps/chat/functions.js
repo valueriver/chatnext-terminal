@@ -6,7 +6,7 @@ import ws from '../../system/ws/index.js';
 import cdpBridge from './cdp-bridge.js';
 import * as computer from './computer.js';
 import { getDb } from '../../system/core/db.js';
-import { saveFile } from '../attachments/index.js';
+import { saveFile } from '../../system/attachments/index.js';
 
 // 截图统一落盘 + 推给用户看 + 只回路径（不塞 base64，避免 token 爆炸）。
 // 让模型“看”屏幕需视觉模型；目前默认非视觉，截图作为文件留存，路径回给模型。

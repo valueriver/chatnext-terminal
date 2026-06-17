@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useChatStore } from '@/apps/chat/store';
 import { useWsStore } from '@/system/stores/ws';
-import { useShortcutsStore } from '@/apps/shortcuts/store';
+import { useShortcutsStore } from '@/system/stores/shortcuts';
 
 const chat = useChatStore();
 const ws = useWsStore();

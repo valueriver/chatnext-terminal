@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useThemeStore } from '@/system/stores/theme';
 import { useModelStore } from '@/apps/settings/store';
-import { useShortcutsStore } from '@/apps/shortcuts/store';
+import { useShortcutsStore } from '@/system/stores/shortcuts';
 import { useWsStore } from '@/system/stores/ws';
 import SettingsHeader from '../components/SettingsHeader.vue';
 
