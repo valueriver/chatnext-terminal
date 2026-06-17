@@ -1,8 +1,6 @@
-// 启示 = 自我升级的对外窗口。每天到设定时间由 selfupgrade 触发 generate()。
-// 自我升级 = 读懂用户 → 升级自己(进化) → 产出当天的「启示」。无人值守，只放开 sql 工具。
-import ws from '../../channel.js';
+// 自我升级生成：读懂用户 → 升级进化 + 沉淀记忆 → 产出当天的「启示」。run 命令与每日调度共用。
+// 无人值守，只放开 sql 工具。
 import { getDb } from '../../system/db.js';
-import { getSetting } from '../../system/settings/index.js';
 import { chat } from '../../system/ai/loop.js';
 import { tools } from '../../system/ai/tools.js';
 import { getRunConfig } from '../../system/ai/config.js';
@@ -30,7 +28,6 @@ const SYSTEM = `你是用户的「自我升级」——每天清晨整理过去�
 
 真诚、聚焦、像懂他的老友。前面的 sql 操作不要解释，最后只输出启示正文。`;
 
-// 本机日期 YYYY-MM-DD，用于一天一份去重
 const localDay = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -42,7 +39,7 @@ const localLabel = () => {
 };
 
 // 生成今天的启示(已存在则跳过)。返回 report id 或 null。
-async function generate({ force = false } = {}) {
+export async function generate({ force = false } = {}) {
     const day = localDay();
     const db = getDb();
     if (!force) {
@@ -63,72 +60,3 @@ async function generate({ force = false } = {}) {
     const info = db.prepare('INSERT INTO reports (day, content, created_at) VALUES (?, ?, ?)').run(day, text, Date.now());
     return Number(info.lastInsertRowid);
 }
-
-function reply(type, reqId, data) {
-    ws.broadcast(type, { reqId, ...data });
-}
-
-function listReports() {
-    const items = getDb().prepare('SELECT id, day, substr(content,1,200) AS preview, created_at FROM reports ORDER BY id DESC LIMIT 200').all();
-    return { items };
-}
-function getReport(id) {
-    return getDb().prepare('SELECT * FROM reports WHERE id = ?').get(id) || null;
-}
-function deleteReport(id) {
-    const info = getDb().prepare('DELETE FROM reports WHERE id = ?').run(id);
-    return { ok: info.changes > 0 };
-}
-
-async function handle(message) {
-    const t = message.type;
-    const d = message.data || {};
-    try {
-        switch (t) {
-            case 'revelation.list':
-                reply('revelation.list.result', d.reqId, { ok: true, ...listReports() });
-                return true;
-            case 'revelation.get':
-                reply('revelation.get.result', d.reqId, { ok: true, report: getReport(d.id) });
-                return true;
-            case 'revelation.delete':
-                reply('revelation.delete.result', d.reqId, { ...deleteReport(d.id) });
-                return true;
-            case 'revelation.run': {
-                const id = await generate({ force: true });
-                reply('revelation.run.result', d.reqId, { ok: Boolean(id), id: id || null });
-                return true;
-            }
-            default:
-                return false;
-        }
-    } catch (err) {
-        console.error(`revelation 错误 [${t}]:`, err.message || err);
-        reply('revelation.error', d.reqId, { ok: false, error: err.message || String(err) });
-        return true;
-    }
-}
-
-// 每日调度：常驻进程每分钟比对设置里的「启示时间」(本机时区)，到点跑一次自我升级。
-let timer = null;
-function upgradeTime() {
-    const v = String(getSetting('upgradeTime', '07:00')).trim();
-    return /^\d{2}:\d{2}$/.test(v) ? v : '07:00';
-}
-async function tick() {
-    try {
-        const d = new Date();
-        const now = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-        if (now === upgradeTime()) await generate();
-    } catch (err) {
-        console.error('启示调度 tick 失败：', err.message || err);
-    }
-}
-function start() {
-    if (timer) return;
-    timer = setInterval(tick, 60 * 1000);
-    console.log('🌅 启示已就绪（每天', upgradeTime(), '自我升级产出）');
-}
-
-export { handle, generate, start };
-export default { handle, generate, start };

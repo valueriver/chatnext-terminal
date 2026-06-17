@@ -1,8 +1,8 @@
 // 对话 app 的纯分发层（零业务）：按子命名空间把 chat.* 路由到各子能力。
-import conversation from './conversation.js';
-import model from './model.js';
-import shortcuts from './shortcuts.js';
-import attachments from './attachments.js';
+import conversation from './conversation/handle.js';
+import model from './model/handle.js';
+import shortcuts from './shortcuts/handle.js';
+import attachments from './attachments/handle.js';
 
 async function handle(message) {
     const t = message.type || '';
@@ -11,6 +11,5 @@ async function handle(message) {
     if (t.startsWith('chat.model.')) return model.handle(message);
     return conversation.handle(message); // 其余 chat.* —— 对话本身
 }
-
 export { handle };
 export default { handle };

@@ -1,5 +1,5 @@
 // 上下文压缩：当 token 超阈值时，用 LLM 摘要旧消息，注入 compaction 消息继续对话。
-import { callLlmStream } from '../../system/ai/llm.js';
+import { callLlmStream } from '../../../system/ai/llm.js';
 import * as store from './store.js';
 
 const DEFAULT_COMPACT_PROMPT = `你负责压缩一段聊天上下文，供后续大模型继续对话时使用。

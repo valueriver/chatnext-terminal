@@ -1,18 +1,18 @@
 // 服务注册表：单一真相。每项形状统一 { prefixes?, handle?, start?, stop? }——
 // 有 prefixes/handle 就参与消息派发，有 start/stop 就参与启动/关闭。加一个单元就加一行。
 import cdpBridge from './system/browser/bridge.js';
-import guard from './system/auth/index.js';
-import chat from './apps/chat/index.js';
-import notes from './apps/notes/index.js';
+import guard from './system/auth/handle.js';
+import chat from './apps/chat/handle.js';
+import notes from './apps/notes/handle.js';
 import outline from './apps/outline/handle.js';
-import tasks from './apps/tasks/index.js';
-import evolution from './apps/evolution/index.js';
-import memories from './apps/memories/index.js';
-import revelation from './apps/revelation/index.js';
-import terminal from './apps/terminal/index.js';
-import files from './apps/files/index.js';
-import status from './apps/status/index.js';
-import screen from './apps/screen/index.js';
+import tasks from './apps/tasks/handle.js';
+import evolution from './apps/evolution/handle.js';
+import memories from './apps/memories/handle.js';
+import revelation from './apps/revelation/handle.js';
+import terminal from './apps/terminal/handle.js';
+import files from './apps/files/handle.js';
+import status from './apps/status/handle.js';
+import screen from './apps/screen/handle.js';
 
 export const SERVICES = [
     // 基础服务（无 UI）
