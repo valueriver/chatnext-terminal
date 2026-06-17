@@ -6,10 +6,11 @@
 
 ## 装 & 用
 1. `chrome://extensions` → 打开「开发者模式」→「加载已解压的扩展程序」→ 选本目录。
-2. 点扩展图标,填一条 wss(把 `session`/`token` 写进 query,由对端校验):
+2. 点扩展图标,填一条 ws 地址(`token` 写进 query,由对端校验)。roam 用的是本机 CDP 桥(server 启动时会打印这条):
    ```
-   wss://<your-worker-domain>/ws?session=mac&token=xxxxxx&device=browser
+   ws://127.0.0.1:9510/cdp?token=<你的 SESSION_ID>
    ```
+   插件本身项目无关——填任意对端地址都行(如经中枢路由的 `wss://<host>/ws?...&device=browser`)。
 3. 显示「已连接」(角标 `on`)即就绪。对端就能驱动**你这台机器、真实登录态的 Chrome**。
 
 ## 线协议(与项目无关)
