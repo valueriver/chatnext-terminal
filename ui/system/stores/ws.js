@@ -116,8 +116,13 @@ export const useWsStore = defineStore('ws', () => {
         }
     }
 
+    function readCookie(name) {
+        const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+        return m ? decodeURIComponent(m[1]) : '';
+    }
+
     function init() {
-        const s = new URLSearchParams(location.search).get('session');
+        const s = readCookie('roam_session');
         if (!s || s === 'default') {
             invalid.value = true;
             state.value = 'offline';
@@ -133,7 +138,7 @@ export const useWsStore = defineStore('ws', () => {
     function connect() {
         clearTimeout(reconnectTimer);
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const params = new URLSearchParams({ session: sessionId.value, device: 'web' });
+        const params = new URLSearchParams({ device: 'web' });
         const savedToken = readToken();
         if (savedToken) params.set('authToken', savedToken);
         const url = `${protocol}//${location.host}/ws?${params.toString()}`;

@@ -7,7 +7,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'node:crypto';
 import { WebSocketServer } from 'ws';
-import { LOCAL_PORT } from '../system/env.js';
+import { LOCAL_PORT, SESSION_ID } from '../system/env.js';
 
 const DIST = fileURLToPath(new URL('../../ui/dist', import.meta.url));
 const MIME = {
@@ -31,16 +31,19 @@ function serveStatic(req, res) {
     if (p === '/') p = '/index.html';
     const file = path.join(DIST, p);
     if (!file.startsWith(DIST)) { res.writeHead(403); res.end(); return; }
+    const sessionCookie = `roam_session=${SESSION_ID || 'local'}; Path=/; SameSite=Lax`;
     fs.readFile(file, (err, data) => {
         if (err) {
             fs.readFile(path.join(DIST, 'index.html'), (e2, html) => {
                 if (e2) { res.writeHead(404); res.end('ui/dist 未构建：先到 ui/ 跑 npm run build'); return; }
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Set-Cookie': sessionCookie });
                 res.end(html);
             });
             return;
         }
-        res.writeHead(200, { 'Content-Type': mimeOf(file) });
+        const headers = { 'Content-Type': mimeOf(file) };
+        if (mimeOf(file).startsWith('text/html')) headers['Set-Cookie'] = sessionCookie;
+        res.writeHead(200, headers);
         res.end(data);
     });
 }

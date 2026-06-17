@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useWsStore } from '@/system/stores/ws';
 
 const routes = [
-    { path: '/', redirect: (to) => ({ path: '/guard', query: to.query }) },
+    { path: '/', redirect: '/guard' },
     {
         path: '/guard',
         name: 'guard',
@@ -74,7 +74,7 @@ const routes = [
         name: 'settings',
         component: () => import('./apps/settings/index.vue'),
     },
-    { path: '/:pathMatch(.*)*', redirect: (to) => ({ path: '/guard', query: to.query }) },
+    { path: '/:pathMatch(.*)*', redirect: '/guard' },
 ];
 
 export const router = createRouter({
@@ -82,18 +82,12 @@ export const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from) => {
-    const patched = { ...to };
-    if (!to.query.session && from.query.session) {
-        patched.query = { ...to.query, session: from.query.session };
-        return patched;
-    }
-
+router.beforeEach((to) => {
     if (to.meta?.public) return true;
 
     const ws = useWsStore();
     if (ws.requiresPassword && !ws.authenticated && !ws.isReconnecting) {
-        return { path: '/guard', query: to.query };
+        return '/guard';
     }
     return true;
 });

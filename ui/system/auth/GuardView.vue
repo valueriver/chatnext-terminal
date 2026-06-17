@@ -29,7 +29,7 @@ function onSubmit() {
 }
 
 function toChat() {
-    router.replace({ path: '/chat', query: router.currentRoute.value.query });
+    router.replace('/chat');
 }
 
 onMounted(() => {
