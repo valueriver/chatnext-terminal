@@ -6,6 +6,7 @@ import chat from './apps/chat/handle.js';
 import notes from './apps/notes/handle.js';
 import outline from './apps/outline/handle.js';
 import tasks from './apps/tasks/handle.js';
+import schedule from './apps/schedule/handle.js';
 import evolution from './apps/evolution/handle.js';
 import memories from './apps/memories/handle.js';
 import revelation from './apps/revelation/handle.js';
@@ -24,6 +25,7 @@ export const SERVICES = [
     { prefixes: ['notes.'], handle: notes.handle },
     { prefixes: ['outline.'], handle: outline.handle },
     { prefixes: ['tasks.'], handle: tasks.handle },
+    { prefixes: ['schedule.'], handle: schedule.handle, start: schedule.start },
     { prefixes: ['evolution.'], handle: evolution.handle },
     { prefixes: ['memories.'], handle: memories.handle },
     { prefixes: ['revelation.'], handle: revelation.handle, start: revelation.start },

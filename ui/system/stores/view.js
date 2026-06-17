@@ -6,6 +6,7 @@ export const useViewStore = defineStore('view', () => {
         { path: '/notes', label: '笔记', icon: '📝' },
         { path: '/outline', label: '大纲', icon: '🌳' },
         { path: '/tasks', label: '任务', icon: '⏱️' },
+        { path: '/schedule', label: '排程', icon: '🗓️' },
         { path: '/evolution', label: '进化', icon: '🧬' },
         { path: '/memories', label: '记忆', icon: '📚' },
         { path: '/revelation', label: '启示', icon: '🌅' },

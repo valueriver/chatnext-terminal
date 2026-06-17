@@ -117,6 +117,23 @@ function getDb() {
             created_at INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_task_messages_task ON task_messages(task_id, id);
+        CREATE TABLE IF NOT EXISTS schedules (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT NOT NULL DEFAULT '排程',
+            prompt     TEXT NOT NULL DEFAULT '',
+            mode       TEXT NOT NULL DEFAULT 'daily',   -- once | daily | interval
+            at         TEXT NOT NULL DEFAULT '',         -- once: epoch ms; daily: 'HH:MM'; interval: 分钟数
+            enabled    INTEGER NOT NULL DEFAULT 1,
+            last_run   INTEGER,
+            created_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS schedule_runs (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            schedule_id INTEGER NOT NULL,
+            task_id     INTEGER NOT NULL,
+            created_at  INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_schedule_runs ON schedule_runs(schedule_id, id);
     `);
     return db;
 }
