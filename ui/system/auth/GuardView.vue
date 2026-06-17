@@ -28,15 +28,15 @@ function onSubmit() {
     ws.submitPassword(password.value);
 }
 
-function toTerminal() {
-    router.replace({ path: '/terminal', query: router.currentRoute.value.query });
+function toChat() {
+    router.replace({ path: '/chat', query: router.currentRoute.value.query });
 }
 
 onMounted(() => {
-    if (ws.authenticated) toTerminal();
+    if (ws.authenticated) toChat();
 });
 
-watch(() => ws.authenticated, (v) => { if (v) toTerminal(); });
+watch(() => ws.authenticated, (v) => { if (v) toChat(); });
 </script>
 
 <template>
