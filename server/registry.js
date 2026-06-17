@@ -4,7 +4,7 @@ import cdpBridge from './system/browser/bridge.js';
 import guard from './system/auth/index.js';
 import chat from './apps/chat/index.js';
 import notes from './apps/notes/index.js';
-import outline from './apps/outline/index.js';
+import outline from './apps/outline/handle.js';
 import tasks from './apps/tasks/index.js';
 import evolution from './apps/evolution/index.js';
 import memories from './apps/memories/index.js';
