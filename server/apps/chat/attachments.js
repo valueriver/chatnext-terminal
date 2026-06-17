@@ -1,6 +1,6 @@
 // 聊天附件上传：前端把文件 data URL 经 attach.upload 上来，落盘后只回 {name, path}（地址）。
 // 消息里只存地址，AI 就在本机、用 shell 自己读，不嵌内容。
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 import { saveFile } from '../../system/core/storage.js';
 
 function reply(type, reqId, data) {

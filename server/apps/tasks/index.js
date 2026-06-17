@@ -1,7 +1,7 @@
 // 任务应用：观察/管理「给应用调用的通道」跑出来的 AI 任务。
 // WS：tasks.list / tasks.get（含过程消息）/ tasks.abort / tasks.run（从 UI 手动发起）。
 // 任务进度由 system/ai/task.js 实时广播（task.update / task.event）。
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 import { getDb } from '../../system/core/db.js';
 import { createTask, abortTask, getTask } from '../../system/ai/task.js';
 

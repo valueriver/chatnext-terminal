@@ -1,7 +1,7 @@
 // 进化：AI 自我演化的人设/原则时间轴。落本机 roam.db 的 evolution 表。
 // 由 AI 通过 sql 工具写入（最新一版即生效的系统提示词），前端只读 + 删除。
 // WS 协议：evolution.list / evolution.delete，结果经 ws.broadcast 回所有网页端。
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 import { getDb } from '../../system/core/db.js';
 
 function reply(type, reqId, data) {

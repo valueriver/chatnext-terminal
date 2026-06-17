@@ -1,7 +1,7 @@
 // 记忆：AI 对用户的长期认知。落本机 roam.db 的 memories 表（三层 tier）。
 // 由 AI 通过 sql 工具写入，前端只读 + 删除。
 // WS 协议：memories.list / memories.delete，结果经 ws.broadcast 回所有网页端。
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 import { getDb } from '../../system/core/db.js';
 
 function reply(type, reqId, data) {

@@ -1,6 +1,6 @@
 import { promises as fsp } from 'fs';
 import path from 'path';
-import ws from '../../../system/ws/index.js';
+import ws from '../../../index.js';
 import { guessMime } from '../../../system/core/mime.js';
 
 const READ_CHUNK = 256 * 1024;

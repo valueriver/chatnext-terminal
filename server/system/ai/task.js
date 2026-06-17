@@ -7,7 +7,7 @@
 //   const { taskId } = createTask({ name: 'notes-tidy', prompt: '把这些要点整理成提纲：…' });
 //   const text = await waitTask(taskId);          // 等结果
 //   const json = parseTaskJson(text);             // 需要 JSON 时
-import ws from '../ws/index.js';
+import ws from '../../index.js';
 import { getDb } from '../core/db.js';
 import { chat } from './loop.js';
 import { tools as allTools } from './tools.js';

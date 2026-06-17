@@ -1,5 +1,5 @@
 import sessions from '../core/sessions.js';
-import ws from '../../../system/ws/index.js';
+import ws from '../../../index.js';
 
 async function create(options = {}) {
     const terminal = await sessions.create(options);

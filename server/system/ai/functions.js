@@ -2,7 +2,7 @@
 // shell + 浏览器（browser_cdp，经 browser-use 扩展走 CDP）+ 电脑（cliclick/osascript）。
 import { exec } from 'child_process';
 import os from 'os';
-import ws from '../ws/index.js';
+import ws from '../../index.js';
 import cdpBridge from '../browser/bridge.js';
 import * as computer from '../computer/index.js';
 import { getDb } from '../core/db.js';

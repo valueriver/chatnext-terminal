@@ -1,6 +1,6 @@
 // 笔记：随手记录想法、片段，喂给 AI 了解你。数据落本机 roam.db 的 notes 表。
 // WS 协议：notes.list / notes.save（有 id 即更新）/ notes.delete，结果经 ws.broadcast 回所有网页端。
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 import { getDb } from '../../system/core/db.js';
 
 const PAGE = 20;

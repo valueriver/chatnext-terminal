@@ -1,6 +1,6 @@
 import os from 'os';
 import { execFile } from 'child_process';
-import ws from '../../system/ws/index.js';
+import ws from '../../index.js';
 
 function cpuTotals() {
     const cpus = os.cpus() || [];

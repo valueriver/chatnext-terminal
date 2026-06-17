@@ -1,6 +1,6 @@
 import { promises as fsp } from 'fs';
 import path from 'path';
-import ws from '../../../system/ws/index.js';
+import ws from '../../../index.js';
 import response from '../core/response.js';
 import uploads from '../core/uploads.js';
 

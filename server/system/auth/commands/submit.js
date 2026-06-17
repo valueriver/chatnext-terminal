@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import ws from '../../ws/index.js';
+import ws from '../../../index.js';
 import { SESSION_PASSWORD } from '../../core/env.js';
 import nonces from '../core/nonces.js';
 import lockout from '../core/lockout.js';
