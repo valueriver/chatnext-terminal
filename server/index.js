@@ -4,7 +4,7 @@
 import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/core/env.js';
 import { generateSessionId } from './system/core/ids.js';
 import channel, { setTransport } from './channel.js';
-import { routeToApp, startAll, stopAll } from './apps.js';
+import { route, startAll, stopAll } from './registry.js';
 import { createRelay } from './transport/relay.js';
 import { createLocal } from './transport/local.js';
 
@@ -27,7 +27,7 @@ async function dispatch(message) {
         return;
     }
     if (t === 'connection.ready') return;
-    if (await routeToApp(message)) return;
+    if (await route(message)) return;
     console.log('未识别的消息类型:', t);
 }
 

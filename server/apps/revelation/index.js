@@ -2,6 +2,7 @@
 // 自我升级 = 读懂用户 → 升级自己(进化) → 产出当天的「启示」。无人值守，只放开 sql 工具。
 import ws from '../../channel.js';
 import { getDb } from '../../system/core/db.js';
+import { getSetting } from '../../system/settings/index.js';
 import { chat } from '../../system/ai/loop.js';
 import { tools } from '../../system/ai/tools.js';
 import { getRunConfig } from '../../system/ai/config.js';
@@ -108,5 +109,26 @@ async function handle(message) {
     }
 }
 
-export { handle, generate };
-export default { handle, generate };
+// 每日调度：常驻进程每分钟比对设置里的「启示时间」(本机时区)，到点跑一次自我升级。
+let timer = null;
+function upgradeTime() {
+    const v = String(getSetting('upgradeTime', '07:00')).trim();
+    return /^\d{2}:\d{2}$/.test(v) ? v : '07:00';
+}
+async function tick() {
+    try {
+        const d = new Date();
+        const now = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        if (now === upgradeTime()) await generate();
+    } catch (err) {
+        console.error('启示调度 tick 失败：', err.message || err);
+    }
+}
+function start() {
+    if (timer) return;
+    timer = setInterval(tick, 60 * 1000);
+    console.log('🌅 启示已就绪（每天', upgradeTime(), '自我升级产出）');
+}
+
+export { handle, generate, start };
+export default { handle, generate, start };
