@@ -103,8 +103,8 @@ function fmtUptime(sec) {
 }
 
 function pctClass(p) {
-    if (p < 60) return 'bg-emerald-500';
-    if (p < 85) return 'bg-amber-400';
+    if (p < 60) return 'bg-accent';
+    if (p < 85) return 'bg-warn';
     return 'bg-rose-500';
 }
 
@@ -121,7 +121,7 @@ onUnmounted(stopPolling);
 </script>
 
 <template>
-    <div class="flex min-h-0 flex-1 flex-col bg-zinc-950">
+    <div class="flex min-h-0 flex-1 flex-col bg-bg">
         <StatusToolbar
             :loading="loading"
             :disabled="!ws.canUseActions"
@@ -131,95 +131,95 @@ onUnmounted(stopPolling);
         />
 
         <main v-if="!ws.showActions && !ws.isReconnecting"
-            class="flex-1 min-h-0 flex items-center justify-center text-sm text-zinc-500">
+            class="flex-1 min-h-0 flex items-center justify-center text-sm text-muted">
             等待客户端连接和认证
         </main>
 
         <main v-else-if="!d && loading"
-            class="flex-1 min-h-0 flex items-center justify-center text-sm text-zinc-500">
+            class="flex-1 min-h-0 flex items-center justify-center text-sm text-muted">
             正在获取系统状态...
         </main>
 
         <main v-else-if="d" class="flex-1 min-h-0 overflow-y-auto px-4 py-4">
             <div class="mx-auto w-full max-w-2xl space-y-4">
-                <section class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">主机</h3>
+                <section class="rounded-lg border border-line bg-bg-elev/40 p-4">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-muted mb-3">主机</h3>
                     <dl class="grid grid-cols-2 gap-y-2 text-sm">
-                        <dt class="text-zinc-500">主机名</dt>
-                        <dd class="text-zinc-100 truncate">{{ d.host.hostname }}</dd>
-                        <dt class="text-zinc-500">系统</dt>
-                        <dd class="text-zinc-100">{{ d.host.platform }} {{ d.host.release }}</dd>
-                        <dt class="text-zinc-500">架构</dt>
-                        <dd class="text-zinc-100">{{ d.host.arch }}</dd>
-                        <dt class="text-zinc-500">运行时长</dt>
-                        <dd class="text-zinc-100">{{ fmtUptime(d.host.uptime) }}</dd>
+                        <dt class="text-muted">主机名</dt>
+                        <dd class="text-ink truncate">{{ d.host.hostname }}</dd>
+                        <dt class="text-muted">系统</dt>
+                        <dd class="text-ink">{{ d.host.platform }} {{ d.host.release }}</dd>
+                        <dt class="text-muted">架构</dt>
+                        <dd class="text-ink">{{ d.host.arch }}</dd>
+                        <dt class="text-muted">运行时长</dt>
+                        <dd class="text-ink">{{ fmtUptime(d.host.uptime) }}</dd>
                     </dl>
                 </section>
 
-                <section class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+                <section class="rounded-lg border border-line bg-bg-elev/40 p-4">
                     <div class="flex items-baseline justify-between mb-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">CPU</h3>
-                        <div class="text-2xl font-mono text-zinc-100">{{ d.cpu.usagePercent }}<span class="text-base text-zinc-500"> %</span></div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">CPU</h3>
+                        <div class="text-2xl font-mono text-ink">{{ d.cpu.usagePercent }}<span class="text-base text-muted"> %</span></div>
                     </div>
-                    <div class="h-1.5 rounded bg-zinc-800 overflow-hidden mb-3">
+                    <div class="h-1.5 rounded bg-bg-hi overflow-hidden mb-3">
                         <div class="h-full transition-all" :class="pctClass(d.cpu.usagePercent)"
                             :style="`width: ${Math.min(100, d.cpu.usagePercent)}%`"></div>
                     </div>
                     <dl class="grid grid-cols-2 gap-y-2 text-sm">
-                        <dt class="text-zinc-500">核心</dt>
-                        <dd class="text-zinc-100">{{ d.cpu.count }}</dd>
-                        <dt class="text-zinc-500">型号</dt>
-                        <dd class="text-zinc-100 truncate">{{ d.cpu.model }}</dd>
-                        <dt class="text-zinc-500">主频</dt>
-                        <dd class="text-zinc-100">{{ d.cpu.speed ? (d.cpu.speed / 1000).toFixed(2) + ' GHz' : '—' }}</dd>
-                        <dt class="text-zinc-500">Load 1/5/15</dt>
-                        <dd class="text-zinc-100 font-mono">
+                        <dt class="text-muted">核心</dt>
+                        <dd class="text-ink">{{ d.cpu.count }}</dd>
+                        <dt class="text-muted">型号</dt>
+                        <dd class="text-ink truncate">{{ d.cpu.model }}</dd>
+                        <dt class="text-muted">主频</dt>
+                        <dd class="text-ink">{{ d.cpu.speed ? (d.cpu.speed / 1000).toFixed(2) + ' GHz' : '—' }}</dd>
+                        <dt class="text-muted">Load 1/5/15</dt>
+                        <dd class="text-ink font-mono">
                             {{ d.cpu.loadavg.map(n => n.toFixed(2)).join(' / ') }}
                         </dd>
                     </dl>
                 </section>
 
-                <section class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+                <section class="rounded-lg border border-line bg-bg-elev/40 p-4">
                     <div class="flex items-baseline justify-between mb-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">内存</h3>
-                        <div class="text-2xl font-mono text-zinc-100">{{ d.mem.percent }}<span class="text-base text-zinc-500"> %</span></div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">内存</h3>
+                        <div class="text-2xl font-mono text-ink">{{ d.mem.percent }}<span class="text-base text-muted"> %</span></div>
                     </div>
-                    <div class="h-1.5 rounded bg-zinc-800 overflow-hidden mb-3">
+                    <div class="h-1.5 rounded bg-bg-hi overflow-hidden mb-3">
                         <div class="h-full transition-all" :class="pctClass(d.mem.percent)"
                             :style="`width: ${Math.min(100, d.mem.percent)}%`"></div>
                     </div>
                     <dl class="grid grid-cols-2 gap-y-2 text-sm">
-                        <dt class="text-zinc-500">已用 / 总量</dt>
-                        <dd class="text-zinc-100 font-mono">{{ fmtBytes(d.mem.used) }} / {{ fmtBytes(d.mem.total) }}</dd>
-                        <dt class="text-zinc-500">空闲</dt>
-                        <dd class="text-zinc-100 font-mono">{{ fmtBytes(d.mem.free) }}</dd>
+                        <dt class="text-muted">已用 / 总量</dt>
+                        <dd class="text-ink font-mono">{{ fmtBytes(d.mem.used) }} / {{ fmtBytes(d.mem.total) }}</dd>
+                        <dt class="text-muted">空闲</dt>
+                        <dd class="text-ink font-mono">{{ fmtBytes(d.mem.free) }}</dd>
                     </dl>
                 </section>
 
-                <section v-if="d.disk" class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+                <section v-if="d.disk" class="rounded-lg border border-line bg-bg-elev/40 p-4">
                     <div class="flex items-baseline justify-between mb-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500">磁盘 ({{ d.disk.mount }})</h3>
-                        <div class="text-2xl font-mono text-zinc-100">{{ d.disk.percent }}<span class="text-base text-zinc-500"> %</span></div>
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">磁盘 ({{ d.disk.mount }})</h3>
+                        <div class="text-2xl font-mono text-ink">{{ d.disk.percent }}<span class="text-base text-muted"> %</span></div>
                     </div>
-                    <div class="h-1.5 rounded bg-zinc-800 overflow-hidden mb-3">
+                    <div class="h-1.5 rounded bg-bg-hi overflow-hidden mb-3">
                         <div class="h-full transition-all" :class="pctClass(d.disk.percent)"
                             :style="`width: ${Math.min(100, d.disk.percent)}%`"></div>
                     </div>
                     <dl class="grid grid-cols-2 gap-y-2 text-sm">
-                        <dt class="text-zinc-500">已用 / 总量</dt>
-                        <dd class="text-zinc-100 font-mono">{{ fmtBytes(d.disk.used) }} / {{ fmtBytes(d.disk.total) }}</dd>
-                        <dt class="text-zinc-500">可用</dt>
-                        <dd class="text-zinc-100 font-mono">{{ fmtBytes(d.disk.free) }}</dd>
+                        <dt class="text-muted">已用 / 总量</dt>
+                        <dd class="text-ink font-mono">{{ fmtBytes(d.disk.used) }} / {{ fmtBytes(d.disk.total) }}</dd>
+                        <dt class="text-muted">可用</dt>
+                        <dd class="text-ink font-mono">{{ fmtBytes(d.disk.free) }}</dd>
                     </dl>
                 </section>
 
-                <section v-if="d.network?.length" class="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">网络</h3>
+                <section v-if="d.network?.length" class="rounded-lg border border-line bg-bg-elev/40 p-4">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-muted mb-3">网络</h3>
                     <ul class="text-sm space-y-1.5">
                         <li v-for="iface in d.network" :key="iface.name + iface.address"
                             class="flex justify-between gap-3">
-                            <span class="text-zinc-500 shrink-0">{{ iface.name }}</span>
-                            <span class="text-zinc-100 font-mono truncate">{{ iface.address }}</span>
+                            <span class="text-muted shrink-0">{{ iface.name }}</span>
+                            <span class="text-ink font-mono truncate">{{ iface.address }}</span>
                         </li>
                     </ul>
                 </section>

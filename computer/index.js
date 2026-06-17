@@ -4,6 +4,7 @@ import router from './system/ws/dispatch.js';
 import guard from './system/auth/index.js';
 import terminal from './apps/terminal/index.js';
 import cdpBridge from './apps/chat/cdp-bridge.js';
+import { startSelfUpgrade } from './system/selfupgrade.js';
 
 async function boot() {
     console.log('🚀 正在启动 Roam Server...');
@@ -23,6 +24,9 @@ async function boot() {
     });
 
     await terminal.ensureDefault();
+
+    // 每天到设定时间产出「启示」（自我升级）。
+    startSelfUpgrade();
 
     ws.init({
         onOpen: () => {

@@ -10,6 +10,7 @@ const DEFAULTS = {
     compressThreshold: '12000',
     toolResultMaxChars: '12000',
     compactPrompt: '',
+    upgradeTime: '07:00',
 };
 
 function getSetting(key, fallback = '') {

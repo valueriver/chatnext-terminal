@@ -93,8 +93,8 @@ function setupChatStream({
                 break;
             case 'input':
                 updateTitle(event.title, event.chatId);
-                if (event.message?.content) {
-                    pushRow({ role: 'user', _key: mkKey('user'), content: event.message.content || '' });
+                if (event.message?.content || event.message?.attachments?.length) {
+                    pushRow({ role: 'user', _key: mkKey('user'), content: event.message.content || '', attachments: Array.isArray(event.message.attachments) ? event.message.attachments : [] });
                 }
                 break;
             case 'message': {

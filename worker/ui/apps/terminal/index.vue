@@ -74,16 +74,16 @@ onUnmounted(() => {
     <div class="flex min-h-0 flex-1 flex-col">
         <TerminalToolbar />
 
-        <div class="relative min-h-0 flex-1 bg-black">
+        <div class="relative min-h-0 flex-1 bg-bg">
             <main
                 v-for="tab in term.terminalTabs"
                 :key="tab.id"
                 v-show="tab.id === term.activeTerminalId"
                 :ref="(el) => setTerminalContainer(tab.id, el)"
-                class="h-full w-full overflow-hidden bg-black"
+                class="h-full w-full overflow-hidden bg-bg"
             ></main>
 
-            <div v-if="!term.terminalTabs.length" class="flex h-full items-center justify-center text-sm text-zinc-500">
+            <div v-if="!term.terminalTabs.length" class="flex h-full items-center justify-center text-sm text-muted">
                 等待终端列表...
             </div>
         </div>

@@ -12,6 +12,7 @@ const chat = async (messages, {
     signal,
     maxRounds = 50,
     toolResultMaxChars = 12000,
+    toolset = tools,
 } = {}) => {
     const workMessages = Array.isArray(messages) ? [...messages] : [];
     let round = 0;
@@ -20,7 +21,7 @@ const chat = async (messages, {
         if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
 
         const payload = { model, messages: workMessages };
-        if (Array.isArray(tools) && tools.length) payload.tools = tools;
+        if (Array.isArray(toolset) && toolset.length) payload.tools = toolset;
 
         const result = await callLlmStream(apiUrl, apiKey, payload, {
             signal,

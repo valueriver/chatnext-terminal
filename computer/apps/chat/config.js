@@ -41,6 +41,7 @@ async function readConfig() {
         compressThreshold: Number(s.compressThreshold) || 12000,
         toolResultMaxChars: Number(s.toolResultMaxChars) || 12000,
         compactPrompt: s.compactPrompt || '',
+        upgradeTime: /^\d{2}:\d{2}$/.test(String(s.upgradeTime || '').trim()) ? s.upgradeTime.trim() : '07:00',
     };
 }
 
@@ -85,6 +86,7 @@ function publicView(c) {
         compressThreshold: c.compressThreshold ?? 12000,
         toolResultMaxChars: c.toolResultMaxChars ?? 12000,
         compactPrompt: c.compactPrompt || '',
+        upgradeTime: c.upgradeTime || '07:00',
         hasKey: Boolean(k),
         keyPreview: !k ? '' : (k.length <= 8 ? '已设置' : `${k.slice(0, 4)}····${k.slice(-4)}`),
     };

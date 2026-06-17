@@ -35,7 +35,7 @@ watch(() => ws.canUseActions, (ready, wasReady) => {
 </script>
 
 <template>
-    <div class="flex-1 min-h-0 flex flex-col bg-zinc-950 relative"
+    <div class="flex-1 min-h-0 flex flex-col bg-bg relative"
          @dragover="onDragOver"
          @dragleave="onDragLeave"
          @drop="onDrop">
@@ -44,8 +44,8 @@ watch(() => ws.canUseActions, (ready, wasReady) => {
         <UploadProgress />
 
         <div v-if="files.isDragOver"
-            class="absolute inset-0 pointer-events-none border-2 border-dashed border-emerald-500 bg-emerald-500/10 flex items-center justify-center">
-            <div class="text-emerald-300 text-sm font-medium">松手上传到当前目录</div>
+            class="absolute inset-0 pointer-events-none border-2 border-dashed border-accent bg-accent/10 flex items-center justify-center">
+            <div class="text-accent-hi text-sm font-medium">松手上传到当前目录</div>
         </div>
 
         <PreviewModal />

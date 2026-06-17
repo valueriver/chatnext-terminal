@@ -11,6 +11,21 @@ import * as store from './store.js';
 
 const controllers = new Map(); // chatId -> AbortController
 
+// 发给模型前展开附件：带 attachments 的用户消息 → 在文本末尾附上文件路径，
+// 让 AI 用 shell 自己去读（它就在本机）。不嵌内容、不走视觉。其余消息原样（剥掉 attachments 字段）。
+function expandAttachments(msg) {
+    if (msg?.role === 'user' && Array.isArray(msg.attachments) && msg.attachments.length) {
+        const lines = msg.attachments
+            .filter((a) => a?.path)
+            .map((a, i) => `${i + 1}. ${a.name || 'file'}: ${a.path}`);
+        if (!lines.length) { const { attachments, ...rest } = msg; return rest; }
+        const content = `${String(msg.content || '')}\n\n【附件文件路径】\n请先读取这些文件内容，再结合用户问题回答。\n${lines.join('\n')}`;
+        return { role: 'user', content };
+    }
+    if (msg?.attachments) { const { attachments, ...rest } = msg; return rest; }
+    return msg;
+}
+
 function emit(kind, data) {
     ws.broadcast('ai.event', { kind, ...data });
 }
@@ -45,11 +60,16 @@ async function pageWithLiveState(chatId, limit, before) {
 async function runSend(d) {
     const chatId = String(d.chatId || '').trim();
     const content = String(d.content ?? '').trim();
+    // 附件：前端已上传到本机 ~/.roam/files，这里只收 {name, path}（地址），最多 10 个。
+    const attachments = (Array.isArray(d.attachments) ? d.attachments : [])
+        .filter((a) => a && a.path && a.name)
+        .map((a) => ({ name: String(a.name), path: String(a.path), size: Number(a.size) || 0 }))
+        .slice(0, 10);
     if (!chatId) { emit('error', { content: '缺少 chatId' }); return; }
 
     const existing = await store.readChat(chatId);
     if (!existing) { emit('error', { chatId, content: '对话不存在' }); return; }
-    if (!content) return;
+    if (!content && !attachments.length) return;
 
     if (controllers.has(chatId)) {
         controllers.get(chatId).abort();
@@ -65,9 +85,10 @@ async function runSend(d) {
     }
 
     const userMessage = { role: 'user', content };
+    if (attachments.length) userMessage.attachments = attachments;
     const extra = {};
     if (existing.messages.length === 0 || existing.title === '新对话') {
-        extra.title = content.slice(0, 30);
+        extra.title = (content || attachments[0]?.name || '附件').slice(0, 30);
     }
     await store.appendMessages(chatId, [userMessage], extra);
     emit('input', { chatId, message: userMessage, title: extra.title || null });
@@ -83,7 +104,7 @@ async function runSend(d) {
     const rows = store.listMessagesRaw(chatId, { afterId });
     const history = rows.map((r) => r.message);
     const latestUsage = rows.length ? rows[rows.length - 1].usage : {};
-    const modelMessages = [{ role: 'system', content: buildSystemPrompt(config) }, ...history];
+    const modelMessages = [{ role: 'system', content: buildSystemPrompt(config) }, ...history.map(expandAttachments)];
 
     // 发送前尝试压缩
     const emitFn = (ev) => emit(ev.type, { chatId, ...ev });

@@ -60,52 +60,52 @@ function remove() {
     <div v-if="open"
         class="fade-enter fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
         @click.self="emit('close')">
-        <div class="sheet-enter sm:animate-none w-full sm:max-w-md bg-zinc-900 border border-zinc-800 rounded-t-2xl sm:rounded-2xl p-4 space-y-4 safe-bottom">
+        <div class="sheet-enter sm:animate-none w-full sm:max-w-md bg-bg-elev border border-line rounded-t-2xl sm:rounded-2xl p-4 space-y-4 safe-bottom">
             <div class="flex items-center justify-between">
-                <h3 class="text-base font-medium text-zinc-100">{{ editingId ? '编辑常用命令' : '新增常用命令' }}</h3>
+                <h3 class="text-base font-medium text-ink">{{ editingId ? '编辑常用命令' : '新增常用命令' }}</h3>
                 <button @click="emit('close')"
-                    class="w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors">
+                    class="w-8 h-8 flex items-center justify-center text-muted hover:text-ink hover:bg-bg-hi rounded transition-colors">
                     ✕
                 </button>
             </div>
 
             <div class="space-y-1.5">
-                <label class="block text-xs text-zinc-400">名称（按钮上显示）</label>
+                <label class="block text-xs text-muted">名称（按钮上显示）</label>
                 <input v-model="formName"
                     placeholder="如：部署"
                     maxlength="20"
-                    class="w-full px-3 h-10 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 border border-zinc-700 rounded focus:outline-none focus:border-emerald-500" />
+                    class="w-full px-3 h-10 bg-bg-hi text-ink placeholder:text-faint border border-line-hi rounded focus:outline-none focus:border-accent" />
             </div>
 
             <div class="space-y-1.5">
-                <label class="block text-xs text-zinc-400">命令内容</label>
+                <label class="block text-xs text-muted">命令内容</label>
                 <textarea v-model="formCmd"
                     placeholder="如：npm run deploy"
                     rows="3"
                     spellcheck="false"
                     autocapitalize="off"
                     autocorrect="off"
-                    class="w-full px-3 py-2 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 border border-zinc-700 rounded focus:outline-none focus:border-emerald-500 resize-none"></textarea>
+                    class="w-full px-3 py-2 bg-bg-hi text-ink placeholder:text-faint border border-line-hi rounded focus:outline-none focus:border-accent resize-none"></textarea>
             </div>
 
-            <label class="flex items-center gap-2 text-xs text-zinc-400 cursor-pointer">
-                <input v-model="formAutoSend" type="checkbox" class="w-4 h-4 accent-emerald-500" />
+            <label class="flex items-center gap-2 text-xs text-muted cursor-pointer">
+                <input v-model="formAutoSend" type="checkbox" class="w-4 h-4 accent-accent" />
                 点击后直接发送（带回车）。取消则只填到输入框
             </label>
 
             <div class="flex items-center gap-2 pt-1">
                 <button v-if="editingId" @click="remove"
-                    class="px-3 h-10 bg-red-900/40 hover:bg-red-900/60 text-red-300 text-sm rounded border border-red-900/60 transition-colors">
+                    class="px-3 h-10 bg-bad/18 hover:bg-bad/32 text-bad text-sm rounded border border-bad/50 transition-colors">
                     删除
                 </button>
                 <div class="flex gap-2 ml-auto">
                     <button @click="emit('close')"
-                        class="px-4 h-10 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded border border-zinc-700 transition-colors">
+                        class="px-4 h-10 bg-bg-hi hover:bg-bg-hi text-ink text-sm rounded border border-line-hi transition-colors">
                         取消
                     </button>
                     <button @click="save"
                         :disabled="!formName.trim() || !formCmd"
-                        class="px-4 h-10 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded transition-colors">
+                        class="px-4 h-10 bg-accent hover:bg-accent-hi disabled:bg-bg-hi disabled:text-faint text-white text-sm font-medium rounded transition-colors">
                         保存
                     </button>
                 </div>

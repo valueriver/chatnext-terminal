@@ -12,16 +12,16 @@ const emit = defineEmits(['refresh']);
 </script>
 
 <template>
-    <div class="shrink-0 border-b border-zinc-800 bg-zinc-900/70">
+    <div class="shrink-0 border-b border-line bg-bg-elev/70">
         <div class="flex min-w-0 items-center gap-3 px-3 py-2">
             <div class="status-app-title min-w-0 flex-1">状态</div>
             <AppPanel />
         </div>
-        <div class="flex items-center gap-2 border-t border-zinc-800 px-3 py-2">
+        <div class="flex items-center gap-2 border-t border-line px-3 py-2">
             <button
                 @click="emit('refresh')"
                 :disabled="loading || disabled"
-                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded border border-zinc-700 bg-zinc-800 px-3 text-sm text-zinc-100 transition-colors hover:bg-zinc-700 active:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-60"
+                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded border border-line-hi bg-bg-hi px-3 text-sm text-ink transition-colors hover:bg-bg-hi active:bg-bg-hi disabled:cursor-not-allowed disabled:opacity-60"
                 title="立即刷新">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" />
@@ -31,7 +31,7 @@ const emit = defineEmits(['refresh']);
                 </svg>
                 <span>{{ loading ? '获取中' : '刷新' }}</span>
             </button>
-            <div class="min-w-0 flex-1 text-right text-xs text-zinc-500">
+            <div class="min-w-0 flex-1 text-right text-xs text-muted">
                 <span v-if="error" class="text-rose-300">{{ error }}</span>
                 <span v-else>每 5 秒自动刷新</span>
             </div>

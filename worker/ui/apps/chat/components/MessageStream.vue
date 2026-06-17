@@ -78,7 +78,15 @@ async function onScroll() {
                 <ToolGroup v-if="block.kind === 'tools'" :items="block.items" />
 
                 <div v-else-if="block.message.role === 'user'" class="mrow me">
-                    <div class="bubble me">{{ block.message.content }}</div>
+                    <div class="bubble me">
+                        <div v-if="block.message.attachments?.length" class="flex flex-wrap gap-1.5 justify-end" :class="block.message.content ? 'mb-1.5' : ''">
+                            <span v-for="(f, i) in block.message.attachments" :key="i" class="inline-flex items-center gap-1.5 max-w-[200px] rounded-[10px] border border-white/30 bg-white/15 px-2 py-1">
+                                <span class="text-[11px]">📎</span>
+                                <span class="truncate text-[11px] font-semibold">{{ f.name }}</span>
+                            </span>
+                        </div>
+                        <template v-if="block.message.content">{{ block.message.content }}</template>
+                    </div>
                 </div>
 
                 <div v-else-if="block.message.role === 'assistant'" class="mrow">

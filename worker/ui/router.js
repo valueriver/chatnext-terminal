@@ -25,6 +25,31 @@ const routes = [
         component: () => import('./apps/files/index.vue'),
     },
     {
+        path: '/notes',
+        name: 'notes',
+        component: () => import('./apps/notes/index.vue'),
+    },
+    {
+        path: '/outline',
+        name: 'outline',
+        component: () => import('./apps/outline/index.vue'),
+    },
+    {
+        path: '/evolution',
+        name: 'evolution',
+        component: () => import('./apps/evolution/index.vue'),
+    },
+    {
+        path: '/memories',
+        name: 'memories',
+        component: () => import('./apps/memories/index.vue'),
+    },
+    {
+        path: '/revelation',
+        name: 'revelation',
+        component: () => import('./apps/revelation/index.vue'),
+    },
+    {
         path: '/status',
         name: 'status',
         component: () => import('./apps/status/index.vue'),

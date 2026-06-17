@@ -125,23 +125,23 @@ watch(() => props.open, (open) => {
 <template>
     <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <button class="absolute inset-0 bg-black/70" @click="emit('close')"></button>
-        <section class="relative z-10 flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl">
-            <header class="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+        <section class="relative z-10 flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line-hi bg-bg shadow-2xl">
+            <header class="flex items-center justify-between border-b border-line px-4 py-3">
                 <div>
-                    <h2 class="text-sm font-semibold text-zinc-100">新建终端</h2>
-                    <p class="mt-1 text-xs text-zinc-500">选择启动目录，最近用过的目录会保存在下面</p>
+                    <h2 class="text-sm font-semibold text-ink">新建终端</h2>
+                    <p class="mt-1 text-xs text-muted">选择启动目录，最近用过的目录会保存在下面</p>
                 </div>
-                <button class="h-8 w-8 rounded bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100" @click="emit('close')">✕</button>
+                <button class="h-8 w-8 rounded bg-bg-elev text-muted hover:bg-bg-hi hover:text-ink" @click="emit('close')">✕</button>
             </header>
 
             <div class="space-y-4 overflow-y-auto px-4 py-4">
                 <section v-if="term.recentDirs.length" class="space-y-2">
-                    <div class="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">最近目录</div>
+                    <div class="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">最近目录</div>
                     <div class="flex flex-wrap gap-2">
                         <button
                             v-for="dir in term.recentDirs"
                             :key="dir"
-                            class="max-w-full rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-left text-xs text-zinc-300 hover:border-emerald-600 hover:text-zinc-100"
+                            class="max-w-full rounded-full border border-line-hi bg-bg-elev px-3 py-1.5 text-left text-xs text-ink hover:border-accent/60 hover:text-ink"
                             @click="navigate(dir)"
                         >
                             {{ dir }}
@@ -150,49 +150,49 @@ watch(() => props.open, (open) => {
                 </section>
 
                 <section class="space-y-2">
-                    <div class="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">启动目录</div>
+                    <div class="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">启动目录</div>
                     <div class="flex items-center gap-2">
                         <input
                             v-model="pathInput"
-                            class="h-10 min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100 outline-none transition focus:border-emerald-500"
+                            class="h-10 min-w-0 flex-1 rounded-lg border border-line-hi bg-bg-elev px-3 text-sm text-ink outline-none transition focus:border-accent"
                             placeholder="输入完整路径"
                             @keydown.enter.prevent="onPathEnter"
                         />
-                        <button class="h-10 rounded-lg border border-zinc-700 px-3 text-xs text-zinc-300 hover:bg-zinc-900" @click="onPathEnter">前往</button>
+                        <button class="h-10 rounded-lg border border-line-hi px-3 text-xs text-ink hover:bg-bg-elev" @click="onPathEnter">前往</button>
                     </div>
-                    <div v-if="errorMsg" class="rounded-lg border border-red-900/60 bg-red-950/30 px-3 py-2 text-xs text-red-300">{{ errorMsg }}</div>
+                    <div v-if="errorMsg" class="rounded-lg border border-bad/50 bg-bad/14 px-3 py-2 text-xs text-bad">{{ errorMsg }}</div>
                 </section>
 
                 <section class="space-y-2">
                     <div class="flex items-center gap-2">
-                        <button class="h-8 w-8 rounded bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100" @click="goUp" title="上一级">↑</button>
-                        <button class="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800" @click="navigate(homePath)">Home</button>
-                        <button class="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800" @click="navigate(pathSep === '\\' ? `${homePath}\\Desktop` : `${homePath}/Desktop`)">Desktop</button>
-                        <div class="truncate text-xs text-zinc-500">{{ cwd || '未选择目录' }}</div>
+                        <button class="h-8 w-8 rounded bg-bg-elev text-muted hover:bg-bg-hi hover:text-ink" @click="goUp" title="上一级">↑</button>
+                        <button class="rounded-lg bg-bg-elev px-3 py-1.5 text-xs text-ink hover:bg-bg-hi" @click="navigate(homePath)">Home</button>
+                        <button class="rounded-lg bg-bg-elev px-3 py-1.5 text-xs text-ink hover:bg-bg-hi" @click="navigate(pathSep === '\\' ? `${homePath}\\Desktop` : `${homePath}/Desktop`)">Desktop</button>
+                        <div class="truncate text-xs text-muted">{{ cwd || '未选择目录' }}</div>
                     </div>
 
-                    <div class="max-h-[320px] overflow-y-auto rounded-xl border border-zinc-800 bg-zinc-900/60">
-                        <div v-if="loading" class="px-4 py-8 text-center text-sm text-zinc-500">目录读取中...</div>
-                        <div v-else-if="directoryEntries.length === 0" class="px-4 py-8 text-center text-sm text-zinc-500">当前目录下没有可进入的子目录</div>
+                    <div class="max-h-[320px] overflow-y-auto rounded-xl border border-line bg-bg-elev/60">
+                        <div v-if="loading" class="px-4 py-8 text-center text-sm text-muted">目录读取中...</div>
+                        <div v-else-if="directoryEntries.length === 0" class="px-4 py-8 text-center text-sm text-muted">当前目录下没有可进入的子目录</div>
                         <button
                             v-for="entry in directoryEntries"
                             :key="entry.name"
-                            class="flex w-full items-center justify-between border-b border-zinc-800/70 px-4 py-3 text-left transition hover:bg-zinc-800/60 last:border-b-0"
+                            class="flex w-full items-center justify-between border-b border-line/70 px-4 py-3 text-left transition hover:bg-bg-hi/60 last:border-b-0"
                             @click="navigate(joinPath(cwd, entry.name))"
                         >
-                            <span class="truncate text-sm text-zinc-200">{{ entry.name }}</span>
-                            <span class="ml-3 text-xs text-zinc-500">进入</span>
+                            <span class="truncate text-sm text-ink">{{ entry.name }}</span>
+                            <span class="ml-3 text-xs text-muted">进入</span>
                         </button>
                     </div>
                 </section>
             </div>
 
-            <footer class="flex items-center justify-between border-t border-zinc-800 px-4 py-3">
-                <div class="text-xs text-zinc-500">创建后会在当前 session 下新增一个独立终端 tab</div>
+            <footer class="flex items-center justify-between border-t border-line px-4 py-3">
+                <div class="text-xs text-muted">创建后会在当前 session 下新增一个独立终端 tab</div>
                 <div class="flex items-center gap-2">
-                    <button class="rounded-lg px-3 py-2 text-sm text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100" @click="emit('close')">取消</button>
+                    <button class="rounded-lg px-3 py-2 text-sm text-muted hover:bg-bg-elev hover:text-ink" @click="emit('close')">取消</button>
                     <button
-                        class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500"
+                        class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hi disabled:bg-bg-hi disabled:text-faint"
                         :disabled="creating"
                         @click="createTerminal"
                     >

@@ -127,13 +127,14 @@ export const useChatStore = defineStore('chat', () => {
         conversations.value = conversations.value.filter((c) => c.id !== id);
         if (currentId.value === id) { currentId.value = ''; messages.value = []; currentTitle.value = ''; hasMore.value = false; oldestIndex = 0; }
     }
-    async function send(text) {
+    async function send(text, attachments = []) {
         const content = (text || '').trim();
-        if (!content || busy.value) return;
+        const atts = Array.isArray(attachments) ? attachments.filter((a) => a && a.path && a.name) : [];
+        if ((!content && !atts.length) || busy.value) return;
         if (!currentId.value) { const c = await newChat(); if (!c) return; }
         busy.value = true;
         viewSeq.value++; // 发送 → 强制滚到底
-        ws.sendMsg({ type: 'ai.send', to: 'desktop', data: { chatId: currentId.value, content } });
+        ws.sendMsg({ type: 'ai.send', to: 'desktop', data: { chatId: currentId.value, content, attachments: atts } });
     }
     function abort() {
         if (!currentId.value) return;

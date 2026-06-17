@@ -13,8 +13,18 @@ const router = useRouter();
 const view = useViewStore();
 const ws = useWsStore();
 const open = ref(false);
+const btnRef = ref(null);
+// 弹层定位锚定到按钮实际位置（贴其正下方 8px），不猜顶栏高度。
+const popStyle = ref({});
 
 function toggle() {
+    if (!open.value && btnRef.value) {
+        const r = btnRef.value.getBoundingClientRect();
+        const gap = 8;
+        popStyle.value = props.align === 'left'
+            ? { top: `${r.bottom + gap}px`, left: `${r.left}px` }
+            : { top: `${r.bottom + gap}px`, right: `${window.innerWidth - r.right}px` };
+    }
     open.value = !open.value;
 }
 
@@ -26,7 +36,7 @@ function pick(path) {
 
 <template>
     <div class="app-panel" :class="`align-${props.align}`">
-        <button class="app-panel-btn" title="应用" @click.stop="toggle">
+        <button ref="btnRef" class="app-panel-btn" title="应用" @click.stop="toggle">
             <span class="app-panel-grid" aria-hidden="true">
                 <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
             </span>
@@ -35,7 +45,7 @@ function pick(path) {
         <Teleport to="body">
             <div v-if="open" class="app-panel-mask" @click="open = false"></div>
             <transition name="app-panel-pop">
-                <div v-if="open" class="app-panel-pop" :class="`align-${props.align}`">
+                <div v-if="open" class="app-panel-pop" :class="`align-${props.align}`" :style="popStyle">
                     <div class="app-panel-status">
                         <span class="app-panel-status-dot" :class="{ connected: ws.state === 'connected', pending: ws.state === 'pending' || ws.isReconnecting, offline: ws.connectionLost || ws.state === 'offline' }"></span>
                         <span>{{ ws.statusText }}</span>
@@ -104,8 +114,6 @@ function pick(path) {
 }
 .app-panel-pop {
     position: fixed;
-    top: calc(58px + env(safe-area-inset-top, 0px));
-    right: 12px;
     z-index: 71;
     width: min(318px, calc(100vw - 24px));
     padding: 10px;
@@ -115,10 +123,6 @@ function pick(path) {
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     box-shadow: 0 22px 60px #00000030;
-}
-.app-panel-pop.align-left {
-    right: auto;
-    left: 12px;
 }
 .app-panel-status {
     display: flex;

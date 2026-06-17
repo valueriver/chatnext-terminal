@@ -100,7 +100,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="flex min-h-0 flex-1 flex-col bg-zinc-950">
+    <div class="flex min-h-0 flex-1 flex-col bg-bg">
         <ScreenToolbar
             :can-capture="ws.canUseActions"
             :loading="loading"
@@ -109,17 +109,17 @@ onUnmounted(() => {
             @capture="capture"
         />
 
-        <main class="relative min-h-0 flex-1 overflow-auto bg-black">
-            <div v-if="!ws.showActions && !ws.isReconnecting" class="flex h-full items-center justify-center px-4 text-center text-sm text-zinc-500">
+        <main class="relative min-h-0 flex-1 overflow-auto bg-bg">
+            <div v-if="!ws.showActions && !ws.isReconnecting" class="flex h-full items-center justify-center px-4 text-center text-sm text-muted">
                 等待客户端连接和认证
             </div>
 
             <div v-else-if="errorMsg" class="flex h-full items-center justify-center px-4 text-center">
                 <div>
-                    <div class="mb-3 text-sm text-red-300">{{ errorMsg }}</div>
+                    <div class="mb-3 text-sm text-bad">{{ errorMsg }}</div>
                     <button
                         @click="capture"
-                        class="inline-flex h-9 items-center justify-center rounded border border-zinc-700 bg-zinc-800 px-3 text-sm text-zinc-100 hover:bg-zinc-700">
+                        class="inline-flex h-9 items-center justify-center rounded border border-line-hi bg-bg-hi px-3 text-sm text-ink hover:bg-bg-hi">
                         重试
                     </button>
                 </div>
@@ -129,12 +129,12 @@ onUnmounted(() => {
                 <img
                     :src="imageUrl"
                     alt="桌面截图"
-                    class="h-auto max-w-full rounded border border-zinc-800 bg-black shadow-2xl"
+                    class="h-auto max-w-full rounded border border-line bg-bg shadow-2xl"
                     :class="{ 'opacity-70': loading }"
                     @load="onImageLoad" />
             </div>
 
-            <div v-else class="flex h-full items-center justify-center text-sm text-zinc-500">
+            <div v-else class="flex h-full items-center justify-center text-sm text-muted">
                 {{ loading ? '正在获取桌面截图...' : '点击刷新获取截图' }}
             </div>
         </main>

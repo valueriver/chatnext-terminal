@@ -26,20 +26,20 @@ function onSnippetClick(s) {
 </script>
 
 <template>
-    <section class="shrink-0 bg-zinc-900 border-t border-zinc-800">
-        <div class="flex items-center px-2 border-b border-zinc-800/70">
+    <section class="shrink-0 bg-bg-elev border-t border-line">
+        <div class="flex items-center px-2 border-b border-line/70">
             <button @click="term.setTab('keys')"
                 class="relative px-3 py-2 text-xs transition-colors"
-                :class="term.activeTab === 'keys' ? 'text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'">
+                :class="term.activeTab === 'keys' ? 'text-ink' : 'text-muted hover:text-ink'">
                 按键
-                <span v-if="term.activeTab === 'keys'" class="absolute left-2 right-2 bottom-0 h-0.5 bg-emerald-500 rounded"></span>
+                <span v-if="term.activeTab === 'keys'" class="absolute left-2 right-2 bottom-0 h-0.5 bg-accent rounded"></span>
             </button>
             <button @click="term.setTab('commands')"
                 class="relative px-3 py-2 text-xs transition-colors"
-                :class="term.activeTab === 'commands' ? 'text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'">
+                :class="term.activeTab === 'commands' ? 'text-ink' : 'text-muted hover:text-ink'">
                 命令
-                <span v-if="snippets.snippets.length" class="ml-1 px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded text-[10px] tabular-nums">{{ snippets.snippets.length }}</span>
-                <span v-if="term.activeTab === 'commands'" class="absolute left-2 right-2 bottom-0 h-0.5 bg-emerald-500 rounded"></span>
+                <span v-if="snippets.snippets.length" class="ml-1 px-1.5 py-0.5 bg-bg-hi text-muted rounded text-[10px] tabular-nums">{{ snippets.snippets.length }}</span>
+                <span v-if="term.activeTab === 'commands'" class="absolute left-2 right-2 bottom-0 h-0.5 bg-accent rounded"></span>
             </button>
         </div>
 
@@ -47,14 +47,14 @@ function onSnippetClick(s) {
             <div class="flex flex-wrap gap-1">
                 <button v-for="key in NAV_KEYS" :key="key.label"
                     @click="term.sendKey(key.code)"
-                    class="shrink-0 min-w-[3rem] px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-200 text-xs rounded border border-zinc-700/60 transition-colors">
+                    class="shrink-0 min-w-[3rem] px-3 py-1.5 bg-bg-hi hover:bg-bg-hi active:bg-bg-hi text-ink text-xs rounded border border-line-hi/60 transition-colors">
                     {{ key.label }}
                 </button>
             </div>
             <div class="flex flex-wrap gap-1">
                 <button v-for="key in CTRL_KEYS" :key="key.label"
                     @click="term.sendKey(key.code)"
-                    class="shrink-0 min-w-[3rem] px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-zinc-200 text-xs rounded border border-zinc-700/60 transition-colors">
+                    class="shrink-0 min-w-[3rem] px-3 py-1.5 bg-bg-hi hover:bg-bg-hi active:bg-bg-hi text-ink text-xs rounded border border-line-hi/60 transition-colors">
                     {{ key.label }}
                 </button>
             </div>
@@ -62,9 +62,9 @@ function onSnippetClick(s) {
 
         <div v-show="term.activeTab === 'commands'" class="px-2 py-2">
             <div v-if="snippets.snippets.length === 0" class="flex items-center justify-between gap-2 py-1">
-                <span class="text-xs text-zinc-500">先在下方输入框输入内容，再点 + 保存为常用命令</span>
+                <span class="text-xs text-muted">先在下方输入框输入内容，再点 + 保存为常用命令</span>
                 <button @click="emit('openAddSnippet')"
-                    class="shrink-0 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs rounded border border-dashed border-zinc-600">
+                    class="shrink-0 px-3 py-1.5 bg-bg-hi hover:bg-bg-hi text-ink text-xs rounded border border-dashed border-line-hi">
                     + 新增
                 </button>
             </div>
@@ -76,11 +76,11 @@ function onSnippetClick(s) {
                     @pointerleave="onPressEnd"
                     @pointercancel="onPressEnd"
                     @contextmenu.prevent="emit('editSnippet', s)"
-                    class="w-full truncate text-left px-3 py-1.5 bg-emerald-900/30 hover:bg-emerald-900/50 active:bg-emerald-900/70 text-emerald-200 text-xs rounded border border-emerald-800/50 transition-colors">
+                    class="w-full truncate text-left px-3 py-1.5 bg-accent/18 hover:bg-accent/25 active:bg-accent/34 text-accent-hi text-xs rounded border border-accent/40 transition-colors">
                     {{ s.name }}
                 </button>
                 <button @click="emit('openAddSnippet')"
-                    class="w-full px-2 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-100 text-xs rounded border border-dashed border-zinc-600 transition-colors"
+                    class="w-full px-2 py-1.5 bg-bg-hi hover:bg-bg-hi text-muted hover:text-ink text-xs rounded border border-dashed border-line-hi transition-colors"
                     title="新增常用命令">
                     +
                 </button>

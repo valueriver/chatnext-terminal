@@ -44,7 +44,7 @@ function renderMessages(raw) {
 
     for (const message of (raw || [])) {
         if (message.role === 'user') {
-            rows.push({ role: 'user', _key: mkKey('user'), content: message.content || '' });
+            rows.push({ role: 'user', _key: mkKey('user'), content: message.content || '', attachments: Array.isArray(message.attachments) ? message.attachments : [] });
             continue;
         }
 

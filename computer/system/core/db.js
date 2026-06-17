@@ -48,6 +48,56 @@ function getDb() {
             created_at       INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_compactions_chat ON compactions(chat_id, id);
+        CREATE TABLE IF NOT EXISTS notes (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            content    TEXT NOT NULL DEFAULT '',
+            tags       TEXT NOT NULL DEFAULT '[]',
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_notes_created ON notes(id DESC);
+        CREATE TABLE IF NOT EXISTS evolution (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            content    TEXT NOT NULL,
+            reason     TEXT NOT NULL DEFAULT '',
+            source     TEXT NOT NULL DEFAULT 'ai',
+            created_at INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS memories (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            title      TEXT NOT NULL DEFAULT '',
+            summary    TEXT NOT NULL DEFAULT '',
+            content    TEXT NOT NULL DEFAULT '',
+            tier       TEXT NOT NULL DEFAULT 'stored',
+            source     TEXT NOT NULL DEFAULT 'ai',
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_memories_id ON memories(id DESC);
+        CREATE TABLE IF NOT EXISTS reports (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            day        TEXT NOT NULL,
+            content    TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_reports_day ON reports(day);
+        CREATE TABLE IF NOT EXISTS shortcuts (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            text       TEXT NOT NULL,
+            sort       INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_shortcuts_sort ON shortcuts(sort, id);
+        CREATE TABLE IF NOT EXISTS outline (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            parent_id  INTEGER,
+            sort       INTEGER NOT NULL DEFAULT 0,
+            text       TEXT NOT NULL DEFAULT '',
+            collapsed  INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_outline_parent ON outline(parent_id, sort, id);
     `);
     return db;
 }
