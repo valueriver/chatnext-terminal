@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 快捷指令：聊天「+」面板的常用语，以本机 roam.db 的 shortcuts 表为真相。设置页增删改排序。
+// 快捷指令：聊天「+」面板的常用语，以本机 one.db 的 shortcuts 表为真相。设置页增删改排序。
 export const useShortcutsStore = defineStore('shortcuts', () => {
     const ws = useWsStore();
     const items = ref([]);

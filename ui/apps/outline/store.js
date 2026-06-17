@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 大纲：树形无限嵌套，以本机 roam.db 的 outline 表为真相。
+// 大纲：树形无限嵌套，以本机 one.db 的 outline 表为真相。
 // 结构性操作（增删/缩进/移动）后重拉全树；纯文本编辑只持久化不重拉，避免打断输入。
 export const useOutlineStore = defineStore('outline', () => {
     const ws = useWsStore();

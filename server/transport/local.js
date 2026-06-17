@@ -31,7 +31,7 @@ function serveStatic(req, res) {
     if (p === '/') p = '/index.html';
     const file = path.join(DIST, p);
     if (!file.startsWith(DIST)) { res.writeHead(403); res.end(); return; }
-    const sessionCookie = `roam_session=${SESSION_ID || 'local'}; Path=/; SameSite=Lax`;
+    const sessionCookie = `one_session=${SESSION_ID || 'local'}; Path=/; SameSite=Lax`;
     fs.readFile(file, (err, data) => {
         if (err) {
             fs.readFile(path.join(DIST, 'index.html'), (e2, html) => {
@@ -96,7 +96,7 @@ export function createLocal({ onMessage }) {
         });
         server.listen(Number(LOCAL_PORT), '0.0.0.0', () => {
             console.log('');
-            console.log('✅ Roam 本地直连已就绪（免密）');
+            console.log('✅ One 本地直连已就绪（免密）');
             console.log(`   本机:   http://localhost:${LOCAL_PORT}`);
             for (const ip of lanIPs()) console.log(`   局域网: http://${ip}:${LOCAL_PORT}`);
             console.log('   ⚠️ 本地模式不校验密码，请只在可信网络使用');

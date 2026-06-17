@@ -1,6 +1,6 @@
 // 系统提示的拼装处。文本在 prompts.js（唯一的家），这里只负责注入与拼装：
 // 进化(AI 自我演化的人设/原则，最新生效，最高优先) + 身份能力 + 记忆 + 用户附加。
-// 进化/记忆从 roam.db 同步读出后在此拼接。
+// 进化/记忆从 one.db 同步读出后在此拼接。
 import { getDb } from '../db.js';
 import { identity } from './prompts.js';
 

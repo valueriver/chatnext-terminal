@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 启示：自我升级每天产出的深度报告，以本机 roam.db 的 reports 表为真相。
+// 启示：自我升级每天产出的深度报告，以本机 one.db 的 reports 表为真相。
 export const useRevelationStore = defineStore('revelation', () => {
     const ws = useWsStore();
     const items = ref([]);

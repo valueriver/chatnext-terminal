@@ -11,7 +11,7 @@ export function createRelay({ sessionId, onMessage, onReady }) {
     function printAccessInfo() {
         const webUrl = `${WEB_URL}/guard?${new URLSearchParams({ session: sessionId }).toString()}`;
         console.log('');
-        console.log('✅ Roam 已连接');
+        console.log('✅ One 已连接');
         console.log('🔗 远程访问入口');
         console.log(`   ${webUrl}`);
         if (SESSION_PASSWORD) {
@@ -32,7 +32,7 @@ export function createRelay({ sessionId, onMessage, onReady }) {
         ws = new WebSocket(`${SERVER_URL}/ws?${params.toString()}`);
 
         ws.on('open', () => {
-            if (printed) console.log('✅ Roam 已重连');
+            if (printed) console.log('✅ One 已重连');
             else { printAccessInfo(); printed = true; }
             onReady?.();
         });
@@ -43,7 +43,7 @@ export function createRelay({ sessionId, onMessage, onReady }) {
             onMessage?.(msg);
         });
         ws.on('close', () => {
-            console.log('⚠️ Roam 连接已断开，3 秒后自动重连...');
+            console.log('⚠️ One 连接已断开，3 秒后自动重连...');
             timer = setTimeout(connect, 3000);
         });
         ws.on('error', (err) => console.error('❌ 网络连接异常:', err.message));

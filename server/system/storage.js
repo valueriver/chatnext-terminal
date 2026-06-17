@@ -1,4 +1,4 @@
-// 本机文件落盘：data URL → ~/.roam/files/，返回 {name, path, size}。截图、聊天附件等都用它。
+// 本机文件落盘：data URL → ~/.one/files/，返回 {name, path, size}。截图、聊天附件等都用它。
 import fs from 'fs';
 import path from 'path';
 import { randomUUID } from 'node:crypto';

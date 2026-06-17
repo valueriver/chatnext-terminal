@@ -1,6 +1,6 @@
 // Cloudflare Worker 入口：无状态中继。
-// /ws → 按 session 路由到 RoamSession（Durable Object）；其余 → 静态资源（ui/dist）。
-export { RoamSession } from './do/session.js';
+// /ws → 按 session 路由到 OneSession（Durable Object）；其余 → 静态资源（ui/dist）。
+export { OneSession } from './do/session.js';
 
 function parseCookie(header, name) {
     if (!header) return '';
@@ -11,7 +11,7 @@ function parseCookie(header, name) {
 function getSessionId(request) {
     const url = new URL(request.url);
     return url.searchParams.get('session')
-        || parseCookie(request.headers.get('Cookie'), 'roam_session')
+        || parseCookie(request.headers.get('Cookie'), 'one_session')
         || '';
 }
 
@@ -22,7 +22,7 @@ export default {
         if (url.pathname === '/ws') {
             const sessionId = getSessionId(request);
             if (!sessionId || sessionId === 'default') return new Response('Missing session', { status: 400 });
-            const stub = env.ROAM_SESSION.get(env.ROAM_SESSION.idFromName(sessionId));
+            const stub = env.ONE_SESSION.get(env.ONE_SESSION.idFromName(sessionId));
             return stub.fetch(request);
         }
 
@@ -35,7 +35,7 @@ export default {
                 status: 301,
                 headers: {
                     'Location': clean.toString(),
-                    'Set-Cookie': `roam_session=${encodeURIComponent(sessionParam)}; Path=/; SameSite=Lax; Secure; Max-Age=31536000`,
+                    'Set-Cookie': `one_session=${encodeURIComponent(sessionParam)}; Path=/; SameSite=Lax; Secure; Max-Age=31536000`,
                 },
             });
         }

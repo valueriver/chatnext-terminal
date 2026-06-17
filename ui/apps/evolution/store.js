@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 进化：AI 自我演化的人设/原则时间轴，以本机 roam.db 的 evolution 表为真相。AI 经 sql 工具写，前端只读 + 删。
+// 进化：AI 自我演化的人设/原则时间轴，以本机 one.db 的 evolution 表为真相。AI 经 sql 工具写，前端只读 + 删。
 export const useEvolutionStore = defineStore('evolution', () => {
     const ws = useWsStore();
     const items = ref([]);

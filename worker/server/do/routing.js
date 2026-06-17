@@ -1,4 +1,4 @@
-// 消息路由 + 设备状态广播。self = RoamSession 实例。
+// 消息路由 + 设备状态广播。self = OneSession 实例。
 export function socketId() {
     return crypto.randomUUID();
 }

@@ -1,4 +1,4 @@
-// 鉴权：访问密码开关 + 免登录 token + 桌面端的授权控制。self = RoamSession 实例。
+// 鉴权：访问密码开关 + 免登录 token + 桌面端的授权控制。self = OneSession 实例。
 import { findWebSocket } from './routing.js';
 
 const TOKEN_TTL = 30 * 24 * 60 * 60 * 1000; // 30 天

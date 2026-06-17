@@ -131,7 +131,7 @@ watch(() => ws.showActions, (v) => { if (v) load(); });
                         </div>
                     </div>
                     <div class="set-note">
-                        <template v-if="ws.showActions">配置保存在本机 Server（~/.roam/roam.db），AI 对话直接用它调用 OpenAI 兼容接口。当前 Key：{{ keyMasked }}。Key 留空＝不修改。</template>
+                        <template v-if="ws.showActions">配置保存在本机 Server（~/.one/one.db），AI 对话直接用它调用 OpenAI 兼容接口。当前 Key：{{ keyMasked }}。Key 留空＝不修改。</template>
                         <template v-else>未连接本机 Server，无法读写模型配置。请先在守卫页完成连接/认证。</template>
                     </div>
                 </div>
@@ -214,7 +214,7 @@ watch(() => ws.showActions, (v) => { if (v) load(); });
                         </div>
                         <div class="set-row">
                             <span class="set-k">项目</span>
-                            <span class="set-v">Roam · 漫游 —— 本机终端 / 文件 / 屏幕 / 对话</span>
+                            <span class="set-v">One —— 本机终端 / 文件 / 屏幕 / 对话</span>
                         </div>
                     </div>
                 </div>

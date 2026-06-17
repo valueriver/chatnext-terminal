@@ -1,10 +1,10 @@
-// RoamSession：每个 session 一个 Durable Object，按 session 隔离地中继 desktop ↔ web。
+// OneSession：每个 session 一个 Durable Object，按 session 隔离地中继 desktop ↔ web。
 // 只做连接生命周期与消息分发；鉴权见 auth.js，路由见 routing.js。
 import { DurableObject } from 'cloudflare:workers';
 import { loadAuthState, isTokenValid, handleAuthControl, broadcastAuthState } from './auth.js';
 import { socketId, route, broadcastDeviceStatus } from './routing.js';
 
-export class RoamSession extends DurableObject {
+export class OneSession extends DurableObject {
     constructor(ctx, env) {
         super(ctx, env);
         this.requiresPassword = true;

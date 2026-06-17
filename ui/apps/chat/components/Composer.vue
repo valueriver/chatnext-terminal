@@ -45,7 +45,7 @@ function pickShortcut(s) {
     taRef.value?.focus();
 }
 
-// 上传：文件 → data URL → WS attach.upload → 拿回 {name, path, size}（落本机 ~/.roam/files）。
+// 上传：文件 → data URL → WS attach.upload → 拿回 {name, path, size}（落本机 ~/.one/files）。
 let bound = false;
 let seq = 0;
 const pending = new Map();

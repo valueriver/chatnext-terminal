@@ -1,4 +1,4 @@
-// 模型配置：存于 roam.db 的 settings 表（KV）。设置页写入，agent 读取。
+// 模型配置：存于 one.db 的 settings 表（KV）。设置页写入，agent 读取。
 import { getSettings, setSettings } from '../settings/index.js';
 
 function readConfig() {

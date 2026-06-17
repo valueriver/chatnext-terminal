@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 笔记以本机 server（~/.roam/roam.db 的 notes 表）为唯一真相，经 WS notes.* 读写。
+// 笔记以本机 server（~/.one/one.db 的 notes 表）为唯一真相，经 WS notes.* 读写。
 export const useNotesStore = defineStore('notes', () => {
     const ws = useWsStore();
     const items = ref([]);

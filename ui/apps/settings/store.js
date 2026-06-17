@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 模型配置以本机 server（~/.roam/model.json）为唯一真相，经 WS 的 model.get/set 读写。
+// 模型配置以本机 server（~/.one/model.json）为唯一真相，经 WS 的 model.get/set 读写。
 // 返回的 config 是安全视图：不含明文 key，只有 hasKey + keyPreview。
 export const useModelStore = defineStore('model', () => {
     const ws = useWsStore();

@@ -1,7 +1,7 @@
 {
-  "name": "roam-server",
+  "name": "one-server",
   "version": "0.2.0",
-  "description": "Roam server — 远程访问本机能力(终端 / 文件 / 屏幕)",
+  "description": "One server — 远程访问本机能力(终端 / 文件 / 屏幕)",
   "type": "module",
   "main": "index.js",
   "scripts": {

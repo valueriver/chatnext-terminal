@@ -2,11 +2,11 @@
 
 用**一条 WebSocket** 驱动 Chrome 的 **CDP（Chrome DevTools Protocol）通道**。
 
-插件本身只是一根“管子”:连上你填的 `wss` 地址,把收到的命令灌给 `chrome.debugger`(= CDP),把结果与事件回传。**没有高层封装** —— 控制端(AI / agent)直接发 CDP,绝大多数 DOM 操作用 `Runtime.evaluate` 跑 JS 即可。做一次,任何项目(roam / one / …)填上自己的地址就能用。
+插件本身只是一根“管子”:连上你填的 `wss` 地址,把收到的命令灌给 `chrome.debugger`(= CDP),把结果与事件回传。**没有高层封装** —— 控制端(AI / agent)直接发 CDP,绝大多数 DOM 操作用 `Runtime.evaluate` 跑 JS 即可。做一次,任何项目填上自己的地址就能用。
 
 ## 装 & 用
 1. `chrome://extensions` → 打开「开发者模式」→「加载已解压的扩展程序」→ 选本目录。
-2. 点扩展图标,填一条 ws 地址(`token` 写进 query,由对端校验)。roam 用的是本机 CDP 桥(server 启动时会打印这条):
+2. 点扩展图标,填一条 ws 地址(`token` 写进 query,由对端校验)。one 用的是本机 CDP 桥(server 启动时会打印这条):
    ```
    ws://127.0.0.1:9510/cdp?token=<你的 SESSION_ID>
    ```

@@ -1,4 +1,4 @@
-// Roam 本机后端入口。职责：启动各服务 → 开 WS 通道并分发。
+// One 本机后端入口。职责：启动各服务 → 开 WS 通道并分发。
 // 通道由配置驱动：配了 CLOUDFLARE_WORKER_URL 就连 Worker（relay），没配就本地直连（local）。
 // index 只做编排：不点名任何 app 的启动细节——各服务自己声明 start/stop（见 apps.js）。
 import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/env.js';
@@ -31,7 +31,7 @@ async function dispatch(message) {
 }
 
 async function boot() {
-    console.log('🚀 正在启动 Roam Server...');
+    console.log('🚀 正在启动 One Server...');
 
     // 拉起所有服务（CDP 桥 / 终端 / 鉴权 / 启示…各自的 start，自己订阅生命周期）
     await startAll(ctx);
@@ -50,7 +50,7 @@ async function boot() {
     }
 
     process.on('SIGINT', () => {
-        console.log('\n🛑 正在关闭 Roam Server...');
+        console.log('\n🛑 正在关闭 One Server...');
         stopAll();
         for (const t of transports) t.stop();
         process.exit(0);
@@ -58,6 +58,6 @@ async function boot() {
 }
 
 boot().catch((err) => {
-    console.error('❌ Roam Server 启动失败:', err.message);
+    console.error('❌ One Server 启动失败:', err.message);
     process.exit(1);
 });

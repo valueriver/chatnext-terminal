@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 
-// 排程：定时触发任务的规则。以本机 roam.db 的 schedules 表为真相；每条触发的任务记在 schedule_runs。
+// 排程：定时触发任务的规则。以本机 one.db 的 schedules 表为真相；每条触发的任务记在 schedule_runs。
 export const useScheduleStore = defineStore('schedule', () => {
     const ws = useWsStore();
     const items = ref([]);     // 排程列表

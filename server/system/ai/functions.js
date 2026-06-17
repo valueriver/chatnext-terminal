@@ -32,7 +32,7 @@ const resolveTimeoutMs = (timeout) => {
     return Math.min(Math.max(seconds * 1000, TIMEOUT_MIN_MS), TIMEOUT_MAX_MS);
 };
 
-// roam 是用户自己的远程操控工具，shell 不限制目录（与终端能力一致），默认主目录。
+// one 是用户自己的远程操控工具，shell 不限制目录（与终端能力一致），默认主目录。
 const shell = ({ command, cwd, timeout } = {}) => new Promise((resolve) => {
     exec(String(command || ''), {
         cwd: String(cwd || '').trim() || os.homedir(),
@@ -81,7 +81,7 @@ const computer_screenshot = async () => {
     };
 };
 
-// 在 roam.db 上任意读写——AI 全权，无限制。
+// 在 one.db 上任意读写——AI 全权，无限制。
 const sql = async ({ query } = {}) => {
     const q = String(query || '').trim();
     if (!q) return { error: '空查询' };
