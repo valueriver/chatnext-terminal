@@ -1,8 +1,7 @@
 // Roam 本机后端入口。职责：启动各服务 → 开 WS 通道并分发。
 // 通道由配置驱动：配了 CLOUDFLARE_WORKER_URL 就连 Worker（relay），没配就本地直连（local）。
 // index 只做编排：不点名任何 app 的启动细节——各服务自己声明 start/stop（见 apps.js）。
-import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/core/env.js';
-import { generateSessionId } from './system/core/ids.js';
+import { CLOUDFLARE_WORKER_URL, SESSION_ID } from './system/env.js';
 import channel, { addTransport } from './channel.js';
 import { route, startAll, stopAll } from './registry.js';
 import { createRelay } from './transport/relay.js';
@@ -38,7 +37,7 @@ async function boot() {
     await startAll(ctx);
 
     // 开 WS 通道（1+1）：本地服务常驻；配了远程则额外叠加 relay。
-    const sessionId = SESSION_ID || generateSessionId();
+    const sessionId = SESSION_ID || crypto.randomUUID();
     const onReady = () => ctx.emitWebConnected(); // 通道就绪 → 给网页推初始状态
     const transports = [];
 

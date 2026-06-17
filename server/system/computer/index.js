@@ -1,7 +1,7 @@
 // 电脑控制（本机，取自 one）。一切皆 shell：截图 screencapture+sips、鼠标 cliclick、键盘 osascript。
 // 仅 macOS。鼠标/滚动需要 cliclick（brew install cliclick）；读屏/截图无第三方依赖。
 import { execFile } from 'node:child_process';
-import { captureCompressed } from '../core/screenshot.js';
+import { captureCompressed } from '../screenshot.js';
 
 const run = (cmd, args, opts = {}) =>
     new Promise((resolve, reject) => {

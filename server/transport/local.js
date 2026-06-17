@@ -7,7 +7,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'node:crypto';
 import { WebSocketServer } from 'ws';
-import { LOCAL_PORT } from '../system/core/env.js';
+import { LOCAL_PORT } from '../system/env.js';
 
 const DIST = fileURLToPath(new URL('../../ui/dist', import.meta.url));
 const MIME = {

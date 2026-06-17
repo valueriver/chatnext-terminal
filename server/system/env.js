@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const serverRoot = path.join(__dirname, '..', '..');
+const serverRoot = path.join(__dirname, '..'); // system/env.js → server 根
 const configPath = path.join(serverRoot, 'config.js');
 const envPath = path.join(serverRoot, '.env');
 

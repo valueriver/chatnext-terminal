@@ -1,7 +1,7 @@
 // 启示 = 自我升级的对外窗口。每天到设定时间由 selfupgrade 触发 generate()。
 // 自我升级 = 读懂用户 → 升级自己(进化) → 产出当天的「启示」。无人值守，只放开 sql 工具。
 import ws from '../../channel.js';
-import { getDb } from '../../system/core/db.js';
+import { getDb } from '../../system/db.js';
 import { getSetting } from '../../system/settings/index.js';
 import { chat } from '../../system/ai/loop.js';
 import { tools } from '../../system/ai/tools.js';

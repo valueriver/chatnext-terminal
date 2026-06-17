@@ -1,5 +1,5 @@
 import ws from '../../channel.js';
-import { captureCompressed } from '../../system/core/screenshot.js';
+import { captureCompressed } from '../../system/screenshot.js';
 
 async function capture(reqId) {
     const shot = await captureCompressed();

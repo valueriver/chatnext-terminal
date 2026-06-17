@@ -3,16 +3,16 @@
 // waitTask 取回结果文本。进度经 WS 实时推送（task.update / task.event）。
 //
 // 应用调用示例（任意 server app）：
-//   import { createTask, waitTask, parseTaskJson } from '../../system/ai/task.js';
+//   import { createTask, waitTask, parseTaskJson } from '../../system/task.js';
 //   const { taskId } = createTask({ name: 'notes-tidy', prompt: '把这些要点整理成提纲：…' });
 //   const text = await waitTask(taskId);          // 等结果
 //   const json = parseTaskJson(text);             // 需要 JSON 时
-import ws from '../../channel.js';
-import { getDb } from '../core/db.js';
-import { chat } from './loop.js';
-import { tools as allTools } from './tools.js';
-import { getRunConfig } from './config.js';
-import { buildSystemPrompt } from './prompt.js';
+import ws from '../channel.js';
+import { getDb } from './db.js';
+import { chat } from './ai/loop.js';
+import { tools as allTools } from './ai/tools.js';
+import { getRunConfig } from './ai/config.js';
+import { buildSystemPrompt } from './ai/prompt.js';
 
 const controllers = new Map(); // taskId -> AbortController
 

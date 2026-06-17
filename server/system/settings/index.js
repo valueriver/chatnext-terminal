@@ -1,5 +1,5 @@
 // 设置：KV 存于 roam.db 的 settings 表。模型配置（含 API Key）全落地本机，不进仓库、不过 Worker。
-import { getDb } from '../core/db.js';
+import { getDb } from '../db.js';
 
 const DEFAULTS = {
     baseUrl: '',

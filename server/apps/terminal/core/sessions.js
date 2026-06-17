@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';
 import ws from '../../../channel.js';
-import { generateTerminalId } from '../../../system/core/ids.js';
+function generateTerminalId() { return 'term-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 import { getDefaultShell, ensureDirectory, getDefaultDirectory } from './shell.js';
 
 const DEFAULT_COLS = 80;

@@ -2,7 +2,7 @@
 // 由 AI 通过 sql 工具写入，前端只读 + 删除。
 // WS 协议：memories.list / memories.delete，结果经 ws.broadcast 回所有网页端。
 import ws from '../../channel.js';
-import { getDb } from '../../system/core/db.js';
+import { getDb } from '../../system/db.js';
 
 function reply(type, reqId, data) {
     ws.broadcast(type, { reqId, ...data });

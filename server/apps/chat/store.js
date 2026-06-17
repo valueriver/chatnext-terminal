@@ -1,8 +1,8 @@
 // 多对话本地存储:chats / messages / compactions 三表,落于共享库 roam.db。
-// roam 一贯「数据留在本机」,不进仓库、不过 Worker。库与建表归 system/core/db.js,
+// roam 一贯「数据留在本机」,不进仓库、不过 Worker。库与建表归 system/db.js,
 // 本模块只做 chat 领域的读写。messages 整条 message 存 JSON,顺序靠自增 id。
 import { randomUUID } from 'node:crypto';
-import { getDb } from '../../system/core/db.js';
+import { getDb } from '../../system/db.js';
 
 function rowToMeta(r, messageCount) {
     return {

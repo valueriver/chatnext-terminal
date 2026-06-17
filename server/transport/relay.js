@@ -1,7 +1,7 @@
 // relay transport：配了 CLOUDFLARE_WORKER_URL 时，作为 client 主动连 Worker 中继。
 // 提供统一接口：start / send / stop；收到的消息经 onMessage 交给 dispatch。
 import WebSocket from 'ws';
-import { SERVER_URL, WEB_URL, SESSION_PASSWORD, DEBUG } from '../system/core/env.js';
+import { SERVER_URL, WEB_URL, SESSION_PASSWORD, DEBUG } from '../system/env.js';
 
 export function createRelay({ sessionId, onMessage, onReady }) {
     let ws = null;

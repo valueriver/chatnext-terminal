@@ -1,7 +1,7 @@
 import { promises as fsp } from 'fs';
 import path from 'path';
 import ws from '../../../channel.js';
-import { guessMime } from '../../../system/core/mime.js';
+import { guessMime } from '../mime.js';
 
 const READ_CHUNK = 256 * 1024;
 const MAX_PREVIEW_BYTES = 20 * 1024 * 1024;

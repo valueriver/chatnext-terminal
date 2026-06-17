@@ -2,7 +2,7 @@
 // 进化(AI 自我演化的人设/原则，最新生效，最高优先) + 身份 + 能力 + 记忆。
 // 进化/记忆从 roam.db 同步读出后在此拼装。
 import os from 'os';
-import { getDb } from '../core/db.js';
+import { getDb } from '../db.js';
 
 // 进化：每行一版系统提示词（AI 自我演化的人设/原则），最新生效。
 function latestEvolution() {
