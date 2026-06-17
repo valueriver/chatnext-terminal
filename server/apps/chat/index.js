@@ -1,12 +1,11 @@
-// AI 服务：处理 ai.* / model.* 消息。
-// - 多对话：ai.list / ai.create / ai.get / ai.rename / ai.delete
-// - 发送：ai.send（流式经 ws.broadcast('ai.event') 推回所有已认证网页端）/ ai.abort
-// - 模型配置：model.get / model.set（落地到 ~/.roam/model.json）
+// 对话 app 的统一入口：对话(ai.*/model.*) + 快捷指令(shortcuts.*) + 附件(attach.*)。
 import ws from '../../channel.js';
 import { chat } from '../../system/ai/loop.js';
 import { buildSystemPrompt } from '../../system/ai/prompt.js';
 import { getRunConfig, readConfig, writeConfig, publicView } from '../../system/ai/config.js';
 import { maybeCompactBeforeRun } from './compactions.js';
+import shortcuts from './shortcuts.js';
+import attachments from './attachments.js';
 import * as store from './store.js';
 
 const controllers = new Map(); // chatId -> AbortController
@@ -160,6 +159,10 @@ async function runSend(d) {
 async function handle(message) {
     const t = message.type;
     const d = message.data || {};
+
+    // 子能力：快捷指令 / 附件
+    if (t.startsWith('shortcuts.')) return shortcuts.handle(message);
+    if (t.startsWith('attach.')) return attachments.handle(message);
 
     try {
         switch (t) {
