@@ -1,8 +1,7 @@
-// 自我升级：computer 是常驻进程，每分钟比对设置里的「启示时间」(本机时区)，
-// 到点就跑当天的自我升级(读笔记/进化/记忆 → 升级进化 + 沉淀记忆 + 产出「启示」)。
+// 启示的每日调度：常驻进程每分钟比对设置里的「启示时间」(本机时区)，到点跑一次自我升级。
 // generate 内部按天去重，多触发也安全。
-import { getSetting } from './settings/index.js';
-import { generate } from '../apps/revelation/index.js';
+import { getSetting } from '../../system/settings/index.js';
+import { generate } from './index.js';
 
 function localHHMM() {
     const d = new Date();
@@ -20,14 +19,14 @@ async function tick() {
         if (localHHMM() !== upgradeTime()) return;
         await generate();
     } catch (err) {
-        console.error('自我升级 tick 失败：', err.message || err);
+        console.error('启示调度 tick 失败：', err.message || err);
     }
 }
 
-function startSelfUpgrade() {
+function startSchedule() {
     if (timer) return;
     timer = setInterval(tick, 60 * 1000); // 每分钟检查一次
-    console.log('🌅 自我升级已就绪（每天', upgradeTime(), '产出「启示」）');
+    console.log('🌅 启示已就绪（每天', upgradeTime(), '自我升级产出）');
 }
 
-export { startSelfUpgrade };
+export { startSchedule };
