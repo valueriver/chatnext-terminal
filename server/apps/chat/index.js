@@ -3,9 +3,9 @@
 // - 发送：ai.send（流式经 ws.broadcast('ai.event') 推回所有已认证网页端）/ ai.abort
 // - 模型配置：model.get / model.set（落地到 ~/.roam/model.json）
 import ws from '../../system/ws/index.js';
-import { chat } from './loop.js';
-import { buildSystemPrompt } from './prompt.js';
-import { getRunConfig, readConfig, writeConfig, publicView } from './config.js';
+import { chat } from '../../system/ai/loop.js';
+import { buildSystemPrompt } from '../../system/ai/prompt.js';
+import { getRunConfig, readConfig, writeConfig, publicView } from '../../system/ai/config.js';
 import { maybeCompactBeforeRun } from './compactions.js';
 import * as store from './store.js';
 

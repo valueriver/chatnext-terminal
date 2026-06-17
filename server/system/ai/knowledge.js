@@ -1,7 +1,7 @@
 // 进化 + 记忆：注入系统提示的内核（同步读 roam.db）。
 //   evolution：每行一版系统提示词（AI 自我演化的人设/原则），最新生效。
 //   memories：三层 tier —— full(必读全文) / starred(星标摘要) / stored(已存储，仅计数)。
-import { getDb } from '../../system/core/db.js';
+import { getDb } from '../core/db.js';
 
 function latestEvolution() {
     const row = getDb().prepare('SELECT content FROM evolution ORDER BY id DESC LIMIT 1').get();

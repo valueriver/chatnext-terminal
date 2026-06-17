@@ -3,8 +3,8 @@
 // 首次运行若检测到旧版 ~/.roam/model.json，自动迁移进 settings 后删除。
 import { promises as fsp } from 'fs';
 import path from 'path';
-import { ROOT } from '../../system/core/db.js';
-import { getSettings, setSettings } from '../../system/settings/index.js';
+import { ROOT } from '../core/db.js';
+import { getSettings, setSettings } from '../settings/index.js';
 
 const LEGACY_PATH = path.join(ROOT, 'model.json');
 let migrated = false;

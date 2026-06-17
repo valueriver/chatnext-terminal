@@ -5,7 +5,7 @@
 //   收 {id, ok:true, result} / {id, ok:false, error}
 //   扩展还会推 {type:'event'|'hello'|'pong'}，这里忽略（无人订阅）。
 import { WebSocketServer } from 'ws';
-import { SESSION_ID, BROWSER_BRIDGE_PORT } from '../../system/core/env.js';
+import { SESSION_ID, BROWSER_BRIDGE_PORT } from '../core/env.js';
 
 const PORT = Number(BROWSER_BRIDGE_PORT) || 9510;
 const REQUEST_TIMEOUT = 30000;

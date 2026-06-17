@@ -3,7 +3,7 @@ import router from './system/ws/dispatch.js';
 
 import guard from './system/auth/index.js';
 import terminal from './apps/terminal/index.js';
-import cdpBridge from './apps/chat/cdp-bridge.js';
+import cdpBridge from './system/browser/bridge.js';
 import { startSelfUpgrade } from './system/selfupgrade.js';
 
 async function boot() {

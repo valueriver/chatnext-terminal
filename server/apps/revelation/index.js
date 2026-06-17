@@ -2,9 +2,9 @@
 // 自我升级 = 读懂用户 → 升级自己(进化) → 产出当天的「启示」。无人值守，只放开 sql 工具。
 import ws from '../../system/ws/index.js';
 import { getDb } from '../../system/core/db.js';
-import { chat } from '../chat/loop.js';
-import { tools } from '../chat/tools.js';
-import { getRunConfig } from '../chat/config.js';
+import { chat } from '../../system/ai/loop.js';
+import { tools } from '../../system/ai/tools.js';
+import { getRunConfig } from '../../system/ai/config.js';
 
 const SQL_ONLY = tools.filter((t) => t.function?.name === 'sql');
 
