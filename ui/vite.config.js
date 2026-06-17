@@ -3,16 +3,17 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
+// 前端独立于宿主：构建产物（dist）由 worker（relay 中继）或 computer（local 直连）任一托管。
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./ui', import.meta.url)),
+      '@': fileURLToPath(new URL('.', import.meta.url)),
     },
   },
   publicDir: false,
   build: {
-    outDir: fileURLToPath(new URL('./public', import.meta.url)),
+    outDir: fileURLToPath(new URL('./dist', import.meta.url)),
     emptyOutDir: true,
   },
   server: {

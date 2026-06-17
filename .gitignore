@@ -3,9 +3,8 @@ node_modules/
 *.log
 
 # build artifacts
-gui/dist/
+ui/dist/
 worker/public/
-worker/dist/
 .wrangler/
 .aios/
 

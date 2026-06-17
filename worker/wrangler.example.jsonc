@@ -19,7 +19,7 @@
 	"main": "server/index.js",
 	"compatibility_date": "2025-09-12",
 	"assets": {
-		"directory": "./public",
+		"directory": "../ui/dist",
 		"binding": "ASSETS",
 		"not_found_handling": "single-page-application"
 	},
