@@ -18,15 +18,16 @@
 
 ```text
 roam/
-├─ worker/        # Cloudflare Worker：WebSocket 中继 + Vue 前端（终端/文件/屏幕/对话/设置）
-├─ computer/      # 本机代理（Node）：终端、文件、屏幕、AI 对话、电脑控制、浏览器 CDP 桥
+├─ worker/        # Cloudflare Worker：WebSocket 中继（托管 ui 构建产物，不存数据）
+├─ server/        # 本机代理（Node）：终端、文件、屏幕、AI 对话、电脑控制、浏览器 CDP 桥
+├─ ui/            # 前端（Vue，独立）：worker 中继或 server 本地任一托管其构建产物
 └─ extension/     # browser-use Chrome 扩展：一条 WS 直通 CDP，驱动真实登录态的浏览器
 ```
 
 运行时链路：
 
 ```text
-远程浏览器  ──https/wss──▶  Cloudflare Worker（中继，不存数据）  ──wss──▶  本机代理 (computer/)
+远程浏览器  ──https/wss──▶  Cloudflare Worker（中继，不存数据）  ──wss──▶  本机代理 (server/)
                                                                               │
                                                   本机 AI ── browser_cdp ──▶ CDP 桥 (127.0.0.1) ──▶ browser-use 扩展 ──▶ Chrome
 ```
@@ -54,7 +55,7 @@ roam/
 
 - Node.js 20+
 - Cloudflare 账号
-- 一台常开的本机电脑（运行 `computer/` 代理）
+- 一台常开的本机电脑（运行 `server/` 代理）
 - 浏览器控制为可选项，需 macOS + Google Chrome；`computer_*` 的鼠标/滚动需要 `cliclick`（`brew install cliclick`）
 
 ## 1. 部署 Worker
@@ -84,12 +85,12 @@ npm run deploy
 ## 2. 配置并启动本机代理
 
 ```bash
-cd ../computer
+cd ../server
 npm install
 cp config.example.js config.js
 ```
 
-编辑 `computer/config.js`：
+编辑 `server/config.js`：
 
 ```js
 export default {
@@ -132,7 +133,7 @@ npm start
 **临时（终端开着才活，阻止休眠）：**
 
 ```bash
-caffeinate -dimsu node /path/to/roam/computer/index.js
+caffeinate -dimsu node /path/to/roam/server/index.js
 ```
 
 **长期（开机自启、崩了自动拉起）：** 用 launchd，新建 `~/Library/LaunchAgents/me.meeem.roam.plist`：
@@ -146,9 +147,9 @@ caffeinate -dimsu node /path/to/roam/computer/index.js
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/node</string>
-        <string>/Users/YOU/path/to/roam/computer/index.js</string>
+        <string>/Users/YOU/path/to/roam/server/index.js</string>
     </array>
-    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/computer</string>
+    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/server</string>
     <key>RunAtLoad</key><true/>
     <key>KeepAlive</key><true/>
     <key>StandardOutPath</key><string>/tmp/roam.out.log</string>
@@ -176,8 +177,8 @@ Description=Roam Agent
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/node /home/YOU/roam/computer/index.js
-WorkingDirectory=/home/YOU/roam/computer
+ExecStart=/usr/bin/node /home/YOU/roam/server/index.js
+WorkingDirectory=/home/YOU/roam/server
 Restart=always
 RestartSec=3
 
@@ -198,8 +199,8 @@ journalctl --user -u roam -f          # 看日志
 用 [nssm](https://nssm.cc/) 把 node 注册成服务：
 
 ```powershell
-nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\computer\index.js"
-nssm set Roam AppDirectory "C:\path\to\roam\computer"
+nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\server\index.js"
+nssm set Roam AppDirectory "C:\path\to\roam\server"
 nssm start Roam
 nssm remove Roam confirm   # 卸载
 ```
@@ -208,7 +209,7 @@ nssm remove Roam confirm   # 卸载
 
 **页面显示未连接：**
 
-- 确认 `computer/` 代理正在运行
+- 确认 `server/` 代理正在运行
 - 确认 `CLOUDFLARE_WORKER_URL` 是当前部署的 Worker 地址
 - 确认远程 URL 里的 `session` 和控制台打印的一致
 
@@ -224,7 +225,7 @@ nssm remove Roam confirm   # 卸载
 - 模型 API Key 存在本机 `~/.roam/roam.db`（settings 表），不进仓库、不过 Worker
 - CDP 桥只监听 `127.0.0.1`，并用 `SESSION_ID` 作 token 校验，挡掉本机其它进程乱连
 - `SESSION_PASSWORD` 用于远程网页访问校验
-- 不要把真实 `computer/config.js` 和 `worker/wrangler.jsonc` 提交到仓库（已在 `.gitignore`）
+- 不要把真实 `server/config.js` 和 `worker/wrangler.jsonc` 提交到仓库（已在 `.gitignore`）
 
 ## License
 
