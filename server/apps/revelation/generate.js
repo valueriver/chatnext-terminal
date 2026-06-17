@@ -1,11 +1,9 @@
 // 自我升级生成：读懂用户 → 升级进化 + 沉淀记忆 → 产出当天的「启示」。run 命令与每日调度共用。
-// 无人值守，只放开 sql 工具。
+// 无人值守自动跑，全部工具可用。
 import { getDb } from '../../system/db.js';
 import { chat } from '../../system/ai/loop.js';
-import { tools } from '../../system/ai/tools.js';
 import { getRunConfig } from '../../system/ai/config.js';
 
-const SQL_ONLY = tools.filter((t) => t.function?.name === 'sql');
 
 const SYSTEM = `你是用户的「自我升级」——每天清晨整理过去、升级自己、并为他准备一份「启示」。你有 sql 工具，按顺序做：
 
@@ -54,7 +52,7 @@ export async function generate({ force = false } = {}) {
             { role: 'system', content: SYSTEM },
             { role: 'user', content: `早。今天是 ${localLabel()}。完成今天的自我升级：读我的笔记、进化、记忆，该升级进化就升级、该记的记忆就记，最后给我今天的深度启示。` },
         ],
-        { apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model, toolset: SQL_ONLY, toolResultMaxChars: cfg.toolResultMaxChars },
+        { apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model, toolResultMaxChars: cfg.toolResultMaxChars },
     );
     if (!text || !text.trim()) return null;
     const info = db.prepare('INSERT INTO reports (day, content, created_at) VALUES (?, ?, ?)').run(day, text, Date.now());

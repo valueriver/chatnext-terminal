@@ -10,7 +10,6 @@
 import ws from '../channel.js';
 import { getDb } from './db.js';
 import { chat } from './ai/loop.js';
-import { tools as allTools } from './ai/tools.js';
 import { getRunConfig } from './ai/config.js';
 import { buildSystemPrompt } from './ai/prompt.js';
 
@@ -36,14 +35,7 @@ function setStatus(taskId, status, extra = {}) {
     broadcast('task.update', { id: taskId, status, ...extra });
 }
 
-// tools 选择：'none'（默认，纯生成/解析）| 'all' | string[]（工具名子集）
-function resolveToolset(tools) {
-    if (tools === 'all') return allTools;
-    if (Array.isArray(tools)) return allTools.filter((t) => tools.includes(t.function?.name));
-    return [];
-}
-
-async function runTask(taskId, { messages, system, tools, responseFormat }) {
+async function runTask(taskId, { messages, system, responseFormat }) {
     let config;
     try { config = await getRunConfig(); }
     catch (err) { setStatus(taskId, 'error', { error: err.message }); return; }
@@ -61,7 +53,6 @@ async function runTask(taskId, { messages, system, tools, responseFormat }) {
             apiUrl: config.apiUrl,
             apiKey: config.apiKey,
             model: config.model,
-            toolset: resolveToolset(tools),
             responseFormat: responseFormat || null,
             toolResultMaxChars: config.toolResultMaxChars,
             signal: controller.signal,
@@ -90,7 +81,7 @@ async function runTask(taskId, { messages, system, tools, responseFormat }) {
 }
 
 // 发起任务：同步返回 { taskId }，AI 在后台跑（fire-and-forget）。
-function createTask({ name = 'task', prompt = '', messages = null, system = null, tools = 'none', responseFormat = null } = {}) {
+function createTask({ name = 'task', prompt = '', messages = null, system = null, responseFormat = null } = {}) {
     const db = getDb();
     const now = Date.now();
     const msgs = Array.isArray(messages) && messages.length ? messages : [{ role: 'user', content: String(prompt || '') }];
@@ -100,7 +91,7 @@ function createTask({ name = 'task', prompt = '', messages = null, system = null
     const taskId = Number(info.lastInsertRowid);
     for (const m of msgs) saveTaskMsg(taskId, m, m.role === 'user' ? 'user' : 'ai');
     broadcast('task.update', { id: taskId, status: 'pending' });
-    void runTask(taskId, { messages: msgs, system, tools, responseFormat });
+    void runTask(taskId, { messages: msgs, system, responseFormat });
     return { taskId };
 }
 
