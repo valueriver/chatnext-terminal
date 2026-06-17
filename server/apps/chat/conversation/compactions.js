@@ -1,16 +1,7 @@
 // 上下文压缩：当 token 超阈值时，用 LLM 摘要旧消息，注入 compaction 消息继续对话。
 import { callLlmStream } from '../../../system/ai/llm.js';
+import { COMPACTION_SYSTEM } from '../../../system/ai/prompts.js';
 import * as store from './store.js';
-
-const DEFAULT_COMPACT_PROMPT = `你负责压缩一段聊天上下文，供后续大模型继续对话时使用。
-
-请保留：
-- 用户明确提出的目标、偏好、限制和已经确认的决策
-- 助手已经完成的关键改动、文件路径、接口协议和运行结果
-- 工具调用中影响后续工作的事实
-- 仍未解决的问题和下一步
-
-请删除寒暄、重复内容、无效中间过程。输出中文摘要，结构清晰，避免编造。`;
 
 const readTotalTokens = (usage = {}) => Number(usage.total_tokens || 0) || 0;
 
@@ -59,7 +50,7 @@ const maybeCompactBeforeRun = async ({ chatId, usage, settings, emit, signal }) 
     const endMessageId = candidates[candidates.length - 1]?.id;
     if (!startMessageId || !endMessageId || endMessageId <= latestEnd) return null;
 
-    const prompt = String(settings.compactPrompt || '').trim() || DEFAULT_COMPACT_PROMPT;
+    const prompt = String(settings.compactPrompt || '').trim() || COMPACTION_SYSTEM;
     const summaryInput = serializeForSummary(candidates);
     const payload = {
         model: settings.model,
