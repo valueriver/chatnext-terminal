@@ -12,6 +12,7 @@ import revelation from '../../apps/revelation/index.js';
 import shortcuts from '../shortcuts/index.js';
 import attachments from '../attachments/index.js';
 import outline from '../../apps/outline/index.js';
+import tasks from '../../apps/tasks/index.js';
 
 let onDevicesChanged = () => {};
 
@@ -70,6 +71,9 @@ async function dispatch(message) {
     }
     if (t.startsWith('outline.')) {
         if (await outline.handle(message)) return;
+    }
+    if (t.startsWith('tasks.')) {
+        if (await tasks.handle(message)) return;
     }
 
     console.log('未识别的消息类型:', t);

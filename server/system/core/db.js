@@ -98,6 +98,25 @@ function getDb() {
             updated_at INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_outline_parent ON outline(parent_id, sort, id);
+        CREATE TABLE IF NOT EXISTS tasks (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT NOT NULL DEFAULT 'task',
+            prompt      TEXT NOT NULL DEFAULT '',
+            response    TEXT,
+            status      TEXT NOT NULL DEFAULT 'pending',
+            error       TEXT,
+            created_at  INTEGER NOT NULL,
+            finished_at INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status, id);
+        CREATE TABLE IF NOT EXISTS task_messages (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            task_id    INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+            message    TEXT NOT NULL,
+            source     TEXT NOT NULL DEFAULT 'ai',
+            created_at INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_task_messages_task ON task_messages(task_id, id);
     `);
     return db;
 }

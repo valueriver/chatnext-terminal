@@ -35,6 +35,11 @@ const routes = [
         component: () => import('./apps/outline/index.vue'),
     },
     {
+        path: '/tasks',
+        name: 'tasks',
+        component: () => import('./apps/tasks/index.vue'),
+    },
+    {
         path: '/evolution',
         name: 'evolution',
         component: () => import('./apps/evolution/index.vue'),

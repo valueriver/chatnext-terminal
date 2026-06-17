@@ -13,6 +13,7 @@ const chat = async (messages, {
     maxRounds = 50,
     toolResultMaxChars = 12000,
     toolset = tools,
+    responseFormat = null,
 } = {}) => {
     const workMessages = Array.isArray(messages) ? [...messages] : [];
     let round = 0;
@@ -22,6 +23,7 @@ const chat = async (messages, {
 
         const payload = { model, messages: workMessages };
         if (Array.isArray(toolset) && toolset.length) payload.tools = toolset;
+        if (responseFormat) payload.response_format = responseFormat;
 
         const result = await callLlmStream(apiUrl, apiKey, payload, {
             signal,
