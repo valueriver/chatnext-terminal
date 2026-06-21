@@ -29,18 +29,6 @@ CREATE TABLE notes (
 );
 CREATE INDEX idx_notes_created ON notes(id DESC);
 
-CREATE TABLE outlines (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  parent_id   INTEGER,                     -- 自引用树;根为 NULL
-  sort        INTEGER NOT NULL DEFAULT 0,
-  text        TEXT NOT NULL DEFAULT '',
-  collapsed   INTEGER NOT NULL DEFAULT 0,
-  done        INTEGER NOT NULL DEFAULT 0,       -- 完成态
-  created_at  INTEGER NOT NULL,
-  updated_at  INTEGER NOT NULL
-);
-CREATE INDEX idx_outlines_parent ON outlines(parent_id, sort, id);
-
 -- ═══════════ 对话(直播在 DO,历史在 D1)═══════════
 CREATE TABLE chats (
   id          TEXT PRIMARY KEY,

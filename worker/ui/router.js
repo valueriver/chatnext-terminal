@@ -11,7 +11,6 @@ const routes = [
     { path: '/chat', name: 'chat', component: () => import('./apps/chat/index.vue') },
     { path: '/chat/:id', name: 'chat-id', component: () => import('./apps/chat/index.vue') },
     { path: '/notes', name: 'notes', component: () => import('./apps/notes/index.vue') },
-    { path: '/outlines', name: 'outlines', component: () => import('./apps/outlines/index.vue') },
     { path: '/settings', name: 'settings', component: () => import('./apps/settings/index.vue') },
 
     // 设备应用:设备 id 编进路由,URL 即"哪台设备"的唯一真相
