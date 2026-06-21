@@ -8,6 +8,7 @@ import terminal from './apps/terminal/handle.js';
 import files from './apps/files/handle.js';
 import screen from './apps/screen/handle.js';
 import status from './apps/status/handle.js';
+import chat from './apps/chat/handle.js';
 import bridge from './system/browser/bridge.js';
 
 const APPS = [
@@ -15,6 +16,7 @@ const APPS = [
     { prefixes: ['fs.'], handle: files.handle },
     { prefixes: ['screen.'], handle: screen.handle },
     { prefixes: ['status.'], handle: status.handle },
+    { prefixes: ['chat.'], handle: chat.handle },
 ];
 
 export async function dispatch(message) {

@@ -6,7 +6,7 @@
 //   ?role=device&id=<id>     设备:收工具/转发请求,回结果
 //
 // 消息协议:所有消息统一用 type 判别,按 app 前缀路由(chat.* / fs.* / terminal.* / …)。
-//   web → DO:    { type:'chat.send', chatId, text }      其余(fs./terminal./…)原样转发给设备
+//   web → DO:    { type:'chat.send', chatId, text } / { type:'chat.abort', chatId }  其余(fs./terminal./…)转发给设备
 //   DO → web:    { type:'chat.event', chatId, kind, … }  单一直播通道,kind=start/message/tool_calls/
 //                   tool_results/usage/compact_start/compact_done/done/error;另有 devices / chat.screenshot
 //   DO → device: { type:'tool.exec', callId, name, args } 其余原样转发
@@ -24,6 +24,7 @@ export class OneHub {
         this.db = env.DB;
         this.dispatch = makeDispatch(ctx);
         this.pending = makePending();
+        this.aborters = new Map(); // chatId → AbortController(进行中的 turn,供中断)
     }
 
     async fetch(request) {
@@ -58,8 +59,15 @@ export class OneHub {
     // ── 网页端来的 ──
     async fromWeb(msg) {
         if (msg.type === 'chat.send') {
-            return runTurn(this.hub(), msg.chatId, msg.text).catch((e) =>
-                this.dispatch.toWeb({ type: 'chat.event', chatId: msg.chatId, kind: 'error', content: e.message || String(e) }));
+            const ac = new AbortController();
+            this.aborters.set(msg.chatId, ac);
+            return runTurn(this.hub(), msg.chatId, { text: msg.text, attachments: msg.attachments }, ac.signal)
+                .catch((e) => this.dispatch.toWeb({ type: 'chat.event', chatId: msg.chatId, kind: 'error', content: e.message || String(e) }))
+                .finally(() => { if (this.aborters.get(msg.chatId) === ac) this.aborters.delete(msg.chatId); });
+        }
+        if (msg.type === 'chat.abort') {
+            this.aborters.get(msg.chatId)?.abort();
+            return;
         }
         // 其余(终端/文件/屏幕)→ 转发给消息指定的设备(msg.device);未指定则当前在线
         this.dispatch.toDevice(msg, msg.device);

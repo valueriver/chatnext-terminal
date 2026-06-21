@@ -107,26 +107,29 @@ export const useChatStore = defineStore('chat', () => {
         if (currentId.value === id) { currentId.value = ''; messages.value = []; currentTitle.value = ''; }
     }
 
-    async function send(text, _attachments = []) {
+    async function send(text, attachments = []) {
         const content = (text || '').trim();
-        if (!content || busy.value) return;
-        // 首条消息才真正创建对话,标题取前 20 字
+        const files = Array.isArray(attachments) ? attachments : [];
+        if ((!content && !files.length) || busy.value) return;
+        // 首条消息才真正创建对话,标题取第一行
         if (!currentId.value) {
-            const d = await api.post('/apps/chats', { title: content.slice(0, 20) }).catch(() => null);
+            const title = (content.split('\n')[0] || files[0]?.name || '新对话').slice(0, 40);
+            const d = await api.post('/apps/chats', { title }).catch(() => null);
             if (!d?.chat) return;
             conversations.value.unshift({ id: d.chat.id, title: d.chat.title, updatedAt: d.chat.updated_at });
             currentId.value = d.chat.id;
             currentTitle.value = d.chat.title;
         }
-        pushRow({ role: 'user', _key: mkKey('user'), content, attachments: [] });
+        pushRow({ role: 'user', _key: mkKey('user'), content, attachments: files });
         busy.value = true;
         viewSeq.value++;
         bumpStream();
-        ws.sendMsg({ type: 'chat.send', chatId: currentId.value, text: content });
+        ws.sendMsg({ type: 'chat.send', chatId: currentId.value, text: content, attachments: files });
     }
 
     function abort() {
-        // DO 暂不支持中断进行中的回合,这里先软停 UI。
+        // 通知 DO 真正中断进行中的回合(断开与模型的连接),并软停 UI。
+        if (currentId.value) ws.sendMsg({ type: 'chat.abort', chatId: currentId.value });
         busy.value = false;
         stream?.resetStreaming();
         bumpStream();

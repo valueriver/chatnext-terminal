@@ -31,10 +31,13 @@ export const useWsStore = defineStore('ws', () => {
         return () => handlers.delete(key);
     }
 
+    // DO 自己消费的消息(不转发给设备),无需附 device
+    const HUB_CONSUMED = new Set(['chat.send', 'chat.abort']);
+
     function sendMsg(msg) {
         if (socket?.readyState !== WebSocket.OPEN) return false;
-        // 除 chat.send(发给 agent)外都是设备消息,附上当前选中设备让 DO 路由
-        if (msg.type !== 'chat.send' && !msg.device && deviceId.value) msg.device = deviceId.value;
+        // 设备消息附上当前选中设备让 DO 路由(agent 控制消息除外)
+        if (!HUB_CONSUMED.has(msg.type) && !msg.device && deviceId.value) msg.device = deviceId.value;
         socket.send(JSON.stringify(msg));
         return true;
     }

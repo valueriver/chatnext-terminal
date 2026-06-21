@@ -13,17 +13,25 @@ import { settings } from '../../system/settings.js';
 
 const MAX_STEPS = 20; // 单 turn 工具往返上限,防失控
 
-export async function runTurn(hub, chatId, userText) {
+export async function runTurn(hub, chatId, input, signal) {
     // 单一直播通道:一条 chat.event 承载所有子事件,kind 判别。前端 stream reducer 直接消费,无翻译层。
     const emit = (kind, extra = {}) => hub.toWeb({ type: 'chat.event', chatId, kind, ...extra });
+    const aborted = () => signal?.aborted;
+
+    const text = String(input?.text || '');
+    const attachments = Array.isArray(input?.attachments) ? input.attachments : [];
 
     const cfg = await loadConfig(hub);
     if (cfg.error) { emit('error', { content: cfg.error }); return; }
 
     emit('start');
-    await persist(hub, chatId, { role: 'user', content: userText });
+    // 用户消息:正文存净文本,附件单独存(供 UI 展示 + context 拼给模型读路径)
+    const userMsg = { role: 'user', content: text };
+    if (attachments.length) userMsg.attachments = attachments;
+    await persist(hub, chatId, userMsg);
 
     for (let step = 0; step < MAX_STEPS; step++) {
+        if (aborted()) { emit('aborted'); return; }
         // 每次调 LLM 前都检测压缩。两种请求场景都覆盖:
         //   step 0 = 发消息;step 1+ = 工具结果续跑。依据是最近一条助手消息的真实用量。
         await maybeCompact(hub, chatId, cfg, emit).catch(() => {});
@@ -33,11 +41,16 @@ export async function runTurn(hub, chatId, userText) {
         let text = '';
         let calls = null;
         let usage = {};
-        const gen = stream({ apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model, messages, tools });
-        for await (const ev of gen) {
-            if (ev.type === 'text') { text += ev.delta; emit('message', { content: ev.delta }); }
-            else if (ev.type === 'tool_call') calls = ev.calls;
-            else if (ev.type === 'usage') usage = ev.usage || {};
+        try {
+            const gen = stream({ apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model, messages, tools, signal });
+            for await (const ev of gen) {
+                if (ev.type === 'text') { text += ev.delta; emit('message', { content: ev.delta }); }
+                else if (ev.type === 'tool_call') calls = ev.calls;
+                else if (ev.type === 'usage') usage = ev.usage || {};
+            }
+        } catch (e) {
+            if (aborted()) { await persist(hub, chatId, assistantMsg(text, null), usage); emit('aborted'); return; }
+            throw e;
         }
         if (usage && Object.keys(usage).length) emit('usage', { usage }); // 标注真实用量(空则不发)
 
@@ -45,6 +58,7 @@ export async function runTurn(hub, chatId, userText) {
         await persist(hub, chatId, assistantMsg(text, calls), usage);
 
         if (!calls || !calls.length) break; // 没有工具 → turn 结束
+        if (aborted()) { emit('aborted'); return; } // 工具执行前再确认一次
 
         // 先广播本轮全部工具调用,再逐个执行并回结果
         emit('tool_calls', { toolCalls: calls.map((c) => ({ id: c.id, name: c.name, args: c.args })) });

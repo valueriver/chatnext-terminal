@@ -23,6 +23,12 @@ export async function build(hub, chatId, { contextTurns = 100, device, toolResul
         const m = body && typeof body === 'object' ? body : { role: r.role, content: String(r.body) };
         // 工具结果按上限截断,避免撑爆上下文(原始全文仍留在 D1)
         if (m.role === 'tool') m.content = truncateToolResult(m.content, { maxChars: toolResultMaxChars }).content;
+        // 用户附件:把文件路径折进正文给模型(它可用 shell 读这些路径);附件字段本身不发给模型
+        if (m.role === 'user' && Array.isArray(m.attachments) && m.attachments.length) {
+            const refs = m.attachments.map((f) => `- ${f.name}: ${f.path}`).join('\n');
+            m.content = `${m.content || ''}\n\n[用户上传的附件,在当前设备本地路径,可用 shell 读取]\n${refs}`.trim();
+            delete m.attachments;
+        }
         messages.push(m);
     }
     // 规整 tool_calls 与结果的配对,补缺、去孤儿、去前导 tool

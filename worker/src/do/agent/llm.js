@@ -4,11 +4,12 @@
 //   { type:'tool_call', calls }      本轮要调的工具(累积完整后一次性给)
 //   { type:'usage', usage }          末块的真实 token 用量(total_tokens 等)
 //   { type:'done', finish }          结束
-export async function* stream({ apiUrl, apiKey, model, messages, tools }) {
+export async function* stream({ apiUrl, apiKey, model, messages, tools, signal }) {
     const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({ model, messages, tools, stream: true, stream_options: { include_usage: true } }),
+        signal, // 传入 AbortSignal,中断时直接断开与模型的连接
     });
     if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
 
