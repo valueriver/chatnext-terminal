@@ -1,5 +1,5 @@
 <script setup>
-import { fmtArgs, toolLabel, toolSubtitle } from '@/apps/chat/lib/format';
+import { fmtArgs, fmtResult, toolLabel, toolSubtitle } from '@/apps/chat/lib/format';
 
 defineProps({
     items: { type: Array, required: true },
@@ -26,10 +26,7 @@ defineProps({
                         {{ item.status === 'running' ? '执行中' : '完成' }}
                     </span>
                 </div>
-                <div v-if="item.expanded" class="tool-body">参数：{{ fmtArgs(item.args) }}<template v-if="item.result">
-
-结果：
-{{ item.result }}</template></div>
+                <div v-if="item.expanded" class="tool-body"><div class="tool-seg">输入</div><pre class="tool-pre">{{ fmtArgs(item.args) }}</pre><template v-if="item.result"><div class="tool-seg">输出</div><pre class="tool-pre">{{ fmtResult(item.result) }}</pre></template></div>
             </div>
         </div>
     </div>

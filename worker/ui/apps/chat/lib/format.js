@@ -2,16 +2,12 @@ import { marked } from 'marked';
 
 marked.setOptions({ breaks: true, gfm: true });
 
+// 与 worker/src/do/agent/tools.js 的工具集对齐。
 const TOOL_LABELS = {
+    sql: '数据库',
     shell: '终端命令',
+    browser_cdp: '浏览器',
     open_app: '打开应用',
-    browser_status: '浏览器状态',
-    browser_open: '打开网页',
-    browser_navigate: '页面导航',
-    browser_tabs: '浏览器标签',
-    browser_activate_tab: '切换标签',
-    browser_read: '读取网页',
-    browser_eval: '执行网页 JS',
     computer_status: '电脑状态',
     computer_screenshot: '屏幕截图',
     computer_type: '键盘输入',
@@ -27,7 +23,8 @@ function toolLabel(name) {
 
 function toolSubtitle(row) {
     const args = row.args || {};
-    return args.summary || args.command || args.url || args.script || args.text || args.name || '';
+    // summary 是大部分设备工具的面向用户摘要;其余工具退回各自的关键参数。
+    return args.summary || args.command || args.query || args.method || args.url || args.text || args.name || '';
 }
 
 function renderMd(value) {
@@ -35,11 +32,23 @@ function renderMd(value) {
 }
 
 function fmtArgs(value) {
+    // summary 已在外层标题展示,展开的「输入」里去掉它,只留真正的参数。
+    const { summary, ...rest } = value && typeof value === 'object' ? value : {};
     try {
-        return JSON.stringify(value, null, 2);
+        return JSON.stringify(rest, null, 2);
     } catch {
         return String(value);
     }
+}
+
+// 「输出」:结果常是 JSON.stringify 出来压成一行的对象,能解析就缩进展示,否则原样。
+function fmtResult(value) {
+    if (value == null || value === '') return '';
+    if (typeof value === 'object') {
+        try { return JSON.stringify(value, null, 2); } catch { return String(value); }
+    }
+    const str = String(value);
+    try { return JSON.stringify(JSON.parse(str), null, 2); } catch { return str; }
 }
 
 function fmtTime(value) {
@@ -52,4 +61,4 @@ function fmtTime(value) {
     return `${date.getMonth() + 1}/${date.getDate()}`;
 }
 
-export { fmtArgs, fmtTime, renderMd, toolLabel, toolSubtitle };
+export { fmtArgs, fmtResult, fmtTime, renderMd, toolLabel, toolSubtitle };
