@@ -44,19 +44,17 @@ watch(() => store.items, () => { if (rootId.value && !store.node(rootId.value)) 
 
         <div ref="scroller" class="flex-1 overflow-y-auto px-5 pb-20 sm:px-6">
             <div class="mx-auto max-w-[720px]">
-                <h2 v-if="current" class="mb-2 px-1 font-serif text-[22px] font-extrabold tracking-tight text-ink">{{ current.text || '未命名' }}</h2>
+                <h2 v-if="current" class="mb-3 px-1 font-serif text-[22px] font-extrabold tracking-tight text-ink">{{ current.text || '未命名' }}</h2>
 
-                <OutlineNode v-for="n in roots" :key="n.id" :id="n.id" @zoom="zoom" />
+                <div class="o-card">
+                    <OutlineNode v-for="n in roots" :key="n.id" :id="n.id" @zoom="zoom" />
 
-                <button
-                    class="mt-1 flex items-center gap-2 rounded-xl px-2.5 py-2 text-[13px] font-semibold text-faint transition hover:bg-accent/10 hover:text-accent"
-                    @click="addRoot"
-                >
-                    <span class="grid h-5 w-5 place-items-center rounded-md bg-[var(--well)] text-base leading-none">+</span>
-                    新增一项
-                </button>
+                    <button class="o-add" @click="addRoot">
+                        <span class="o-add-plus">+</span>新增一项
+                    </button>
+                </div>
 
-                <div v-if="!roots.length" class="select-none pt-20 text-center">
+                <div v-if="!roots.length" class="select-none pt-16 text-center">
                     <div class="font-serif text-[24px] font-black text-faint">从一个想法开始</div>
                     <p class="mt-2 text-[13px] text-muted">回车建同级 · Tab 缩进 · 点圆点聚焦</p>
                 </div>
@@ -64,3 +62,20 @@ watch(() => store.items, () => { if (rootId.value && !store.node(rootId.value)) 
         </div>
     </section>
 </template>
+
+<style scoped>
+.o-card {
+    background: var(--panel);
+    border-radius: 22px;
+    box-shadow: 0 6px 20px #0000000d;
+    padding: 10px 12px;
+}
+.o-add {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 2px; padding: 7px 8px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; color: var(--faint);
+    transition: background .12s, color .12s;
+}
+.o-add:hover { background: var(--accent-soft); color: var(--accent-d); }
+.o-add-plus { display: grid; place-items: center; height: 20px; width: 20px; border-radius: 7px; background: var(--well); font-size: 15px; line-height: 1; }
+</style>
