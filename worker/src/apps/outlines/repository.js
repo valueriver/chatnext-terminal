@@ -1,5 +1,6 @@
 // outlines 表数据访问 —— 唯一碰 SQL 的地方。root 用 NULL;前端用 0 表示 root,api 处归一。
 const norm = (p) => (p ? Number(p) : null);
+const clip = (v) => String(v ?? '').slice(0, 10000); // 单节点文本上限
 
 export const all = async (db) =>
     (await db.prepare('SELECT id, parent_id, sort, text, collapsed, done FROM outlines ORDER BY parent_id, sort, id').all()).results;
@@ -19,7 +20,7 @@ export const shiftAfter = (db, parentId, base) =>
 export async function insert(db, parentId, sort, text, now) {
     const r = await db.prepare(
         'INSERT INTO outlines (parent_id, sort, text, collapsed, created_at, updated_at) VALUES (?, ?, ?, 0, ?, ?)',
-    ).bind(norm(parentId), sort, String(text || ''), now, now).run();
+    ).bind(norm(parentId), sort, clip(text), now, now).run();
     return Number(r.meta.last_row_id);
 }
 
@@ -30,7 +31,7 @@ export const setSort = (db, id, sort) =>
     db.prepare('UPDATE outlines SET sort = ? WHERE id = ?').bind(sort, id).run();
 
 export const setText = (db, id, text, now) =>
-    db.prepare('UPDATE outlines SET text = ?, updated_at = ? WHERE id = ?').bind(String(text), now, id).run();
+    db.prepare('UPDATE outlines SET text = ?, updated_at = ? WHERE id = ?').bind(clip(text), now, id).run();
 
 export const setCollapsed = (db, id, collapsed) =>
     db.prepare('UPDATE outlines SET collapsed = ? WHERE id = ?').bind(collapsed ? 1 : 0, id).run();

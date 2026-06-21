@@ -4,6 +4,7 @@ import { useThemeStore } from '@/system/stores/theme';
 import { useModelStore } from '@/apps/settings/store';
 import { useShortcutsStore } from '@/system/stores/shortcuts';
 import { useWsStore } from '@/system/stores/ws';
+import { logout } from '@/system/api';
 import SettingsHeader from '../components/SettingsHeader.vue';
 
 const theme = useThemeStore();
@@ -201,6 +202,14 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                         </div>
                     </div>
                 </div>
+
+                <!-- 账户 -->
+                <div class="set-group">
+                    <div class="set-title">账户</div>
+                    <div class="set-actions">
+                        <button class="set-act danger" @click="logout">退出登录</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -208,4 +217,6 @@ watch(() => ws.connected, (v) => { if (v) load(); });
 
 <style scoped>
 .set-actions { display: flex; gap: 10px; align-items: center; margin: 14px 6px 0; }
+.set-act.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, transparent); }
+.set-act.danger:hover { background: color-mix(in srgb, var(--bad) 12%, transparent); }
 </style>
