@@ -39,19 +39,19 @@ export async function maybe(hub, chatId, cfg) {
     const threshold = Number(cfg.compressThreshold) || 12000;
 
     // 最近一条带用量的消息(即上一次助手回复)的真实 token
-    const last = await hub.db.first(
-        "SELECT usage FROM messages WHERE chat_id = ? AND usage != '{}' ORDER BY id DESC LIMIT 1", chatId,
-    );
+    const last = await hub.db.prepare(
+        "SELECT usage FROM messages WHERE chat_id = ? AND usage != '{}' ORDER BY id DESC LIMIT 1",
+    ).bind(chatId).first();
     const tokens = totalTokens(parse(last?.usage));
     if (!tokens || tokens < threshold) return false;
 
-    const comp = await hub.db.first(
-        'SELECT end_message_id FROM compactions WHERE chat_id = ? ORDER BY id DESC LIMIT 1', chatId,
-    );
+    const comp = await hub.db.prepare(
+        'SELECT end_message_id FROM compactions WHERE chat_id = ? ORDER BY id DESC LIMIT 1',
+    ).bind(chatId).first();
     const afterId = comp?.end_message_id || 0;
-    const rows = await hub.db.all(
-        'SELECT id, body FROM messages WHERE chat_id = ? AND id > ? ORDER BY id ASC', chatId, afterId,
-    );
+    const { results: rows } = await hub.db.prepare(
+        'SELECT id, body FROM messages WHERE chat_id = ? AND id > ? ORDER BY id ASC',
+    ).bind(chatId, afterId).all();
     const suffixStart = keepSuffixStart(rows);
     if (suffixStart <= 2) return false; // 太少不值得压
 
@@ -76,9 +76,8 @@ export async function maybe(hub, chatId, cfg) {
     }
     if (!summary.trim()) return false;
 
-    await hub.db.run(
+    await hub.db.prepare(
         'INSERT INTO compactions (chat_id, start_message_id, end_message_id, summary, tokens, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-        chatId, startId, endId, summary.trim(), compTokens, Date.now(),
-    );
+    ).bind(chatId, startId, endId, summary.trim(), compTokens, Date.now()).run();
     return true;
 }

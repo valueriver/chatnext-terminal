@@ -14,15 +14,15 @@ const DEFAULTS = {
 export function settings(db) {
     return {
         async get(key, fallback = '') {
-            const row = await db.first('SELECT value FROM settings WHERE key = ?', String(key));
+            const row = await db.prepare('SELECT value FROM settings WHERE key = ?').bind(String(key)).first();
             return row ? row.value : fallback;
         },
         async set(key, value) {
-            await db.run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', String(key), String(value ?? ''));
+            await db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').bind(String(key), String(value ?? '')).run();
         },
         async all() {
-            const rows = await db.all('SELECT key, value FROM settings');
-            return { ...DEFAULTS, ...Object.fromEntries(rows.map((r) => [r.key, r.value])) };
+            const { results } = await db.prepare('SELECT key, value FROM settings').all();
+            return { ...DEFAULTS, ...Object.fromEntries(results.map((r) => [r.key, r.value])) };
         },
     };
 }

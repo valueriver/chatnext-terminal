@@ -10,7 +10,6 @@
 //   DO → web:    chat.delta / chat.tool / chat.tool_result / chat.done / chat.error / devices
 //   DO → device: { t:'tool.exec', callId, name, args } 其余原样转发
 //   device → DO: { t:'tool.result', callId, result }   其余原样转发给 web
-import { makeDb } from '../system/db/d1.js';
 import { makeDispatch } from './dispatch.js';
 import { makePending } from './store.js';
 import { runTurn } from './agent/loop.js';
@@ -21,7 +20,7 @@ export class OneHub {
     constructor(ctx, env) {
         this.ctx = ctx;
         this.env = env;
-        this.db = makeDb(env);
+        this.db = env.DB;
         this.dispatch = makeDispatch(ctx);
         this.pending = makePending();
     }

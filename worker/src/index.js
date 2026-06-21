@@ -3,7 +3,6 @@
 //   /system/… → 基础系统层(身份/设备)
 //   /apps/…   → 云端数据应用(笔记/大纲,HTTP CRUD over D1)
 //   其余      → 前端静态资源(ui/dist)
-import { makeDb } from './system/db/d1.js';
 import systemRoutes from './system/index.js';
 import appsRoutes from './apps/index.js';
 import { verify } from './system/identity/service.js';
@@ -29,7 +28,7 @@ export default {
             return env.HUB.get(env.HUB.idFromName('one')).fetch(request);
         }
 
-        const ctx = { env, db: makeDb(env) };
+        const ctx = { env, db: env.DB };
 
         // HTTP 鉴权:统一 Bearer JWT。public 端点放行,其余必须有效 token。
         if (area === 'system' || area === 'apps') {

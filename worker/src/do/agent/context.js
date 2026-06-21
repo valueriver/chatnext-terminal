@@ -7,16 +7,14 @@ export async function build(hub, chatId, { contextTurns = 100, device, toolResul
     const db = hub.db;
 
     // 最新一条压缩摘要(它之前的原始消息用摘要替代)
-    const comp = await db.first(
+    const comp = await db.prepare(
         'SELECT summary, end_message_id FROM compactions WHERE chat_id = ? ORDER BY id DESC LIMIT 1',
-        chatId,
-    );
+    ).bind(chatId).first();
     const afterId = comp?.end_message_id || 0;
 
-    const rows = await db.all(
+    const { results: rows } = await db.prepare(
         'SELECT role, body FROM messages WHERE chat_id = ? AND id > ? ORDER BY id ASC LIMIT ?',
-        chatId, afterId, contextTurns,
-    );
+    ).bind(chatId, afterId, contextTurns).all();
 
     const messages = [{ role: 'system', content: systemPrompt({ device }) }];
     if (comp?.summary) messages.push({ role: 'system', content: `【先前对话摘要】\n${comp.summary}` });

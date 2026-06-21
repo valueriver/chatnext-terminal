@@ -13,10 +13,10 @@ const CLOUD = {
         if (!q) return { error: '空查询' };
         try {
             if (/^(select|with|pragma)\b/i.test(q)) {
-                const rows = await hub.db.all(q);
-                return { rows, count: rows.length };
+                const { results } = await hub.db.prepare(q).all();
+                return { rows: results, count: results.length };
             }
-            const r = await hub.db.run(q);
+            const r = await hub.db.prepare(q).run();
             return { ok: true, changes: r.meta?.changes ?? 0, lastRowId: Number(r.meta?.last_row_id) || 0 };
         } catch (err) {
             return { error: err.message || String(err) };

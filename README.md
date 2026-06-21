@@ -84,7 +84,7 @@ cp wrangler.example.jsonc wrangler.jsonc
 
 ```bash
 npx wrangler d1 create one          # 把输出的 database_id 填回 wrangler.jsonc
-npx wrangler d1 execute one --remote --file=src/system/db/schema.sql
+npx wrangler d1 execute one --remote --file=schema.sql
 ```
 
 设置鉴权密钥（JWT 签名用）：

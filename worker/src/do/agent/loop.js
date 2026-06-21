@@ -67,11 +67,10 @@ function assistantMsg(text, calls) {
 }
 
 async function persist(hub, chatId, message, usage = {}) {
-    await hub.db.run(
+    await hub.db.prepare(
         'INSERT INTO messages (chat_id, role, body, usage, created_at) VALUES (?, ?, ?, ?, ?)',
-        chatId, message.role, JSON.stringify(message), JSON.stringify(usage || {}), Date.now(),
-    );
-    await hub.db.run('UPDATE chats SET updated_at = ? WHERE id = ?', Date.now(), chatId);
+    ).bind(chatId, message.role, JSON.stringify(message), JSON.stringify(usage || {}), Date.now()).run();
+    await hub.db.prepare('UPDATE chats SET updated_at = ? WHERE id = ?').bind(Date.now(), chatId).run();
 }
 
 async function loadConfig(hub) {
