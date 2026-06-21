@@ -75,11 +75,21 @@ export class OneHub {
     hub() {
         const dispatch = this.dispatch;
         const pending = this.pending;
+        const db = this.db;
         return {
-            db: this.db,
+            db,
             toWeb: (m) => dispatch.toWeb(m),
             hasDevice: () => dispatch.hasDevice(),
-            device: () => null, // ⚠️ 待接:从 devices 表取选中设备的能力,喂给 prompt
+            // 当前选中设备(v1:第一台在线)的真实信息,喂给 prompt。无在线设备 → null
+            async device() {
+                const id = dispatch.currentDeviceId();
+                if (!id) return null;
+                const row = await deviceRepo.get(db, id).catch(() => null);
+                if (!row) return { id, name: id, capabilities: [] };
+                let capabilities = [];
+                try { capabilities = JSON.parse(row.capabilities || '[]'); } catch { /* 旧数据 */ }
+                return { id: row.id, name: row.name || row.id, capabilities };
+            },
             // 派工具给设备 + 等结果(按 callId 关联)。deviceId 省略则 dispatch 选当前在线设备
             callDevice: (name, args, deviceId) => {
                 const { callId, promise } = pending.create();

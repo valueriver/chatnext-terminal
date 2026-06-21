@@ -24,7 +24,7 @@ export async function runTurn(hub, chatId, userText) {
         //   step 0 = 发消息;step 1+ = 工具结果续跑。依据是最近一条助手消息的真实用量。
         await maybeCompact(hub, chatId, cfg).catch(() => {});
 
-        const messages = await build(hub, chatId, { contextTurns: cfg.contextTurns, device: hub.device(), toolResultMaxChars: cfg.toolResultMaxChars });
+        const messages = await build(hub, chatId, { contextTurns: cfg.contextTurns, device: await hub.device(), toolResultMaxChars: cfg.toolResultMaxChars });
 
         let text = '';
         let calls = null;
