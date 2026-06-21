@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:ui": "npm --prefix ../ui run build",
+    "build:ui": "npm --prefix ui run build",
     "dev": "wrangler dev --port 9506",
     "predeploy": "npm run build:ui",
     "deploy": "wrangler deploy",

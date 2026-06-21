@@ -21,7 +21,7 @@ one/
 ├─ worker/        # Cloudflare Worker：WebSocket 中继（托管 ui 构建产物，不存数据）
 ├─ server/        # 本机代理（Node）：终端、文件、屏幕、AI 对话、电脑控制、浏览器 CDP 桥
 ├─ ui/            # 前端（Vue，独立）：worker 中继或 server 本地任一托管其构建产物
-└─ extension/     # browser-use Chrome 扩展：一条 WS 直通 CDP，驱动真实登录态的浏览器
+└─ browser/       # browser-use Chrome 扩展：一条 WS 直通 CDP，驱动真实登录态的浏览器
 ```
 
 运行时链路：
@@ -120,7 +120,7 @@ npm start
 
 ## 4. （可选）接入浏览器控制
 
-1. Chrome → 扩展管理 → 打开「开发者模式」→「加载已解压的扩展程序」→ 选 `one/extension/`
+1. Chrome → 扩展管理 → 打开「开发者模式」→「加载已解压的扩展程序」→ 选 `one/browser/`
 2. 点扩展图标，把上一步控制台打印的 **CDP 桥地址**（`ws://127.0.0.1:9510/cdp?token=...`）填进「连接地址」并连接，角标显示 `on`
 3. 之后在对话里让 AI 干网页活，它就通过 `browser_cdp` 驱动这台机器上真实登录态的 Chrome
 
@@ -215,7 +215,7 @@ nssm remove One confirm   # 卸载
 
 **AI 说"还没配置模型"：** 去 设置 → 模型设置 填好 API 地址 / Key / 模型。
 
-**`browser_cdp` 报"扩展未连接"：** 确认 Chrome 已装 `extension/` 且扩展弹窗里填了 CDP 桥地址、角标为 `on`。
+**`browser_cdp` 报"扩展未连接"：** 确认 Chrome 已装 `browser/` 且扩展弹窗里填了 CDP 桥地址、角标为 `on`。
 
 **`computer_*` 鼠标/滚动失败：** `brew install cliclick`（截图和键盘无需它）。
 
