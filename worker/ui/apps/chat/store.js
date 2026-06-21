@@ -30,17 +30,10 @@ export const useChatStore = defineStore('chat', () => {
     function bind() {
         if (bound) return;
         bound = true;
-        stream = setupChatStream({ messages, currentId, currentTitle, conversations, busy, pushRow, refresh, bumpStream });
+        stream = setupChatStream({ messages, currentId, busy, pushRow, refresh, bumpStream });
 
-        // DO 新协议 → stream 事件
-        ws.onMessage('chat.delta', (m) => stream.onEvent({ kind: 'message', chatId: m.chatId, content: m.delta || '' }));
-        ws.onMessage('chat.tool', (m) => stream.onEvent({ kind: 'tool_calls', chatId: m.chatId, toolCalls: [m.call] }));
-        ws.onMessage('chat.tool_result', (m) => stream.onEvent({
-            kind: 'tool_results', chatId: m.chatId,
-            results: [{ toolCallId: m.callId, content: typeof m.result === 'string' ? m.result : JSON.stringify(m.result ?? '') }],
-        }));
-        ws.onMessage('chat.done', (m) => stream.onEvent({ kind: 'done', chatId: m.chatId }));
-        ws.onMessage('chat.error', (m) => stream.onEvent({ kind: 'error', chatId: m.chatId, content: m.error || '出错了' }));
+        // 单一直播通道:chat.event 直接喂给 stream reducer,无翻译层。
+        ws.onMessage('chat.event', (e) => stream.onEvent(e));
         // 设备截图(executor 经 channel 广播,type=chat.screenshot)
         ws.onMessage('chat.screenshot', (msg) => {
             const d = msg.data || {};

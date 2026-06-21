@@ -7,7 +7,8 @@
 //
 // 消息协议(provisional,待逐字敲死):
 //   web → DO:    { t:'chat.send', chatId, text }      其余设备类消息原样转发给设备
-//   DO → web:    chat.delta / chat.tool / chat.tool_result / chat.done / chat.error / devices
+//   DO → web:    { t:'chat.event', chatId, kind, … }  单一直播通道,kind=start/message/tool_calls/
+//                   tool_results/usage/compact_start/compact_done/done/error;另有 devices / chat.screenshot
 //   DO → device: { t:'tool.exec', callId, name, args } 其余原样转发
 //   device → DO: { t:'tool.result', callId, result }   其余原样转发给 web
 import { makeDispatch } from './dispatch.js';

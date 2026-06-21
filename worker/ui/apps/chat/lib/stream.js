@@ -11,14 +11,13 @@ function findLastAssistant(messages) {
 function setupChatStream({
     messages,
     currentId,
-    currentTitle,
-    conversations,
     busy,
     pushRow,
     refresh,
     bumpStream,
 }) {
     let streamingKey = '';
+    let compactKey = '';
 
     function closeStreaming() {
         if (!streamingKey) return null;
@@ -42,13 +41,6 @@ function setupChatStream({
         });
         streamingKey = row._key;
         return row;
-    }
-
-    function updateTitle(title, chatId) {
-        if (!title) return;
-        currentTitle.value = title;
-        const item = conversations.value.find((conversation) => conversation.id === chatId);
-        if (item) item.title = title;
     }
 
     function completeToolResult(result) {
@@ -91,12 +83,18 @@ function setupChatStream({
                 busy.value = true;
                 closeStreaming();
                 break;
-            case 'input':
-                updateTitle(event.title, event.chatId);
-                if (event.message?.content || event.message?.attachments?.length) {
-                    pushRow({ role: 'user', _key: mkKey('user'), content: event.message.content || '', attachments: Array.isArray(event.message.attachments) ? event.message.attachments : [] });
-                }
+            case 'compact_start': {
+                closeStreaming();
+                const row = pushRow({ role: 'system', _key: mkKey('system'), content: '正在压缩较早的上下文…', compacting: true });
+                compactKey = row._key;
                 break;
+            }
+            case 'compact_done': {
+                const row = compactKey && messages.value.find((item) => item._key === compactKey);
+                if (row) { row.content = '已压缩较早的上下文以节省窗口'; row.compacting = false; }
+                compactKey = '';
+                break;
+            }
             case 'message': {
                 const row = currentStreaming();
                 row.content += event.content || '';

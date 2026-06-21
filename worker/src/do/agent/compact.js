@@ -35,7 +35,7 @@ function serialize(rows) {
     }).join('\n\n---\n\n');
 }
 
-export async function maybe(hub, chatId, cfg) {
+export async function maybe(hub, chatId, cfg, emit = () => {}) {
     const threshold = Number(cfg.compressThreshold) || 12000;
 
     // 最近一条带用量的消息(即上一次助手回复)的真实 token
@@ -59,25 +59,31 @@ export async function maybe(hub, chatId, cfg) {
     const startId = candidates[0].id;
     const endId = candidates[candidates.length - 1].id;
 
-    const prompt = String(cfg.compactPrompt || '').trim() || COMPACTION_SYSTEM;
-    let summary = '';
-    let compTokens = 0;
-    const gen = stream({
-        apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model,
-        messages: [
-            { role: 'system', content: prompt },
-            { role: 'user', content: `请压缩以下聊天消息：\n\n${serialize(candidates)}` },
-        ],
-        tools: [],
-    });
-    for await (const ev of gen) {
-        if (ev.type === 'text') summary += ev.delta;
-        else if (ev.type === 'usage') compTokens = totalTokens(ev.usage);
-    }
-    if (!summary.trim()) return false;
+    // 决定要压了 → 向前端广播开始/结束(可见反馈),finally 保证一定收尾
+    emit('compact_start', { meta: { startId, endId, tokens, threshold } });
+    try {
+        const prompt = String(cfg.compactPrompt || '').trim() || COMPACTION_SYSTEM;
+        let summary = '';
+        let compTokens = 0;
+        const gen = stream({
+            apiUrl: cfg.apiUrl, apiKey: cfg.apiKey, model: cfg.model,
+            messages: [
+                { role: 'system', content: prompt },
+                { role: 'user', content: `请压缩以下聊天消息：\n\n${serialize(candidates)}` },
+            ],
+            tools: [],
+        });
+        for await (const ev of gen) {
+            if (ev.type === 'text') summary += ev.delta;
+            else if (ev.type === 'usage') compTokens = totalTokens(ev.usage);
+        }
+        if (!summary.trim()) return false;
 
-    await hub.db.prepare(
-        'INSERT INTO compactions (chat_id, start_message_id, end_message_id, summary, tokens, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-    ).bind(chatId, startId, endId, summary.trim(), compTokens, Date.now()).run();
-    return true;
+        await hub.db.prepare(
+            'INSERT INTO compactions (chat_id, start_message_id, end_message_id, summary, tokens, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        ).bind(chatId, startId, endId, summary.trim(), compTokens, Date.now()).run();
+        return true;
+    } finally {
+        emit('compact_done', { meta: { startId, endId } });
+    }
 }
