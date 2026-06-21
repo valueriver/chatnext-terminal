@@ -19,8 +19,7 @@ defineProps({
                 <div class="tool-head" @click="item.expanded = !item.expanded">
                     <span class="tool-caret">{{ item.expanded ? '▾' : '▸' }}</span>
                     <span class="tool-title">
-                        {{ toolLabel(item.name) }}
-                        <template v-if="toolSubtitle(item)"> · {{ toolSubtitle(item) }}</template>
+                        {{ toolSubtitle(item) || toolLabel(item.name) }}
                     </span>
                     <span class="pill" :class="item.status === 'running' ? 'run' : 'done'">
                         {{ item.status === 'running' ? '执行中' : '完成' }}
