@@ -19,6 +19,8 @@ function toolName(toolCall) {
 }
 
 function toolArgs(toolCall) {
+    // 实时事件:args 已是解析好的对象;历史(OpenAI 形状):function.arguments 是 JSON 字符串。
+    if (toolCall?.args && typeof toolCall.args === 'object') return toolCall.args;
     return safeParse(toolCall?.function?.arguments ?? toolCall?.arguments ?? {});
 }
 
