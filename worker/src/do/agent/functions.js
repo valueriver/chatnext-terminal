@@ -32,7 +32,7 @@ export async function execute(name, args, hub) {
     if (!hub.hasDevice()) {
         return { error: '没有在线设备,无法执行设备工具。请上线一台设备后重试。' };
     }
-    // device 是路由参数,不传给设备执行器;省略则由 hub 选当前在线设备
-    const { device, ...rest } = args || {};
+    // device 是路由参数、summary 是展示字段 —— 都不传给设备执行器;device 省略则由 hub 选当前在线设备
+    const { device, summary, ...rest } = args || {};
     return hub.callDevice(name, rest, device);
 }

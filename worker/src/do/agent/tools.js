@@ -2,6 +2,8 @@
 // 设备工具与设备端 server 的 functions.js 同名 —— 大脑发请求,设备出手;均带 device 路由参数。
 // device:目标设备 id(从设备列表选;省略则用当前在线设备)。
 const DEVICE = { type: 'string', description: '目标设备 id(从设备列表选;省略则用当前在线设备)' };
+// summary:每个工具必填的一句话摘要,前端显示在工具消息上方。
+const SUMMARY = { type: 'string', description: '本次操作的一句话摘要,面向用户展示。' };
 
 export const tools = [
     // ───────── 云端原生(碰 D1,无需设备) ─────────
@@ -16,8 +18,8 @@ export const tools = [
             ].join('\n'),
             parameters: {
                 type: 'object',
-                properties: { query: { type: 'string', description: '一条 SQL 语句' } },
-                required: ['query'],
+                properties: { query: { type: 'string', description: '一条 SQL 语句' }, summary: SUMMARY },
+                required: ['query', 'summary'],
             },
         },
     },
@@ -33,7 +35,7 @@ export const tools = [
                 properties: {
                     device: DEVICE,
                     command: { type: 'string', description: '要执行的 shell 命令。' },
-                    summary: { type: 'string', description: '本次命令的一句话摘要,面向用户展示。' },
+                    summary: SUMMARY,
                     cwd: { type: 'string', description: '可选工作目录,默认用户主目录。' },
                     timeout: { type: 'number', description: '超时秒数,默认 30,范围 [1,300]。' },
                 },
@@ -64,7 +66,7 @@ export const tools = [
                     method: { type: 'string', description: 'CDP 方法名,如 "Page.navigate"、"Runtime.evaluate"、"Input.dispatchMouseEvent"。' },
                     params: { type: 'object', description: '该 CDP 方法的参数对象。' },
                     tabId: { type: 'number', description: '可选,目标标签的 tabId;默认当前活动标签。' },
-                    summary: { type: 'string', description: '本次操作的一句话摘要,面向用户展示。' },
+                    summary: SUMMARY,
                 },
                 required: ['method', 'summary'],
             },
@@ -77,7 +79,7 @@ export const tools = [
         function: {
             name: 'computer_status',
             description: '查看目标设备电脑控制可用性:平台、驱动(screencapture/osascript/cliclick)是否就绪、逻辑屏幕尺寸、当前前台应用。点击前建议先查屏幕尺寸。',
-            parameters: { type: 'object', properties: { device: DEVICE } },
+            parameters: { type: 'object', properties: { device: DEVICE, summary: SUMMARY }, required: ['summary'] },
         },
     },
     {
@@ -85,7 +87,7 @@ export const tools = [
         function: {
             name: 'computer_screenshot',
             description: '截取目标设备整个屏幕并推送到对话界面给用户查看,返回尺寸等元信息(不返回图像数据本身)。',
-            parameters: { type: 'object', properties: { device: DEVICE } },
+            parameters: { type: 'object', properties: { device: DEVICE, summary: SUMMARY }, required: ['summary'] },
         },
     },
     {
@@ -95,8 +97,8 @@ export const tools = [
             description: '在目标设备打开/切换到一个应用(macOS:open -a)。',
             parameters: {
                 type: 'object',
-                properties: { device: DEVICE, name: { type: 'string', description: '应用名,如 "Safari"、"备忘录"' } },
-                required: ['name'],
+                properties: { device: DEVICE, name: { type: 'string', description: '应用名,如 "Safari"、"备忘录"' }, summary: SUMMARY },
+                required: ['name', 'summary'],
             },
         },
     },
@@ -107,8 +109,8 @@ export const tools = [
             description: '在目标设备当前前台应用输入一段文本(keystroke)。',
             parameters: {
                 type: 'object',
-                properties: { device: DEVICE, text: { type: 'string' } },
-                required: ['text'],
+                properties: { device: DEVICE, text: { type: 'string' }, summary: SUMMARY },
+                required: ['text', 'summary'],
             },
         },
     },
@@ -123,8 +125,9 @@ export const tools = [
                     device: DEVICE,
                     key: { type: 'string', description: '单个字符或命名键:enter/tab/space/escape/delete/up/down/left/right/home/end/page_up/page_down/f1..f12' },
                     modifiers: { type: 'array', items: { type: 'string' }, description: 'command/control/option/shift 的任意组合' },
+                    summary: SUMMARY,
                 },
-                required: ['key'],
+                required: ['key', 'summary'],
             },
         },
     },
@@ -140,7 +143,9 @@ export const tools = [
                     x: { type: 'number' }, y: { type: 'number' },
                     button: { type: 'string', enum: ['left', 'right'], description: '默认 left' },
                     clicks: { type: 'number', description: '点击次数,默认 1;2 为双击' },
+                    summary: SUMMARY,
                 },
+                required: ['summary'],
             },
         },
     },
@@ -151,8 +156,8 @@ export const tools = [
             description: '把目标设备鼠标移动到指定逻辑坐标(需 cliclick)。',
             parameters: {
                 type: 'object',
-                properties: { device: DEVICE, x: { type: 'number' }, y: { type: 'number' } },
-                required: ['x', 'y'],
+                properties: { device: DEVICE, x: { type: 'number' }, y: { type: 'number' }, summary: SUMMARY },
+                required: ['x', 'y', 'summary'],
             },
         },
     },
@@ -167,7 +172,9 @@ export const tools = [
                     device: DEVICE,
                     direction: { type: 'string', enum: ['up', 'down', 'left', 'right'], description: '默认 down' },
                     amount: { type: 'number', description: '滚动量,默认 3' },
+                    summary: SUMMARY,
                 },
+                required: ['summary'],
             },
         },
     },
