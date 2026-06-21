@@ -59,7 +59,7 @@ export class OneHub {
     async fromWeb(msg) {
         if (msg.t === 'chat.send') {
             return runTurn(this.hub(), msg.chatId, msg.text).catch((e) =>
-                this.dispatch.toWeb({ t: 'chat.error', chatId: msg.chatId, error: e.message || String(e) }));
+                this.dispatch.toWeb({ t: 'chat.event', chatId: msg.chatId, kind: 'error', content: e.message || String(e) }));
         }
         // 其余(终端/文件/屏幕)→ 转发给消息指定的设备(msg.device);未指定则当前在线
         this.dispatch.toDevice(msg, msg.device);
