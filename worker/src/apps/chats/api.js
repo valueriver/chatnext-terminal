@@ -14,7 +14,15 @@ export default async function chatsApi(request, ctx, { id }) {
             return Response.json({ chat: await repo.get(db, cid) });
         }
     } else {
-        if (request.method === 'GET') return Response.json({ chat: await repo.get(db, id), messages: await repo.messages(db, id) });
+        if (request.method === 'GET') {
+            const url = new URL(request.url);
+            const beforeId = Number(url.searchParams.get('before')) || 0;
+            const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 200);
+            const rows = await repo.messages(db, id, { beforeId, limit });
+            const body = { messages: rows, hasMore: rows.length === limit };
+            if (!beforeId) body.chat = await repo.get(db, id); // 初次加载才带会话信息
+            return Response.json(body);
+        }
         if (request.method === 'PUT') { await repo.rename(db, id, (await request.json().catch(() => ({}))).title, now); return Response.json({ ok: true }); }
         if (request.method === 'DELETE') { await repo.remove(db, id); return Response.json({ ok: true }); }
     }

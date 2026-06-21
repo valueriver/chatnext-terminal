@@ -13,6 +13,10 @@ export const rename = (db, id, title, now) =>
 
 export const remove = (db, id) => db.prepare('DELETE FROM chats WHERE id = ?').bind(id).run();
 
-// 消息历史(含压缩前的全文;前端按 role/body 渲染)
-export const messages = async (db, chatId) =>
-    (await db.prepare('SELECT id, role, body, usage, created_at FROM messages WHERE chat_id = ? ORDER BY id ASC').bind(chatId).all()).results;
+// 消息历史(分页:取最新 limit 条;beforeId>0 则取该 id 之前更旧的一页)。返回正序(id 升序)。
+export const messages = async (db, chatId, { beforeId = 0, limit = 50 } = {}) => {
+    const { results } = beforeId > 0
+        ? await db.prepare('SELECT id, role, body, usage, created_at FROM messages WHERE chat_id = ? AND id < ? ORDER BY id DESC LIMIT ?').bind(chatId, beforeId, limit).all()
+        : await db.prepare('SELECT id, role, body, usage, created_at FROM messages WHERE chat_id = ? ORDER BY id DESC LIMIT ?').bind(chatId, limit).all();
+    return results.reverse();
+};

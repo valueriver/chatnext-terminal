@@ -5,6 +5,9 @@ import { api } from '@/system/api';
 import { mkKey, renderMessages } from '@/apps/chat/lib/messages';
 import { setupChatStream } from '@/apps/chat/lib/stream';
 
+// 历史行的 body 是 JSON 字符串(整条消息),解析失败兜底为 {role, content}
+const parseBody = (m) => { try { return JSON.parse(m.body); } catch { return { role: m.role, content: m.body }; } };
+
 // 对话历史走 /apps/chats(REST);直播走 DO 的 WS(发 chat.send,收单一通道 chat.event)。
 // chat.event 直接喂给 stream reducer(按 kind 分支),无翻译层。
 export const useChatStore = defineStore('chat', () => {
@@ -18,8 +21,10 @@ export const useChatStore = defineStore('chat', () => {
     const ready = ref(false);
     const streamTick = ref(0);
     const viewSeq = ref(0);
-    const hasMore = ref(false);     // 云端一次返回全部历史,无分页
+    const hasMore = ref(false);     // 是否还有更早的历史可加载
     const loadingOlder = ref(false);
+    const PAGE = 50;
+    let oldestId = 0;               // 已加载的最小消息 id,作往前翻页游标
 
     let bound = false;
     let stream = null;
@@ -51,22 +56,40 @@ export const useChatStore = defineStore('chat', () => {
     async function openChat(id) {
         currentId.value = id;
         stream?.resetStreaming();
-        const d = await api.get(`/apps/chats/${id}`).catch(() => null);
-        const raw = (d?.messages || []).map((m) => { try { return JSON.parse(m.body); } catch { return { role: m.role, content: m.body }; } });
-        messages.value = renderMessages(raw);
+        const d = await api.get(`/apps/chats/${id}?limit=${PAGE}`).catch(() => null);
+        const rows = d?.messages || [];
+        oldestId = rows[0]?.id || 0;
+        hasMore.value = Boolean(d?.hasMore);
+        messages.value = renderMessages(rows.map(parseBody));
         currentTitle.value = d?.chat?.title || '';
         busy.value = false;
         viewSeq.value++;
     }
 
-    // 云端无分页,保留接口给 MessageStream 滚动调用
-    async function loadOlder() { return 0; }
+    // 上滑加载更早一页:往 messages 头部插入,返回本次条数(MessageStream 据此维持滚动位置)
+    async function loadOlder() {
+        if (!hasMore.value || loadingOlder.value || !currentId.value || !oldestId) return 0;
+        loadingOlder.value = true;
+        try {
+            const d = await api.get(`/apps/chats/${currentId.value}?before=${oldestId}&limit=${PAGE}`).catch(() => null);
+            const rows = d?.messages || [];
+            if (!rows.length) { hasMore.value = false; return 0; }
+            oldestId = rows[0].id;
+            hasMore.value = Boolean(d?.hasMore);
+            messages.value = [...renderMessages(rows.map(parseBody)), ...messages.value];
+            return rows.length;
+        } finally {
+            loadingOlder.value = false;
+        }
+    }
 
     // 新对话只进入空白态,不落库;首条消息发送时才真正创建(见 send)。
     function newChat() {
         currentId.value = '';
         currentTitle.value = '';
         messages.value = [];
+        oldestId = 0;
+        hasMore.value = false;
         stream?.resetStreaming();
         viewSeq.value++;
     }
