@@ -6,7 +6,6 @@
 import systemRoutes from './system/index.js';
 import appsRoutes from './apps/index.js';
 import { verify } from './system/identity/service.js';
-import { err } from './system/respond.js';
 
 export { OneHub } from './do/index.js';
 
@@ -35,7 +34,7 @@ export default {
             if (!PUBLIC.has(url.pathname)) {
                 const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
                 const payload = await verify(ctx, token);
-                if (!payload) return err('unauthorized', 401);
+                if (!payload) return Response.json({ error: 'unauthorized' }, { status: 401 });
                 ctx.auth = payload;
             }
             return area === 'system' ? systemRoutes(request, ctx) : appsRoutes(request, ctx);
