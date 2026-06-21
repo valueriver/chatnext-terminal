@@ -7,7 +7,13 @@ export default async function notesApi(request, ctx, { id }) {
     const now = Date.now();
 
     if (!id) {
-        if (request.method === 'GET') return Response.json({ notes: await repo.list(db) });
+        if (request.method === 'GET') {
+            const url = new URL(request.url);
+            const offset = Math.max(0, Number(url.searchParams.get('offset')) || 0);
+            const limit = Math.min(Number(url.searchParams.get('limit')) || 60, 200);
+            const notes = await repo.list(db, { limit, offset });
+            return Response.json({ notes, hasMore: notes.length === limit });
+        }
         if (request.method === 'POST') return Response.json({ note: await repo.create(db, await request.json().catch(() => ({})), now) });
     } else {
         const nid = Number(id);

@@ -3,8 +3,8 @@ const COLS = 'id, content, tags, color, pinned, created_at, updated_at';
 const MAX_CONTENT = 100000; // 单条笔记内容上限,防异常超大写入
 const text = (v) => String(v ?? '').slice(0, MAX_CONTENT);
 
-export const list = async (db) =>
-    (await db.prepare(`SELECT ${COLS} FROM notes ORDER BY pinned DESC, id DESC`).all()).results;
+export const list = async (db, { limit = 60, offset = 0 } = {}) =>
+    (await db.prepare(`SELECT ${COLS} FROM notes ORDER BY pinned DESC, id DESC LIMIT ? OFFSET ?`).bind(limit, offset).all()).results;
 
 export const get = (db, id) =>
     db.prepare(`SELECT ${COLS} FROM notes WHERE id = ?`).bind(id).first();

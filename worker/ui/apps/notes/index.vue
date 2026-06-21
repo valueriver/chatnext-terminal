@@ -97,6 +97,11 @@ onMounted(notes.load);
                         <span class="mt-2 text-[9.5px] font-medium text-faint">{{ relTime(n.created_at) }}</span>
                     </button>
                 </div>
+                <div v-if="notes.hasMore && !query" class="mt-4 flex justify-center pb-4">
+                    <button class="rounded-full border border-line px-4 py-1.5 text-[12px] text-muted hover:text-ink disabled:opacity-50" :disabled="notes.loadingMore" @click="notes.loadMore">
+                        {{ notes.loadingMore ? '加载中…' : '加载更多' }}
+                    </button>
+                </div>
               </div>
             </div>
 
