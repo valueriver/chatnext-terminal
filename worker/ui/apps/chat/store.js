@@ -5,8 +5,8 @@ import { api } from '@/system/api';
 import { mkKey, renderMessages } from '@/apps/chat/lib/messages';
 import { setupChatStream } from '@/apps/chat/lib/stream';
 
-// 对话历史走 /apps/chats(REST);直播走 DO 的 WS(chat.send → chat.delta/tool/...)。
-// DO 的新协议在这里翻译成 stream.js 认的事件 kind,复用其渲染机。
+// 对话历史走 /apps/chats(REST);直播走 DO 的 WS(发 chat.send,收单一通道 chat.event)。
+// chat.event 直接喂给 stream reducer(按 kind 分支),无翻译层。
 export const useChatStore = defineStore('chat', () => {
     const ws = useWsStore();
 
@@ -99,7 +99,7 @@ export const useChatStore = defineStore('chat', () => {
         busy.value = true;
         viewSeq.value++;
         bumpStream();
-        ws.sendMsg({ t: 'chat.send', chatId: currentId.value, text: content });
+        ws.sendMsg({ type: 'chat.send', chatId: currentId.value, text: content });
     }
 
     function abort() {

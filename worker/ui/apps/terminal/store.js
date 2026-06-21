@@ -339,8 +339,9 @@ export const useTerminalStore = defineStore('terminal', () => {
             if (msg.data?.error) toast.show(msg.data.error, 2400);
         });
 
-        ws.onMessage('connection.devices', (msg) => {
-            if (msg.data?.devices?.desktop === 'connected') {
+        // 当前设备(重新)上线时,拉一次终端列表。devices 在线状态由 ws store 维护。
+        watch(() => ws.currentDevice?.online, (online, was) => {
+            if (online && !was) {
                 requestTerminalList();
                 setTimeout(fitActiveTerminal, 80);
             }

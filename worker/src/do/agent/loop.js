@@ -15,7 +15,7 @@ const MAX_STEPS = 20; // 单 turn 工具往返上限,防失控
 
 export async function runTurn(hub, chatId, userText) {
     // 单一直播通道:一条 chat.event 承载所有子事件,kind 判别。前端 stream reducer 直接消费,无翻译层。
-    const emit = (kind, extra = {}) => hub.toWeb({ t: 'chat.event', chatId, kind, ...extra });
+    const emit = (kind, extra = {}) => hub.toWeb({ type: 'chat.event', chatId, kind, ...extra });
 
     const cfg = await loadConfig(hub);
     if (cfg.error) { emit('error', { content: cfg.error }); return; }

@@ -1,6 +1,6 @@
 // 与 worker DO 的实时连接(/do/ws?token=JWT)。只暴露真实状态,无旧鉴权概念。
-// 消息派发:chat.* 用 t;终端/文件/屏幕/状态用 type。
-// 设备能力消息(有 type)自动附 device=当前选中设备 → DO 路由到那台机器。
+// 消息统一用 type 判别,按 app 前缀分(chat.* / fs.* / terminal.* / …)。
+// 除 chat.send(发给 agent)外的消息都自动附 device=当前选中设备 → DO 路由到那台机器。
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { getToken } from '@/system/api';
@@ -33,8 +33,8 @@ export const useWsStore = defineStore('ws', () => {
 
     function sendMsg(msg) {
         if (socket?.readyState !== WebSocket.OPEN) return false;
-        // 设备能力消息(有 type 的)路由到路由指定的设备
-        if (msg.type && !msg.device && deviceId.value) msg.device = deviceId.value;
+        // 除 chat.send(发给 agent)外都是设备消息,附上当前选中设备让 DO 路由
+        if (msg.type !== 'chat.send' && !msg.device && deviceId.value) msg.device = deviceId.value;
         socket.send(JSON.stringify(msg));
         return true;
     }
@@ -50,8 +50,8 @@ export const useWsStore = defineStore('ws', () => {
         socket.onopen = () => { state.value = 'connected'; };
         socket.onmessage = (e) => {
             let msg; try { msg = JSON.parse(e.data); } catch { return; }
-            if (msg.t === 'devices') { devices.value = msg.devices || []; }
-            handlers.get(msg.t || msg.type)?.(msg);
+            if (msg.type === 'devices') { devices.value = msg.devices || []; }
+            handlers.get(msg.type)?.(msg);
         };
         socket.onclose = () => {
             state.value = 'offline';

@@ -5,12 +5,12 @@
 //   ?role=web                网页端:发聊天、收流式;终端/屏幕等设备消息的转发对端
 //   ?role=device&id=<id>     设备:收工具/转发请求,回结果
 //
-// 消息协议(provisional,待逐字敲死):
-//   web → DO:    { t:'chat.send', chatId, text }      其余设备类消息原样转发给设备
-//   DO → web:    { t:'chat.event', chatId, kind, … }  单一直播通道,kind=start/message/tool_calls/
+// 消息协议:所有消息统一用 type 判别,按 app 前缀路由(chat.* / fs.* / terminal.* / …)。
+//   web → DO:    { type:'chat.send', chatId, text }      其余(fs./terminal./…)原样转发给设备
+//   DO → web:    { type:'chat.event', chatId, kind, … }  单一直播通道,kind=start/message/tool_calls/
 //                   tool_results/usage/compact_start/compact_done/done/error;另有 devices / chat.screenshot
-//   DO → device: { t:'tool.exec', callId, name, args } 其余原样转发
-//   device → DO: { t:'tool.result', callId, result }   其余原样转发给 web
+//   DO → device: { type:'tool.exec', callId, name, args } 其余原样转发
+//   device → DO: { type:'tool.result', callId, result }   其余原样转发给 web
 import { makeDispatch } from './dispatch.js';
 import { makePending } from './store.js';
 import { runTurn } from './agent/loop.js';
@@ -39,7 +39,7 @@ export class OneHub {
         const { 0: client, 1: server } = new WebSocketPair();
         this.ctx.acceptWebSocket(server, [tag]);
         if (deviceId) await deviceRepo.touch(this.db, deviceId, Date.now()).catch(() => {});
-        else this.dispatch.toDevice({ t: 'web.connected' }); // 网页接入 → 让设备推快照(终端等)
+        else this.dispatch.toDevice({ type: 'web.connected' }); // 网页接入 → 让设备推快照(终端等)
         this.broadcastDevices();
         return new Response(null, { status: 101, webSocket: client });
     }
@@ -57,9 +57,9 @@ export class OneHub {
 
     // ── 网页端来的 ──
     async fromWeb(msg) {
-        if (msg.t === 'chat.send') {
+        if (msg.type === 'chat.send') {
             return runTurn(this.hub(), msg.chatId, msg.text).catch((e) =>
-                this.dispatch.toWeb({ t: 'chat.event', chatId: msg.chatId, kind: 'error', content: e.message || String(e) }));
+                this.dispatch.toWeb({ type: 'chat.event', chatId: msg.chatId, kind: 'error', content: e.message || String(e) }));
         }
         // 其余(终端/文件/屏幕)→ 转发给消息指定的设备(msg.device);未指定则当前在线
         this.dispatch.toDevice(msg, msg.device);
@@ -67,7 +67,7 @@ export class OneHub {
 
     // ── 设备来的 ──
     fromDevice(msg) {
-        if (msg.t === 'tool.result') { this.pending.resolve(msg.callId, msg.result); return; }
+        if (msg.type === 'tool.result') { this.pending.resolve(msg.callId, msg.result); return; }
         // 其余(终端输出/截图等)→ 转发给网页端
         this.dispatch.toWeb(msg);
     }
@@ -94,7 +94,7 @@ export class OneHub {
             // 派工具给设备 + 等结果(按 callId 关联)。deviceId 省略则 dispatch 选当前在线设备
             callDevice: (name, args, deviceId) => {
                 const { callId, promise } = pending.create();
-                const sent = dispatch.toDevice({ t: 'tool.exec', callId, name, args }, deviceId);
+                const sent = dispatch.toDevice({ type: 'tool.exec', callId, name, args }, deviceId);
                 if (!sent) return Promise.resolve({ error: deviceId ? `设备 ${deviceId} 不在线` : '没有在线设备' });
                 return promise;
             },
@@ -108,6 +108,6 @@ export class OneHub {
                 .filter((t) => t.startsWith('device:')).map((t) => t.slice('device:'.length)),
         );
         const list = rows.map((d) => ({ id: d.id, name: d.name, online: online.has(d.id) }));
-        this.dispatch.toWeb({ t: 'devices', devices: list });
+        this.dispatch.toWeb({ type: 'devices', devices: list });
     }
 }
