@@ -4,7 +4,6 @@ import { useTerminalStore } from '@/apps/terminal/store';
 import { useWsStore } from '@/system/stores/ws';
 import NewTerminalModal from './NewTerminalModal.vue';
 import ControlCenter from '@/system/components/ControlCenter.vue';
-import DeviceNav from '@/system/components/DeviceNav.vue';
 
 const term = useTerminalStore();
 const ws = useWsStore();
@@ -14,7 +13,6 @@ const showNewModal = ref(false);
 <template>
     <div class="shrink-0 border-b border-line bg-bg-elev">
         <div class="flex min-w-0 items-center gap-3 px-3 py-2">
-            <DeviceNav />
             <div class="term-app-title min-w-0 flex-1">终端</div>
             <ControlCenter />
         </div>

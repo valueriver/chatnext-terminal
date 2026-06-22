@@ -1,13 +1,12 @@
-// 与 worker DO 的实时连接(/do/ws?token=JWT)。只暴露真实状态,无旧鉴权概念。
+// 与 worker DO 的实时连接(/do/ws?token=JWT)。单设备:不再有"选哪台"概念。
 // 消息统一用 type 判别,按 app 前缀分(chat.* / fs.* / terminal.* / …)。
-// 除 chat.send(发给 agent)外的消息都自动附 device=当前选中设备 → DO 路由到那台机器。
+// 设备消息直接转发给那台唯一设备(DO 侧单目标),前端无需附 device。
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { getToken } from '@/system/api';
 
 export const useWsStore = defineStore('ws', () => {
     const state = ref('offline');     // offline | pending | connected
-    const devices = ref([]);          // [{id,name,online}]
     const connected = computed(() => state.value === 'connected');
     const statusText = computed(() => (
         state.value === 'connected' ? '已连接'
@@ -15,11 +14,9 @@ export const useWsStore = defineStore('ws', () => {
                 : '连接已断开,重连中…'
     ));
 
-    // 当前设备 = 路由 /devices/:id 里的 id(由 router.afterEach 注入)。URL 即唯一真相。
-    const deviceId = ref('');
-    const onlineDevices = computed(() => devices.value.filter((d) => d.online));
-    const currentDevice = computed(() => devices.value.find((d) => d.id === deviceId.value) || null);
-    function setDevice(id) { deviceId.value = id || ''; }
+    // 唯一一台设备的状态(来自 DO 的 { type:'device', online, name, paired })
+    const device = ref({ online: false, name: '', paired: false });
+    const deviceOnline = computed(() => Boolean(device.value.online));
 
     const handlers = new Map();
     let socket = null;
@@ -31,13 +28,8 @@ export const useWsStore = defineStore('ws', () => {
         return () => handlers.delete(key);
     }
 
-    // DO 自己消费的消息(不转发给设备),无需附 device
-    const HUB_CONSUMED = new Set(['chat.send', 'chat.abort']);
-
     function sendMsg(msg) {
         if (socket?.readyState !== WebSocket.OPEN) return false;
-        // 设备消息附上当前选中设备让 DO 路由(agent 控制消息除外)
-        if (!HUB_CONSUMED.has(msg.type) && !msg.device && deviceId.value) msg.device = deviceId.value;
         socket.send(JSON.stringify(msg));
         return true;
     }
@@ -53,11 +45,14 @@ export const useWsStore = defineStore('ws', () => {
         socket.onopen = () => { state.value = 'connected'; };
         socket.onmessage = (e) => {
             let msg; try { msg = JSON.parse(e.data); } catch { return; }
-            if (msg.type === 'devices') { devices.value = msg.devices || []; }
+            if (msg.type === 'device') {
+                device.value = { online: !!msg.online, name: msg.name || '', paired: !!msg.paired };
+            }
             handlers.get(msg.type)?.(msg);
         };
         socket.onclose = () => {
             state.value = 'offline';
+            device.value = { ...device.value, online: false };
             if (!stopped) { clearTimeout(timer); timer = setTimeout(connect, 3000); }
         };
         socket.onerror = () => {};
@@ -67,8 +62,8 @@ export const useWsStore = defineStore('ws', () => {
     function stop() { stopped = true; clearTimeout(timer); try { socket?.close(); } catch { /* ignore */ } }
 
     return {
-        state, devices, connected, statusText,
-        onlineDevices, currentDevice, setDevice,
+        state, connected, statusText,
+        device, deviceOnline,
         onMessage, sendMsg, start, stop,
     };
 });

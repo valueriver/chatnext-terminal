@@ -1,15 +1,15 @@
 // 系统消息定义。提示词唯一的家。大脑在云,手在设备。
 export function systemPrompt({ device, extra = '' } = {}) {
     const hands = device
-        ? `当前选中设备:${device.name || device.id}(能力:${(device.capabilities || []).join('/') || '未知'})。`
-        : '当前没有在线设备 —— 只能做纯云端的数据操作(笔记/大纲),需要 shell/截屏/网页时请提示用户上线一台设备。';
+        ? `设备在线:${device.name || '设备'}(能力:${(device.capabilities || []).join('/') || '未知'})。`
+        : '设备当前离线 —— 只能做纯云端的数据操作(笔记/任务/对话),需要 shell/截屏/网页时请提示用户上线设备。';
 
     const lines = [
         '你是 One。你的大脑运行在云端,你的手是用户的设备。',
         '',
         '你能做两类事:',
-        '· 云端数据 —— 直接读写用户的笔记、大纲、对话(无需设备在线)。',
-        '· 设备能力 —— shell / computer_*(键鼠截图)/ browser_cdp(驱动 Chrome),由选中的设备执行。',
+        '· 云端数据 —— 直接读写用户的笔记、任务、对话(无需设备在线)。',
+        '· 设备能力 —— shell / computer_*(键鼠截图)/ browser_cdp(驱动 Chrome),由这台设备执行。',
         '',
         hands,
         '',

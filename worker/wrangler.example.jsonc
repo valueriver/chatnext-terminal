@@ -53,6 +53,11 @@
 		"enabled": true
 	},
 
+	// 定时任务引擎:每分钟触发 scheduled(),DO tick 比对各任务 cron。
+	"triggers": {
+		"crons": ["* * * * *"]
+	},
+
 	// 不绑自定义域名就把整个 "routes" 段删掉,Cloudflare 会自动给
 	// one.<your-subdomain>.workers.dev 的测试地址。
 	// 要绑自己的域名(如 one.example.com):

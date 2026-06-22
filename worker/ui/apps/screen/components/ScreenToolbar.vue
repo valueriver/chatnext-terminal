@@ -1,6 +1,5 @@
 <script setup>
 import ControlCenter from '@/system/components/ControlCenter.vue';
-import DeviceNav from '@/system/components/DeviceNav.vue';
 
 defineProps({
     canCapture: { type: Boolean, default: false },
@@ -15,7 +14,6 @@ const emit = defineEmits(['capture']);
 <template>
     <div class="shrink-0 border-b border-line bg-bg-elev/70">
         <div class="flex min-w-0 items-center gap-3 px-3 py-2">
-            <DeviceNav />
             <div class="screen-app-title min-w-0 flex-1">屏幕</div>
             <ControlCenter />
         </div>

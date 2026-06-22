@@ -1,32 +1,20 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
-import { api } from '@/system/api';
+import { ref } from 'vue';
 
-// 中控台两层:
-//   云端组(第一组)— 对话 + 数据应用 + 设置,跟设备无关。
-//   设备子导航 — 进入某设备后用:主页(/status,含连接+本机状态)/文件/终端/屏幕。
+// 应用面板 = 单一真相,平铺 8 个(单设备,无设备子层)。
+// 两类:云数据应用(对话/任务/笔记/设置)+ 设备能力应用(文件/终端/状态/屏幕)。
+// 能力应用 needsDevice:设备没连时面板里点进去显示"未连接"占位(各 app 自管)。
 export const useViewStore = defineStore('view', () => {
-    const CLOUD_FIXED = [{ path: '/chat', label: '对话', icon: '💬' }];
-    const SETTINGS = { path: '/settings', label: '设置', icon: '⚙️' };
+    const apps = ref([
+        { path: '/chat', label: '对话', icon: '💬' },
+        { path: '/tasks', label: '任务', icon: '⏰' },
+        { path: '/notes', label: '笔记', icon: '📝' },
+        { path: '/files', label: '文件', icon: '📁', needsDevice: true },
+        { path: '/terminal', label: '终端', icon: '⌨️', needsDevice: true },
+        { path: '/status', label: '状态', icon: '📊', needsDevice: true },
+        { path: '/screen', label: '屏幕', icon: '🖥️', needsDevice: true },
+        { path: '/settings', label: '设置', icon: '⚙️' },
+    ]);
 
-    // 设备内四项(seg 拼到 /devices/:id/<seg>)。主页 = 连接 + 本机状态
-    const DEVICE_NAV = [
-        { seg: 'home', label: '主页', icon: '🏠' },
-        { seg: 'files', label: '文件', icon: '📁' },
-        { seg: 'terminal', label: '终端', icon: '⌨️' },
-        { seg: 'screen', label: '屏幕', icon: '🖥️' },
-    ];
-
-    const dataApps = ref([]);
-    const cloudItems = computed(() => [...CLOUD_FIXED, ...dataApps.value, SETTINGS]);
-    const deviceNav = computed(() => DEVICE_NAV);
-
-    async function load() {
-        try {
-            const { apps } = await api.get('/apps');
-            dataApps.value = (apps || []).map((a) => ({ path: `/${a.name}`, label: a.label, icon: a.icon }));
-        } catch { /* ignore */ }
-    }
-
-    return { cloudItems, deviceNav, load };
+    return { apps };
 });

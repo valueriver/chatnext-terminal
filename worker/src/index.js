@@ -49,4 +49,13 @@ export default {
         }
         return res;
     },
+
+    // cron(每分钟)→ 唯一 DO 实例跑到点的定时任务。
+    async scheduled(event, env, ctx) {
+        ctx.waitUntil(
+            env.HUB.get(env.HUB.idFromName('one'))
+                .fetch(new Request('https://do/tick', { method: 'POST' }))
+                .catch(() => {}),
+        );
+    },
 };
