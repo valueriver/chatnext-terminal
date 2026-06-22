@@ -15,7 +15,6 @@
 import { makeDispatch } from './dispatch.js';
 import { makePending } from './store.js';
 import { runTurn } from './agent/loop.js';
-import { runDueTasks, runOne } from './tick.js';
 import { verify } from '../system/identity/service.js';
 import * as deviceRepo from '../system/identity/repository.js';
 
@@ -30,23 +29,9 @@ export class OneHub {
     }
 
     async fetch(request) {
-        const url = new URL(request.url);
-
-        // cron tick(非 WS):跑到点的定时任务
-        if (url.pathname.endsWith('/tick') && request.method === 'POST') {
-            await runDueTasks(this.hub()).catch((e) => console.error('tick error', e?.message));
-            return new Response('ok');
-        }
-        // 立即运行某条任务(来自 tasks api 的「立即运行」)
-        if (url.pathname.endsWith('/run-task') && request.method === 'POST') {
-            const { taskId } = await request.json().catch(() => ({}));
-            const task = taskId && await this.db.prepare('SELECT * FROM tasks WHERE id = ?').bind(taskId).first();
-            if (task) runOne(this.hub(), task).catch((e) => console.error('run-task error', e?.message));
-            return new Response('ok');
-        }
-
         if (request.headers.get('Upgrade') !== 'websocket') return new Response('hub', { status: 200 });
 
+        const url = new URL(request.url);
         // 鉴权:WS 走 ?token=。role 从 JWT 取,不信任 query。
         const payload = await verify({ env: this.env }, url.searchParams.get('token'));
         if (!payload) return new Response('unauthorized', { status: 401 });

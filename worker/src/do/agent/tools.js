@@ -12,7 +12,7 @@ export const tools = [
             name: 'sql',
             description: [
                 '在云端 D1 上执行任意 SQL(全权:SELECT/INSERT/UPDATE/DELETE/CREATE/ALTER/PRAGMA…)。这是你自己的库,随意读写。',
-                '表:notes / tasks / task_runs / chats / messages / compactions / shortcuts / settings。',
+                '表:chats / messages / compactions / shortcuts / settings。',
                 '查表结构:SELECT sql FROM sqlite_master WHERE name=\'表名\'。',
             ].join('\n'),
             parameters: {
