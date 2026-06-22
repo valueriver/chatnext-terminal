@@ -51,14 +51,18 @@ export async function runDueTasks(hub) {
     const minute = Math.floor(now.getTime() / 60000);
 
     const { results: tasks } = await db.prepare(
-        'SELECT id, name, prompt, cron, needs_device, last_run_minute FROM tasks WHERE enabled = 1',
+        'SELECT id, name, prompt, kind, cron, run_at, needs_device, last_run_minute FROM tasks WHERE enabled = 1',
     ).all();
 
     for (const t of tasks || []) {
         if (t.last_run_minute === minute) continue;       // 本分钟已跑,去重
-        if (!cronMatch(t.cron, now)) continue;            // 没到点
-        // 立刻占位本分钟,避免重叠 tick 重复触发
-        await db.prepare('UPDATE tasks SET last_run_minute = ?, last_run_at = ? WHERE id = ?')
+        // 到点判定:once 看 run_at(空=尽快);cron 比对表达式
+        const due = t.kind === 'once'
+            ? (!t.run_at || now.getTime() >= Number(t.run_at))
+            : cronMatch(t.cron, now);
+        if (!due) continue;
+        // 立刻占位本分钟,避免重叠 tick 重复触发;一次性任务跑完即停用
+        await db.prepare('UPDATE tasks SET last_run_minute = ?, last_run_at = ?' + (t.kind === 'once' ? ', enabled = 0' : '') + ' WHERE id = ?')
             .bind(minute, now.getTime(), t.id).run();
         await runOne(hub, t).catch((e) => console.error('task run error', t.id, e?.message));
     }

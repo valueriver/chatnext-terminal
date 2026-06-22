@@ -27,7 +27,9 @@ CREATE TABLE tasks (
   id              TEXT PRIMARY KEY,
   name            TEXT NOT NULL DEFAULT '',
   prompt          TEXT NOT NULL DEFAULT '',        -- 给 agent 的指令
-  cron            TEXT NOT NULL DEFAULT '',         -- 5 段 cron(UTC):分 时 日 月 周
+  kind            TEXT NOT NULL DEFAULT 'cron',     -- cron(循环) | once(一次性)
+  cron            TEXT NOT NULL DEFAULT '',         -- kind=cron:5 段 cron(UTC) 分 时 日 月 周
+  run_at          INTEGER,                          -- kind=once:计划运行时刻(epoch ms);空=尽快
   enabled         INTEGER NOT NULL DEFAULT 1,
   needs_device    INTEGER NOT NULL DEFAULT 0,       -- 需要设备在线才跑;离线则跳过
   last_run_at     INTEGER,
