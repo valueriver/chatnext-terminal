@@ -129,8 +129,8 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                         </div>
                     </div>
                     <div class="set-note">
-                        <template v-if="ws.connected">配置保存在本机 Server（~/.one/one.db），AI 对话直接用它调用 OpenAI 兼容接口。当前 Key：{{ keyMasked }}。Key 留空＝不修改。</template>
-                        <template v-else>未连接本机 Server，无法读写模型配置。请先在守卫页完成连接/认证。</template>
+                        <template v-if="ws.connected">配置保存在云端（Worker 的 D1 数据库），AI 对话由云端 agent 用它调用 OpenAI 兼容接口。当前 Key：{{ keyMasked }}。Key 留空＝不修改。</template>
+                        <template v-else>未连接云端，无法读写模型配置。请先在守卫页完成连接/认证。</template>
                     </div>
                 </div>
 
