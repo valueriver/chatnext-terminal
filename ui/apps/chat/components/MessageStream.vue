@@ -7,6 +7,8 @@ import ToolGroup from './ToolGroup.vue';
 
 const chat = useChatStore();
 const streamRef = ref(null);
+const suggestions = ['今天我该从哪件事开始?', '帮我梳理一下最近的进展', '看看我电脑的状态'];
+defineEmits(['suggest']);
 
 const showTyping = computed(() => {
     if (!chat.busy) return false;
@@ -70,8 +72,11 @@ async function onScroll() {
             <div v-else-if="chat.hasMore && chat.messages.length" class="load-older hint">↑ 上滑加载更早</div>
 
             <div v-if="!chat.messages.length" class="hero">
-                <h1>One <em>助手</em></h1>
-                <div class="cap">本机 AI 对话，可执行命令、操作浏览器与电脑。直接说你想做什么。</div>
+                <h1>今天想做点什么<em>?</em></h1>
+                <div class="cap">one 能查数据、控制你的电脑和浏览器，陪你把事情想清楚。</div>
+                <div class="suggestions">
+                    <button v-for="s in suggestions" :key="s" class="suggestion-pill" @click="$emit('suggest', s)">{{ s }}</button>
+                </div>
             </div>
 
             <template v-for="block in blocks" :key="block.key">
@@ -123,5 +128,31 @@ async function onScroll() {
     border-radius: 14px;
     box-shadow: 0 6px 20px #00000022;
     border: 1px solid var(--line);
+}
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+    justify-content: center;
+}
+.suggestion-pill {
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: 0.18s;
+    box-shadow: 0 1px 3px #00000008;
+}
+.suggestion-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--panel);
+    box-shadow: 0 4px 14px #00000010;
+    transform: translateY(-1px);
 }
 </style>

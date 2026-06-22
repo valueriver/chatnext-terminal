@@ -47,7 +47,8 @@ function openInTerminal() {
         to: 'desktop',
         data: { terminalId: term.activeTerminalId, input: `cd "${escaped}"\r` }
     });
-    router.push({ path: '/terminal', query: route.query });
+    const session = route.params.session || '';
+    router.push(session ? `/${session}/terminal` : '/terminal');
     toast.show('已切到终端');
 }
 

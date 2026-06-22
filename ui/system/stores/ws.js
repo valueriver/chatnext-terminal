@@ -116,14 +116,14 @@ export const useWsStore = defineStore('ws', () => {
         }
     }
 
-    function readCookie(name) {
-        const m = document.cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
-        return m ? decodeURIComponent(m[1]) : '';
+    function getSessionFromPath() {
+        const seg = location.pathname.split('/')[1] || '';
+        return (seg && seg !== 'guard') ? seg : '';
     }
 
     function init() {
-        const s = readCookie('one_session');
-        if (!s || s === 'default') {
+        const s = getSessionFromPath();
+        if (!s) {
             invalid.value = true;
             state.value = 'offline';
             statusText.value = '无效的访问链接';
@@ -141,7 +141,7 @@ export const useWsStore = defineStore('ws', () => {
         const params = new URLSearchParams({ device: 'web' });
         const savedToken = readToken();
         if (savedToken) params.set('authToken', savedToken);
-        const url = `${protocol}//${location.host}/ws?${params.toString()}`;
+        const url = `${protocol}//${location.host}/${sessionId.value}/ws?${params.toString()}`;
 
         state.value = 'pending';
         statusText.value = connectionLost.value

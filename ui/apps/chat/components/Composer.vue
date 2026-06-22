@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useChatStore } from '@/apps/chat/store';
 import { useWsStore } from '@/system/stores/ws';
 import { useShortcutsStore } from '@/system/stores/shortcuts';
@@ -88,6 +88,9 @@ async function onFiles(event) {
     uploading.value = false;
 }
 function removeAtt(i) { atts.value = atts.value.filter((_, idx) => idx !== i); }
+
+function fillText(text) { input.value = text; nextTick(() => taRef.value?.focus()); }
+defineExpose({ fillText });
 
 function loadShortcuts() { if (ws.showActions) shortcuts.load(); }
 onMounted(loadShortcuts);

@@ -290,10 +290,10 @@ select.set-input { cursor: pointer; }
 /* —— 对话：消息流 / 气泡 / 工具卡 / 输入框（取自 aios） —— */
 .stream { min-height: 0; flex: 1; overflow-y: auto; padding: 14px 24px 6px; scroll-behavior: smooth; }
 .thread { max-width: 720px; margin: 0 auto; padding-bottom: 8px; display: flex; flex-direction: column; }
-.hero { padding: 38px 6px 10px; animation: rise 0.5s both; }
-.hero h1 { font-size: 34px; font-weight: 900; letter-spacing: -1px; line-height: 1.25; color: var(--ink); }
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 20px 60px; animation: rise 0.5s both; }
+.hero h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.3; color: var(--ink); }
 .hero h1 em { font-style: normal; color: var(--accent-d); }
-.hero .cap { font-size: 13.5px; font-weight: 600; color: var(--muted); margin-top: 8px; line-height: 1.8; }
+.hero .cap { font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 10px; line-height: 1.7; }
 .mrow { display: flex; gap: 10px; margin: 5px 0; align-items: flex-end; animation: rise 0.4s both; }
 .mrow.me { justify-content: flex-end; }
 .avatar { width: 34px; height: 34px; border-radius: 32%; background: var(--panel); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: var(--accent-d); box-shadow: 0 4px 12px #00000012, inset 0 -3px 6px #00000008; flex-shrink: 0; }

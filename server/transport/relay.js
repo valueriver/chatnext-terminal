@@ -9,7 +9,7 @@ export function createRelay({ sessionId, onMessage, onReady }) {
     let printed = false;
 
     function printAccessInfo() {
-        const webUrl = `${WEB_URL}/guard?${new URLSearchParams({ session: sessionId }).toString()}`;
+        const webUrl = `${WEB_URL}/${sessionId}`;
         console.log('');
         console.log('✅ One 已连接');
         console.log('🔗 远程访问入口');
@@ -28,8 +28,8 @@ export function createRelay({ sessionId, onMessage, onReady }) {
     }
 
     function connect() {
-        const params = new URLSearchParams({ session: sessionId, device: 'desktop' });
-        ws = new WebSocket(`${SERVER_URL}/ws?${params.toString()}`);
+        const params = new URLSearchParams({ device: 'desktop' });
+        ws = new WebSocket(`${SERVER_URL}/${sessionId}/ws?${params.toString()}`);
 
         ws.on('open', () => {
             if (printed) console.log('✅ One 已重连');

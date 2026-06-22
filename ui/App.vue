@@ -21,7 +21,8 @@ watch(
     ([req, authed, invalid, reconnecting]) => {
         if (invalid) return;
         if (req && !authed && !reconnecting && route.name !== 'guard') {
-            router.replace({ path: '/guard', query: route.query });
+            const session = route.params.session || '';
+            router.replace(session ? `/${session}` : '/');
         }
     },
     { immediate: true }

@@ -14,7 +14,7 @@ export class OneSession extends DurableObject {
 
     async fetch(request) {
         const url = new URL(request.url);
-        if (url.pathname !== '/ws') return new Response('Not Found', { status: 404 });
+        if (!url.pathname.endsWith('/ws')) return new Response('Not Found', { status: 404 });
         if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected Upgrade: websocket', { status: 426 });
 
         const device = url.searchParams.get('device');

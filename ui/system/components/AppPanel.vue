@@ -28,9 +28,17 @@ function toggle() {
     open.value = !open.value;
 }
 
-function pick(path) {
+function sessionBase() {
+    const s = route.params.session;
+    return s ? `/${s}` : '';
+}
+function fullPath(rel) { return `${sessionBase()}/${rel}`; }
+function isActive(rel) { return route.path === fullPath(rel); }
+
+function pick(rel) {
     open.value = false;
-    if (route.path !== path) router.push({ path, query: route.query });
+    const target = fullPath(rel);
+    if (route.path !== target) router.push(target);
 }
 </script>
 
@@ -55,7 +63,7 @@ function pick(path) {
                             v-for="item in view.navItems"
                             :key="item.path"
                             class="app-panel-item"
-                            :class="{ on: route.path === item.path }"
+                            :class="{ on: isActive(item.path) }"
                             @click="pick(item.path)"
                         >
                             <span class="app-panel-emoji">{{ item.icon }}</span>

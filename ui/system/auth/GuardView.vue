@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useWsStore } from '@/system/stores/ws';
 
 const router = useRouter();
+const route = useRoute();
 const ws = useWsStore();
 const password = ref('');
 
@@ -29,7 +30,8 @@ function onSubmit() {
 }
 
 function toChat() {
-    router.replace('/chat');
+    const session = ws.sessionId || route.params.session || '';
+    router.replace(session ? `/${session}/chat` : '/');
 }
 
 onMounted(() => {
@@ -43,7 +45,7 @@ watch(() => ws.authenticated, (v) => { if (v) toChat(); });
     <main class="flex-1 min-h-0 flex items-center justify-center px-6 py-10 overflow-y-auto bg-bg">
         <div class="w-full max-w-sm flex flex-col items-center">
             <h1 class="font-serif font-black text-[40px] leading-none tracking-tight text-center text-ink">
-                漫游<span class="text-accent">.</span>
+                One<span class="text-accent">.</span>
             </h1>
 
             <div class="mt-6 flex items-center gap-2">

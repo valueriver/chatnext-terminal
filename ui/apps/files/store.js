@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { marked } from 'marked';
 import { useToastStore } from '@/system/stores/toast';
 import { useFsClient } from '@/apps/files/useFsClient';
 
@@ -19,6 +20,7 @@ export const useFilesStore = defineStore('files', () => {
 
     const preview = ref(null);
     const actionSheet = ref(null);
+    const previewMode = ref('source');
 
     const filterText = ref('');
     const sortBy = ref(localStorage.getItem('files_sortBy') || 'name');
@@ -133,6 +135,29 @@ export const useFilesStore = defineStore('files', () => {
     function openActionSheet(entry) { actionSheet.value = entry; }
     function closeActionSheet() { actionSheet.value = null; }
 
+    function previewFormat(name, mime = '') {
+        const lower = String(name || '').toLowerCase();
+        if (lower.endsWith('.md') || lower.endsWith('.markdown') || mime === 'text/markdown') return 'markdown';
+        if (lower.endsWith('.html') || lower.endsWith('.htm') || mime === 'text/html') return 'html';
+        return '';
+    }
+
+    function canRenderPreview() {
+        return preview.value?.kind === 'text' && !!preview.value?.format;
+    }
+
+    function setPreviewMode(mode) {
+        previewMode.value = mode === 'render' ? 'render' : 'source';
+    }
+
+    const renderedPreview = computed(() => {
+        const p = preview.value;
+        if (!p || p.kind !== 'text') return '';
+        if (p.format === 'markdown') return marked.parse(String(p.content || ''), { breaks: true, gfm: true });
+        if (p.format === 'html') return String(p.content || '');
+        return '';
+    });
+
     function inferKind(mime, name) {
         mime = mime || '';
         if (mime.startsWith('image/')) return 'image';
@@ -157,7 +182,9 @@ export const useFilesStore = defineStore('files', () => {
             const kind = inferKind(mime, entry.name);
             if (kind === 'text') {
                 const text = await blob.text();
-                preview.value = { name: entry.name, size: entry.size, mime, kind, content: text, path: p, blob };
+                const format = previewFormat(entry.name, mime);
+                previewMode.value = format ? 'render' : 'source';
+                preview.value = { name: entry.name, size: entry.size, mime, kind, content: text, format, path: p, blob };
             } else if (kind === 'image') {
                 const url = URL.createObjectURL(blob);
                 preview.value = { name: entry.name, size: entry.size, mime, kind, url, blob, path: p };
@@ -298,10 +325,10 @@ export const useFilesStore = defineStore('files', () => {
     return {
         entries, viewEntries, cwd, homePath, pathSep, loading, errorMsg,
         showHidden, uploadProgress, isDragOver,
-        preview, actionSheet, breadcrumbs,
+        preview, previewMode, renderedPreview, actionSheet, breadcrumbs,
         filterText, sortBy, sortDir, setSort,
         ensureLoaded, refresh, navigate, goUp, goHome, toggleHidden,
-        openEntry, openPreview, closePreview, downloadPreview,
+        openEntry, openPreview, closePreview, downloadPreview, canRenderPreview, setPreviewMode,
         openActionSheet, closeActionSheet,
         downloadEntry, deleteEntry, renameEntry,
         createFolder, createFile, copyCurrentPath, uploadFiles,

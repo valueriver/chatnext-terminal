@@ -30,7 +30,7 @@ const status = computed(() => {
             class="fixed inset-0 z-30 flex items-center justify-center bg-bg/80 backdrop-blur-sm">
             <div class="flex flex-col items-center gap-3">
                 <div class="font-serif font-black text-[28px] leading-none tracking-tight text-ink">
-                    漫游<span class="text-accent">.</span>
+                    One<span class="text-accent">.</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="gate-dot" :data-state="status.id"></span>

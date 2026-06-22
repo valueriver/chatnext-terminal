@@ -1,45 +1,39 @@
 // Cloudflare Worker 入口：无状态中继。
-// /ws → 按 session 路由到 OneSession（Durable Object）；其余 → 静态资源（ui/dist）。
+// /:session/ws → 按 session 路由到 OneSession（Durable Object）；其余 → 静态资源（ui/dist）。
 export { OneSession } from './do/session.js';
 
-function parseCookie(header, name) {
-    if (!header) return '';
-    const match = header.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
-    return match ? decodeURIComponent(match[1]) : '';
-}
-
-function getSessionId(request) {
-    const url = new URL(request.url);
-    return url.searchParams.get('session')
-        || parseCookie(request.headers.get('Cookie'), 'one_session')
-        || '';
+function extractSession(pathname) {
+    const m = pathname.match(/^\/([^/]+)/);
+    const id = m ? m[1] : '';
+    return (id && id !== 'ws') ? id : '';
 }
 
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
+        const sessionId = extractSession(url.pathname);
 
-        if (url.pathname === '/ws') {
-            const sessionId = getSessionId(request);
-            if (!sessionId || sessionId === 'default') return new Response('Missing session', { status: 400 });
+        // /:session/ws → WebSocket 到 Durable Object
+        if (sessionId && url.pathname === `/${sessionId}/ws`) {
             const stub = env.ONE_SESSION.get(env.ONE_SESSION.idFromName(sessionId));
             return stub.fetch(request);
         }
 
-        // 首次带 ?session= 访问：种 cookie 后 301 到干净 URL
-        const sessionParam = url.searchParams.get('session');
-        if (sessionParam && sessionParam !== 'default') {
-            const clean = new URL(url);
-            clean.searchParams.delete('session');
-            return new Response(null, {
-                status: 301,
-                headers: {
-                    'Location': clean.toString(),
-                    'Set-Cookie': `one_session=${encodeURIComponent(sessionParam)}; Path=/; SameSite=Lax; Secure; Max-Age=31536000`,
-                },
-            });
+        // /:session/* → SPA（静态资源）
+        if (sessionId) {
+            // 把 /:session/xxx 重写为 /xxx 给 ASSETS 处理
+            const assetPath = url.pathname.slice(sessionId.length + 1) || '/';
+            const assetUrl = new URL(assetPath, url.origin);
+            assetUrl.search = url.search;
+            return env.ASSETS.fetch(new Request(assetUrl, request));
         }
 
+        // 裸域根路径 → 返回提示
+        if (url.pathname === '/' || url.pathname === '') {
+            return new Response('One', { status: 200, headers: { 'Content-Type': 'text/plain' } });
+        }
+
+        // 其它路径 → 尝试静态资源
         return env.ASSETS.fetch(request);
     },
 };

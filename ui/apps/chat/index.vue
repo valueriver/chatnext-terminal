@@ -10,6 +10,11 @@ import MessageStream from './components/MessageStream.vue';
 const chat = useChatStore();
 const ws = useWsStore();
 const showHistory = ref(false);
+const composerRef = ref(null);
+
+function onSuggest(text) {
+    if (composerRef.value?.fillText) composerRef.value.fillText(text);
+}
 
 async function newChat() {
     showHistory.value = false;
@@ -42,8 +47,8 @@ watch(() => ws.showActions, (ready) => {
             />
             <div v-if="showHistory" class="chat-side-mask" @click="showHistory = false"></div>
             <div class="chat-main">
-                <MessageStream />
-                <Composer />
+                <MessageStream @suggest="onSuggest" />
+                <Composer ref="composerRef" />
             </div>
         </div>
     </section>

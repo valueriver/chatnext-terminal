@@ -71,8 +71,10 @@ export function createLocal({ onMessage }) {
         clients.set(id, ws);
         // 本地免密：连上即认证通过
         try { ws.send(JSON.stringify({ type: 'connection.ready', to: 'web', data: { clientId: id, authenticated: true, requiresPassword: false } })); } catch {}
-        // 触发一次设备状态，让 server 把终端快照推给新连入的网页
-        onMessage?.({ type: 'connection.devices', data: { devices: { desktop: 'connected', web: 'connected' } } });
+        // 告知前端设备状态，并触发 server 内部推终端快照等初始数据
+        const devicesMsg = { type: 'connection.devices', to: 'web', data: { devices: { desktop: 'connected', web: 'connected' } } };
+        try { ws.send(JSON.stringify(devicesMsg)); } catch {}
+        onMessage?.(devicesMsg);
 
         ws.on('message', (raw) => {
             let msg;
