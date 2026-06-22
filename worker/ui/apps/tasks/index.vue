@@ -81,10 +81,10 @@ const STATUS = { done: '✓ 完成', error: '✕ 出错', skipped: '↷ 跳过',
 <template>
     <section class="view">
         <div class="head">
-            <ControlCenter align="left" />
             <div class="head-title">⏰ 任务</div>
             <button v-if="mode === 'list'" class="add" @click="openNew">+ 新建</button>
             <button v-else class="add ghost" @click="mode = 'list'">取消</button>
+            <ControlCenter />
         </div>
 
         <div class="page-wrap">

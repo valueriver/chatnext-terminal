@@ -46,11 +46,11 @@ onUnmounted(() => clearInterval(timer));
 <template>
     <section class="view">
         <div class="head">
-            <ControlCenter align="left" />
             <div class="head-title">
                 <span class="dot" :class="online ? 'on' : 'off'"></span>
                 状态
             </div>
+            <ControlCenter />
         </div>
 
         <div class="page-wrap">
