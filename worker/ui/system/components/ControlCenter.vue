@@ -44,10 +44,7 @@ function go(path) { open.value = false; if (route.path !== path) router.push(pat
                             v-for="item in view.apps" :key="item.path"
                             class="cc-app" :class="{ on: route.path === item.path }" @click="go(item.path)"
                         >
-                            <span class="cc-emoji">
-                                {{ item.icon }}
-                                <span v-if="item.needsDevice && !ws.deviceOnline" class="cc-off" title="设备未连接"></span>
-                            </span>
+                            <span class="cc-emoji">{{ item.icon }}</span>
                             <span class="cc-name">{{ item.label }}</span>
                         </button>
                     </div>
@@ -85,7 +82,7 @@ function go(path) { open.value = false; if (route.path !== path) router.push(pat
     backdrop-filter: blur(22px) saturate(1.4); -webkit-backdrop-filter: blur(22px) saturate(1.4);
     box-shadow: 0 1px 0 #ffffff30 inset, 0 18px 50px #0000002e;
 }
-.cc-cloud { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.cc-cloud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .cc-app {
     display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0;
     padding: 11px 2px 9px; border-radius: 16px; color: var(--color-muted);
@@ -102,7 +99,6 @@ function go(path) { open.value = false; if (route.path !== path) router.push(pat
     background: var(--color-bg-elev); font-size: 23px; line-height: 1;
     box-shadow: 0 1px 0 #ffffff40 inset, 0 2px 6px #0000000f; transition: transform .14s, box-shadow .14s, background .14s;
 }
-.cc-off { position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 999px; background: var(--color-faint); box-shadow: 0 0 0 2px var(--color-bg-elev); }
 .cc-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 700; }
 .cc-dev-row {
     display: flex; align-items: center; gap: 9px; width: 100%; margin-top: 10px; padding: 10px 12px;
