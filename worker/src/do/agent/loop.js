@@ -104,6 +104,5 @@ async function loadConfig(hub) {
         contextTurns: Number(c.contextTurns) || 100,
         compressThreshold: Number(c.compressThreshold) || 12000,
         toolResultMaxChars: Number(c.toolResultMaxChars) || 12000,
-        compactPrompt: c.compactPrompt || '',
     };
 }

@@ -37,7 +37,7 @@ async function scMove(i, dir) {
     await shortcuts.reorder(arr);
 }
 
-const form = reactive({ apiUrl: '', apiKey: '', model: '', compressThreshold: '12000', toolResultMaxChars: '12000', compactPrompt: '' });
+const form = reactive({ apiUrl: '', apiKey: '', model: '', compressThreshold: '12000', toolResultMaxChars: '12000' });
 const saved = ref(false);
 const saving = ref(false);
 
@@ -49,8 +49,7 @@ const dirty = computed(() =>
     form.model !== (model.config.model || '') ||
     form.apiKey.trim().length > 0 ||
     String(form.compressThreshold) !== String(model.config.compressThreshold ?? 12000) ||
-    String(form.toolResultMaxChars) !== String(model.config.toolResultMaxChars ?? 12000) ||
-    form.compactPrompt !== (model.config.compactPrompt || '')
+    String(form.toolResultMaxChars) !== String(model.config.toolResultMaxChars ?? 12000)
 );
 
 function syncFromServer() {
@@ -60,7 +59,6 @@ function syncFromServer() {
     form.apiKey = ''; // 不回填明文，留空＝不改
     form.compressThreshold = String(c.compressThreshold ?? 12000);
     form.toolResultMaxChars = String(c.toolResultMaxChars ?? 12000);
-    form.compactPrompt = c.compactPrompt || '';
 }
 
 async function load() {
@@ -77,7 +75,6 @@ async function save() {
         model: String(form.model).trim(),
         compressThreshold: String(Number(form.compressThreshold) || 12000),
         toolResultMaxChars: String(Number(form.toolResultMaxChars) || 12000),
-        compactPrompt: String(form.compactPrompt),
     };
     if (form.apiKey.trim()) patch.apiKey = form.apiKey.trim();
     await model.save(patch);
@@ -142,10 +139,6 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                         <div class="set-row set-row-col">
                             <span class="set-k">工具结果上限（字符）</span>
                             <input class="set-input" v-model="form.toolResultMaxChars" type="number" :disabled="!ws.connected" placeholder="12000" />
-                        </div>
-                        <div class="set-row set-row-col">
-                            <span class="set-k">压缩提示词</span>
-                            <textarea class="set-input set-textarea" v-model="form.compactPrompt" :disabled="!ws.connected" rows="5" placeholder="留空＝使用内置默认压缩提示词" spellcheck="false"></textarea>
                         </div>
                     </div>
                     <div class="set-note">上下文超「压缩阈值」时自动把较早消息摘要成一条；工具结果超「上限」会截断。</div>

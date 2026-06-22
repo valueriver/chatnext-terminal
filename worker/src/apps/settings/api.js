@@ -2,7 +2,7 @@
 // 安全视图:不回 apiKey 明文,只给是否已设 + 预览;写入空 apiKey 视为不改。
 import { settings, DEFAULTS } from '../../system/settings.js';
 
-const EDITABLE = ['apiUrl', 'apiKey', 'model', 'system', 'contextTurns', 'compressThreshold', 'toolResultMaxChars', 'compactPrompt'];
+const EDITABLE = ['apiUrl', 'apiKey', 'model', 'system', 'contextTurns', 'compressThreshold', 'toolResultMaxChars'];
 
 function publicView(all) {
     const k = String(all.apiKey || '');

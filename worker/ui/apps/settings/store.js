@@ -7,7 +7,7 @@ import { api } from '@/system/api';
 export const useModelStore = defineStore('model', () => {
     const config = ref({
         apiUrl: '', model: '', system: '', contextTurns: 100,
-        compressThreshold: 12000, toolResultMaxChars: 12000, compactPrompt: '',
+        compressThreshold: 12000, toolResultMaxChars: 12000,
         hasKey: false, keyPreview: '',
     });
     const loaded = ref(false);

@@ -8,7 +8,6 @@ const DEFAULTS = {
     contextTurns: '100',
     compressThreshold: '12000',
     toolResultMaxChars: '12000',
-    compactPrompt: '',
 };
 
 export function settings(db) {
