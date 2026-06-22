@@ -7,7 +7,7 @@ import systemRoutes from './system/index.js';
 import appsRoutes from './apps/index.js';
 import { verify } from './system/identity/service.js';
 
-export { OneHub } from './do/index.js';
+export { RoamHub } from './do/index.js';
 
 // 自鉴权端点(用口令/设备密钥自证,不需要 JWT)
 const PUBLIC = new Set([
@@ -24,7 +24,7 @@ export default {
 
         // 实时:单用户 → 唯一 hub 实例(WS 在 DO 内验 ?token=)
         if (area === 'do') {
-            return env.HUB.get(env.HUB.idFromName('one')).fetch(request);
+            return env.HUB.get(env.HUB.idFromName('roam')).fetch(request);
         }
 
         const ctx = { env, db: env.DB };

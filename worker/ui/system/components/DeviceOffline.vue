@@ -12,7 +12,7 @@ const origin = location.origin;
             <div class="off-icon">🖥️<span class="off-dot"></span></div>
             <div class="off-title">{{ ws.device.paired ? '设备离线' : '还没有连接设备' }}</div>
             <p class="off-sub">
-                这个应用要在你的电脑上执行。{{ ws.device.paired ? '去那台电脑把 One 设备端启动起来即可恢复。' : '在你想操控的电脑上把 One 设备端跑起来,连到本账户:' }}
+                这个应用要在你的电脑上执行。{{ ws.device.paired ? '去那台电脑把 Roam 设备端启动起来即可恢复。' : '在你想操控的电脑上把 Roam 设备端跑起来,连到本账户:' }}
             </p>
 
             <ol class="off-steps">

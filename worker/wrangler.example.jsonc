@@ -6,20 +6,20 @@
  *   1) Cloudflare account_id
  *        npx wrangler whoami
  *   2) D1 数据库(账户/对话/设置/快捷指令都落这里):
- *        npx wrangler d1 create one
+ *        npx wrangler d1 create roam
  *        把输出的 database_id 填到下面 d1_databases[0].database_id
- *        建表: npx wrangler d1 execute one --remote --file=schema.sql
+ *        建表: npx wrangler d1 execute roam --remote --file=schema.sql
  *   3) 鉴权密钥(JWT 签名):
  *        npx wrangler secret put AUTH_SECRET   # 如 openssl rand -hex 32
  *   4) (可选)绑自己的域名 — 先把域名托管进 Cloudflare,再填 routes;
  *        不绑就把整个 "routes" 段删掉,Worker 会自动给一个
- *        one.<your-subdomain>.workers.dev 的测试地址。
+ *        roam.<your-subdomain>.workers.dev 的测试地址。
  *
- * Worker = 账户 + 大脑 + 数据:DO(OneHub) 做实时中继 + AI agent,D1 存所有云端数据。
+ * Worker = 账户 + 大脑 + 数据:DO(RoamHub) 做实时中继 + AI agent,D1 存所有云端数据。
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "one",
+	"name": "roam",
 	"account_id": "<YOUR_CLOUDFLARE_ACCOUNT_ID>",
 	"main": "src/index.js",
 	"compatibility_date": "2025-09-12",
@@ -31,7 +31,7 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "OneHub",
+				"class_name": "RoamHub",
 				"name": "HUB"
 			}
 		]
@@ -39,13 +39,13 @@
 	"migrations": [
 		{
 			"tag": "v1",
-			"new_sqlite_classes": ["OneHub"]
+			"new_sqlite_classes": ["RoamHub"]
 		}
 	],
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "one",
+			"database_name": "roam",
 			"database_id": "<YOUR_D1_DATABASE_ID>"
 		}
 	],
@@ -54,8 +54,8 @@
 	},
 
 	// 不绑自定义域名就把整个 "routes" 段删掉,Cloudflare 会自动给
-	// one.<your-subdomain>.workers.dev 的测试地址。
-	// 要绑自己的域名(如 one.example.com):
+	// roam.<your-subdomain>.workers.dev 的测试地址。
+	// 要绑自己的域名(如 roam.example.com):
 	//   1) 先在 Cloudflare 控制台 → Websites 把域名托管进来
 	//   2) 下面 pattern 换成要绑的域名
 	//   3) npm run deploy 之后 Cloudflare 会自动配 DNS + 证书

@@ -1,6 +1,6 @@
-# One
+# Roam
 
-**在手机上继续用你电脑里的 Claude Code / Codex** —— 把本机的终端 / 文件 / 屏幕带到任意设备的浏览器，随时接管你正跑着的 CC / Codex 会话。这是 One 的核心。
+**在手机上继续用你电脑里的 Claude Code / Codex** —— 把本机的终端 / 文件 / 屏幕带到任意设备的浏览器，随时接管你正跑着的 CC / Codex 会话。这是 Roam 的核心。
 
 > 还有一个**可选**项：内置 AI 助手。不想用 CC/Codex 时，可以接任意 OpenAI 兼容模型（开源模型、coding plan、自建网关都行），让它直接 `shell` / 控制鼠标键盘 / 用 CDP 驱动你登录态的 Chrome —— 多给你一种选择，不替代主线。
 
@@ -13,10 +13,10 @@
 ## 项目组成
 
 ```text
-one/
+roam/
 ├─ worker/        # Cloudflare Worker：账户 + 大脑 + 数据
 │  ├─ src/
-│  │  ├─ do/      #   OneHub(Durable Object)：实时中继 + AI agent runtime（WS）
+│  │  ├─ do/      #   RoamHub(Durable Object)：实时中继 + AI agent runtime（WS）
 │  │  ├─ system/  #   身份鉴权(JWT)、设备注册、D1 访问
 │  │  └─ apps/    #   云端数据应用(chats/settings)，HTTP CRUD over D1
 │  └─ ui/         #   前端(Vue)，构建产物由 Worker 托管
@@ -68,8 +68,8 @@ one/
 ## 1. 部署 Worker（账户 + 大脑 + 数据）
 
 ```bash
-git clone https://github.com/realuckyang/one
-cd one/worker
+git clone https://github.com/realuckyang/roam
+cd roam/worker
 npm install
 cp wrangler.example.jsonc wrangler.jsonc
 ```
@@ -78,13 +78,13 @@ cp wrangler.example.jsonc wrangler.jsonc
 
 - `account_id`：Cloudflare account id，`npx wrangler whoami` 可查
 - `d1_databases[0].database_id`：建库后填（见下一步）
-- `routes`：可选，自定义域名；不绑就删掉整个 `routes` 段，Cloudflare 会给一个 `one.<subdomain>.workers.dev`
+- `routes`：可选，自定义域名；不绑就删掉整个 `routes` 段，Cloudflare 会给一个 `roam.<subdomain>.workers.dev`
 
 创建 D1 库并建表：
 
 ```bash
-npx wrangler d1 create one          # 把输出的 database_id 填回 wrangler.jsonc
-npx wrangler d1 execute one --remote --file=schema.sql
+npx wrangler d1 create roam          # 把输出的 database_id 填回 wrangler.jsonc
+npx wrangler d1 execute roam --remote --file=schema.sql
 ```
 
 设置鉴权密钥（JWT 签名用）：
@@ -99,7 +99,7 @@ npx wrangler secret put AUTH_SECRET   # 粘贴一段随机串，如 openssl rand
 npm run deploy
 ```
 
-完成后得到 Worker 地址，例如 `https://one.example.workers.dev` 或你的自定义域名。首次打开网页会引导你**设置访问密码**（写入 D1，之后用它登录）。
+完成后得到 Worker 地址，例如 `https://roam.example.workers.dev` 或你的自定义域名。首次打开网页会引导你**设置访问密码**（写入 D1，之后用它登录）。
 
 ## 2. 启动本机设备代理
 
@@ -113,7 +113,7 @@ cp config.example.js config.js
 
 ```js
 export default {
-    WORKER_URL: 'https://one.example.workers.dev', // 上一步的 Worker 地址；本地 dev 用 http://localhost:9506
+    WORKER_URL: 'https://roam.example.workers.dev', // 上一步的 Worker 地址；本地 dev 用 http://localhost:9506
     DEVICE_ID: '',            // 留空用主机名（同机重启稳定）
     DEVICE_SECRET: '',        // 设备注册密钥：首次注册即设定，之后须一致（防别人冒用此 id）
     DEVICE_NAME: '',          // 显示名：留空用主机名
@@ -137,7 +137,7 @@ npm start
 
 ## 4.（可选）接入浏览器控制
 
-1. Chrome → 扩展管理 → 打开「开发者模式」→「加载已解压的扩展程序」→ 选 `one/browser/`
+1. Chrome → 扩展管理 → 打开「开发者模式」→「加载已解压的扩展程序」→ 选 `roam/browser/`
 2. 点扩展图标，把设备代理启动时打印的 **CDP 桥地址**（`ws://127.0.0.1:9510/cdp?token=...`）填进「连接地址」并连接，角标显示 `on`
 3. 之后在对话里让 AI 干网页活，它就通过 `browser_cdp` 驱动这台机器上真实登录态的 Chrome
 
@@ -150,27 +150,27 @@ npm start
 **临时（终端开着才活，阻止休眠）：**
 
 ```bash
-caffeinate -dimsu node /path/to/one/computer/index.js
+caffeinate -dimsu node /path/to/roam/computer/index.js
 ```
 
-**长期（开机自启、崩了自动拉起）：** 用 launchd，新建 `~/Library/LaunchAgents/me.meeem.one.plist`：
+**长期（开机自启、崩了自动拉起）：** 用 launchd，新建 `~/Library/LaunchAgents/me.meeem.roam.plist`：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>Label</key><string>me.meeem.one</string>
+    <key>Label</key><string>me.meeem.roam</string>
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/node</string>
-        <string>/Users/YOU/path/to/one/computer/index.js</string>
+        <string>/Users/YOU/path/to/roam/computer/index.js</string>
     </array>
-    <key>WorkingDirectory</key><string>/Users/YOU/path/to/one/computer</string>
+    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/computer</string>
     <key>RunAtLoad</key><true/>
     <key>KeepAlive</key><true/>
-    <key>StandardOutPath</key><string>/tmp/one.out.log</string>
-    <key>StandardErrorPath</key><string>/tmp/one.err.log</string>
+    <key>StandardOutPath</key><string>/tmp/roam.out.log</string>
+    <key>StandardErrorPath</key><string>/tmp/roam.err.log</string>
 </dict>
 </plist>
 ```
@@ -178,24 +178,24 @@ caffeinate -dimsu node /path/to/one/computer/index.js
 加载：
 
 ```bash
-launchctl load ~/Library/LaunchAgents/me.meeem.one.plist
-launchctl unload ~/Library/LaunchAgents/me.meeem.one.plist  # 卸载
+launchctl load ~/Library/LaunchAgents/me.meeem.roam.plist
+launchctl unload ~/Library/LaunchAgents/me.meeem.roam.plist  # 卸载
 ```
 
 `which node` 看你的 node 路径，nvm 装的话写 nvm 实际路径。
 
 ### Linux
 
-systemd user service，新建 `~/.config/systemd/user/one.service`：
+systemd user service，新建 `~/.config/systemd/user/roam.service`：
 
 ```ini
 [Unit]
-Description=One Device
+Description=Roam Device
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/node /home/YOU/one/computer/index.js
-WorkingDirectory=/home/YOU/one/computer
+ExecStart=/usr/bin/node /home/YOU/roam/computer/index.js
+WorkingDirectory=/home/YOU/roam/computer
 Restart=always
 RestartSec=3
 
@@ -205,8 +205,8 @@ WantedBy=default.target
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now one
-journalctl --user -u one -f          # 看日志
+systemctl --user enable --now roam
+journalctl --user -u roam -f          # 看日志
 ```
 
 未登录也要跑（headless 服务器）：`sudo loginctl enable-linger $USER`。
@@ -216,10 +216,10 @@ journalctl --user -u one -f          # 看日志
 用 [nssm](https://nssm.cc/) 把 node 注册成服务：
 
 ```powershell
-nssm install One "C:\Program Files\nodejs\node.exe" "C:\path\to\one\computer\index.js"
-nssm set One AppDirectory "C:\path\to\one\computer"
-nssm start One
-nssm remove One confirm   # 卸载
+nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\computer\index.js"
+nssm set Roam AppDirectory "C:\path\to\roam\computer"
+nssm start Roam
+nssm remove Roam confirm   # 卸载
 ```
 
 ## 排障

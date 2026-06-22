@@ -2,7 +2,7 @@
 // REST 约定:GET 读,POST 建,PUT 改,DELETE 删。
 import { useToastStore } from '@/system/stores/toast';
 
-const TOKEN_KEY = 'one_token';
+const TOKEN_KEY = 'roam_token';
 
 // 统一错误提示:很多调用处会 .catch 吞掉,这里先弹个 toast 保证用户有感知。
 function toastError(msg) {

@@ -35,8 +35,8 @@ function macScreenshotError(err) {
     const raw = String(err?.stderr || err?.message || err || '').trim();
     if (/could not create image from display|no display|not authorized|screen recording|TCC/i.test(raw)) {
         return new Error([
-            'macOS 截图失败：One Server 当前无法访问屏幕。',
-            '请确认 One Server 是在已登录的图形桌面会话里启动的，并在“系统设置 -> 隐私与安全性 -> 屏幕录制”里允许启动它的应用（Terminal/iTerm/Node/服务管理器）。授权后需要重启 One Server。',
+            'macOS 截图失败：Roam Server 当前无法访问屏幕。',
+            '请确认 Roam Server 是在已登录的图形桌面会话里启动的，并在“系统设置 -> 隐私与安全性 -> 屏幕录制”里允许启动它的应用（Terminal/iTerm/Node/服务管理器）。授权后需要重启 Roam Server。',
             raw ? `原始错误：${raw}` : '',
         ].filter(Boolean).join('\n'));
     }
@@ -60,7 +60,7 @@ async function readValidJpeg(file) {
 }
 
 async function captureToTemp(command, argsForFile, options = {}) {
-    const file = path.join(os.tmpdir(), `one-screen-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+    const file = path.join(os.tmpdir(), `roam-screen-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
     try {
         await runFile(command, argsForFile(file), { timeout: 15000, maxBuffer: 64 * 1024 * 1024, ...options });
         return await readValidPng(file);
@@ -127,7 +127,7 @@ async function capturePng() {
 async function compressPngForWire(png, options = {}) {
     const maxSide = Math.max(320, Math.min(4096, Number(options.maxSide) || DEFAULT_MAX_SIDE));
     const quality = Math.max(1, Math.min(100, Number(options.quality) || DEFAULT_JPEG_QUALITY));
-    const tmpPng = path.join(os.tmpdir(), `one-screen-src-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
+    const tmpPng = path.join(os.tmpdir(), `roam-screen-src-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
     const tmpJpg = `${tmpPng}.jpg`;
     try {
         await fsp.writeFile(tmpPng, png);

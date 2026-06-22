@@ -356,7 +356,7 @@ export const useTerminalStore = defineStore('terminal', () => {
         });
 
         // 主题切换时，所有终端配色实时跟随 晴空/谧夜
-        window.addEventListener('one-theme', () => {
+        window.addEventListener('roam-theme', () => {
             const th = pickTermTheme();
             for (const terminal of terminalInstances.values()) terminal.options.theme = th;
         });

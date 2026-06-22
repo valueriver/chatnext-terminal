@@ -30,7 +30,7 @@ async function onSubmit() {
     <main class="flex-1 min-h-0 flex items-center justify-center px-6 py-10 overflow-y-auto bg-bg">
         <div class="w-full max-w-sm flex flex-col items-center">
             <h1 class="font-serif font-black text-[40px] leading-none tracking-tight text-center text-ink">
-                One<span class="text-accent">.</span>
+                Roam<span class="text-accent">.</span>
             </h1>
             <p class="mt-3 text-xs text-muted">登录到你的云端</p>
 

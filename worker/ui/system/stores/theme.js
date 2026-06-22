@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-const KEY = 'one-theme';
+const KEY = 'roam-theme';
 const THEMES = ['sky', 'night'];   // 晴空 / 谧夜
-const DEFAULT = 'night';           // 默认谧夜，延续 one 的暗色调性
+const DEFAULT = 'night';           // 默认谧夜，延续 roam 的暗色调性
 
 export const THEME_LABELS = { sky: '晴空', night: '谧夜' };
 
@@ -22,7 +22,7 @@ function apply(theme) {
     if (theme === 'night') el.dataset.theme = 'night';
     else delete el.dataset.theme;
     // 通知非 CSS 的消费者（如 xterm 终端）跟随换肤
-    try { window.dispatchEvent(new CustomEvent('one-theme', { detail: { theme } })); } catch {}
+    try { window.dispatchEvent(new CustomEvent('roam-theme', { detail: { theme } })); } catch {}
 }
 
 export const useThemeStore = defineStore('theme', () => {

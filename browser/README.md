@@ -6,7 +6,7 @@
 
 ## 装 & 用
 1. `chrome://extensions` → 打开「开发者模式」→「加载已解压的扩展程序」→ 选本目录。
-2. 点扩展图标,填一条 ws 地址(`token` 写进 query,由对端校验)。one 用的是本机 CDP 桥(server 启动时会打印这条):
+2. 点扩展图标,填一条 ws 地址(`token` 写进 query,由对端校验)。roam 用的是本机 CDP 桥(server 启动时会打印这条):
    ```
    ws://127.0.0.1:9510/cdp?token=<你的 SESSION_ID>
    ```

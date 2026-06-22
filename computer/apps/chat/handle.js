@@ -1,10 +1,10 @@
-// 设备侧 chat app:接收网页端上传的聊天附件,落到本机 ~/.one/files,回 path 供 agent 用 shell 读。
+// 设备侧 chat app:接收网页端上传的聊天附件,落到本机 ~/.roam/files,回 path 供 agent 用 shell 读。
 import { promises as fsp } from 'fs';
 import os from 'os';
 import path from 'path';
 import ws from '../../channel.js';
 
-const DIR = path.join(os.homedir(), '.one', 'files');
+const DIR = path.join(os.homedir(), '.roam', 'files');
 
 async function handle(message) {
     const { type, data = {} } = message;

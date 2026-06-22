@@ -6,7 +6,7 @@ import './style.css';
 
 // 预挂主题，避免首屏闪烁；晴空为默认（无属性），谧夜挂 data-theme="night"
 try {
-    if (localStorage.getItem('one-theme') !== 'sky') {
+    if (localStorage.getItem('roam-theme') !== 'sky') {
         document.documentElement.dataset.theme = 'night';
     }
 } catch {}

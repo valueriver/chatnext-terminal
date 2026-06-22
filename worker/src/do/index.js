@@ -1,5 +1,5 @@
-// OneHub:账户活体运行时。WS Hibernation 入口 + 事件分发;agent 住在里面跑。
-// 单用户 · 单设备 → 全局唯一实例(idFromName('one'))。
+// RoamHub:账户活体运行时。WS Hibernation 入口 + 事件分发;agent 住在里面跑。
+// 单用户 · 单设备 → 全局唯一实例(idFromName('roam'))。
 //
 // 连接(WS 升级在 /do/ws):
 //   ?role=web      网页端:发聊天、收流式;终端/屏幕等设备消息的转发对端
@@ -16,7 +16,7 @@ import { runTurn } from './agent/loop.js';
 import { verify } from '../system/identity/service.js';
 import * as deviceRepo from '../system/identity/repository.js';
 
-export class OneHub {
+export class RoamHub {
     constructor(ctx, env) {
         this.ctx = ctx;
         this.env = env;

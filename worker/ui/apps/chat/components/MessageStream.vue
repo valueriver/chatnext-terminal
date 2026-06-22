@@ -70,7 +70,7 @@ async function onScroll() {
             <div v-else-if="chat.hasMore && chat.messages.length" class="load-older hint">↑ 上滑加载更早</div>
 
             <div v-if="!chat.messages.length" class="hero">
-                <h1>One <em>助手</em></h1>
+                <h1>Roam <em>助手</em></h1>
                 <div class="cap">本机 AI 对话，可执行命令、操作浏览器与电脑。直接说你想做什么。</div>
             </div>
 
