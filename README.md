@@ -94,5 +94,3 @@ Chrome → 扩展管理 → 开发者模式 → 加载 `roam/browser/`。
 ## License
 
 MIT
-
-[LINUX DO](https://linux.do) · [AIOS](https://github.com/valueriver/AIOS)
