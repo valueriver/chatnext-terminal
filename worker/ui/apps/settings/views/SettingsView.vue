@@ -128,21 +128,18 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                             <input class="set-input" v-model="form.model" :disabled="!ws.connected" placeholder="gpt-4o" spellcheck="false" autocapitalize="off" />
                         </div>
                     </div>
-                    <div class="set-note">
-                        <template v-if="ws.connected">配置保存在云端（Worker 的 D1 数据库），AI 对话由云端 agent 用它调用 OpenAI 兼容接口。当前 Key：{{ keyMasked }}。Key 留空＝不修改。</template>
-                        <template v-else>未连接云端，无法读写模型配置。请先在守卫页完成连接/认证。</template>
-                    </div>
+                    <div class="set-note">配置存在云端，AI 对话用它调用 OpenAI 兼容接口。Key 留空＝不改。</div>
                 </div>
 
                 <!-- 对话压缩 -->
                 <div class="set-group">
                     <div class="set-title">对话压缩</div>
                     <div class="set-card">
-                        <div class="set-row">
+                        <div class="set-row set-row-col">
                             <span class="set-k">压缩阈值（tokens）</span>
                             <input class="set-input" v-model="form.compressThreshold" type="number" :disabled="!ws.connected" placeholder="12000" />
                         </div>
-                        <div class="set-row">
+                        <div class="set-row set-row-col">
                             <span class="set-k">工具结果上限（字符）</span>
                             <input class="set-input" v-model="form.toolResultMaxChars" type="number" :disabled="!ws.connected" placeholder="12000" />
                         </div>
@@ -151,9 +148,13 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                             <textarea class="set-input set-textarea" v-model="form.compactPrompt" :disabled="!ws.connected" rows="5" placeholder="留空＝使用内置默认压缩提示词" spellcheck="false"></textarea>
                         </div>
                     </div>
-                    <div class="set-note">
-                        上下文累计 token 超过「压缩阈值」时，自动用模型把较早的消息摘要成一条，之后只带摘要继续对话。工具返回超「上限」的部分会截断，避免撑爆上下文。
-                    </div>
+                    <div class="set-note">上下文超「压缩阈值」时自动把较早消息摘要成一条；工具结果超「上限」会截断。</div>
+                </div>
+
+                <!-- 模型 / 压缩 的保存 -->
+                <div class="set-actions">
+                    <button class="cta" :disabled="!ws.connected || !dirty || saving" @click="save">{{ saved ? '已保存 ✓' : (saving ? '保存中…' : '保存') }}</button>
+                    <button class="set-act" :disabled="!dirty || saving" @click="reset">重置</button>
                 </div>
 
                 <!-- 快捷指令 -->
@@ -178,34 +179,18 @@ watch(() => ws.connected, (v) => { if (v) load(); });
                             </template>
                         </div>
                     </div>
-                    <div class="set-note">
-                        聊天输入框「+」面板里的常用语，点一下填进输入框。可增删改、用 ↑↓ 调整顺序。
-                    </div>
-                </div>
-
-                <div class="set-actions">
-                    <button class="cta" :disabled="!ws.connected || !dirty || saving" @click="save">{{ saved ? '已保存 ✓' : (saving ? '保存中…' : '保存') }}</button>
-                    <button class="set-act" :disabled="!dirty || saving" @click="reset">重置</button>
-                </div>
-
-                <!-- 关于 -->
-                <div class="set-group">
-                    <div class="set-title">关于</div>
-                    <div class="set-card">
-                        <div class="set-row">
-                            <span class="set-k">连接</span>
-                            <span class="set-v">{{ ws.statusText }}</span>
-                        </div>
-                        <div class="set-row">
-                            <span class="set-k">项目</span>
-                            <span class="set-v">One —— 本机终端 / 文件 / 屏幕 / 对话</span>
-                        </div>
-                    </div>
+                    <div class="set-note">聊天输入框「+」面板里的常用语，点一下填进输入框。改动即时生效。</div>
                 </div>
 
                 <!-- 账户 -->
                 <div class="set-group">
                     <div class="set-title">账户</div>
+                    <div class="set-card">
+                        <div class="set-row">
+                            <span class="set-k">连接</span>
+                            <span class="set-v">{{ ws.statusText }}</span>
+                        </div>
+                    </div>
                     <div class="set-actions">
                         <button class="set-act danger" @click="logout">退出登录</button>
                     </div>
