@@ -7,6 +7,8 @@ import { ref } from 'vue';
 export const useViewStore = defineStore('view', () => {
     const apps = ref([
         { path: '/chat', label: '对话', icon: '💬' },
+        { path: '/notes', label: '笔记', icon: '📝' },
+        { path: '/tasks', label: '任务', icon: '⏰' },
         { path: '/files', label: '文件', icon: '📁', needsDevice: true },
         { path: '/terminal', label: '终端', icon: '⌨️', needsDevice: true },
         { path: '/status', label: '状态', icon: '📊', needsDevice: true },

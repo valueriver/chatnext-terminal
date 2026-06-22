@@ -12,6 +12,8 @@ const routes = [
     // 云应用
     { path: '/chat', name: 'chat', component: () => import('./apps/chat/index.vue') },
     { path: '/chat/:id', name: 'chat-id', component: () => import('./apps/chat/index.vue') },
+    { path: '/notes', name: 'notes', component: () => import('./apps/notes/index.vue') },
+    { path: '/tasks', name: 'tasks', component: () => import('./apps/tasks/index.vue') },
     { path: '/settings', name: 'settings', component: () => import('./apps/settings/index.vue') },
 
     // 设备能力应用

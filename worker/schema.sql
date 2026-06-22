@@ -9,6 +9,44 @@ CREATE TABLE settings (
   value TEXT NOT NULL DEFAULT ''
 );
 
+-- ═══════════ 笔记 ═══════════
+CREATE TABLE notes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  content     TEXT NOT NULL DEFAULT '',
+  color       TEXT NOT NULL DEFAULT 'yellow',
+  pinned      INTEGER NOT NULL DEFAULT 0,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);
+CREATE INDEX idx_notes_created ON notes(id DESC);
+
+-- ═══════════ 任务(云端定时 AI) ═══════════
+CREATE TABLE tasks (
+  id              TEXT PRIMARY KEY,
+  name            TEXT NOT NULL DEFAULT '',
+  prompt          TEXT NOT NULL DEFAULT '',
+  kind            TEXT NOT NULL DEFAULT 'cron',
+  cron            TEXT NOT NULL DEFAULT '',
+  run_at          INTEGER,
+  enabled         INTEGER NOT NULL DEFAULT 1,
+  needs_device    INTEGER NOT NULL DEFAULT 0,
+  last_run_at     INTEGER,
+  last_run_minute INTEGER,
+  created_at      INTEGER NOT NULL,
+  updated_at      INTEGER NOT NULL
+);
+
+CREATE TABLE task_runs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_id     TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  status      TEXT NOT NULL,
+  summary     TEXT NOT NULL DEFAULT '',
+  chat_id     TEXT,
+  started_at  INTEGER NOT NULL,
+  finished_at INTEGER
+);
+CREATE INDEX idx_task_runs_task ON task_runs(task_id, id DESC);
+
 -- ═══════════ 对话(直播在 DO,历史在 D1)═══════════
 CREATE TABLE chats (
   id          TEXT PRIMARY KEY,
