@@ -1,20 +1,12 @@
--- One 云端库(D1)。单用户:整库即这个用户的数据,无 account_id。
--- 设备端原 ~/.one/one.db 的数据应用部分,迁到这里;另加 devices 表表达多设备。
+-- One 云端库(D1)。单用户 · 单设备:整库即这个用户的数据,无 account_id。
+-- 设备配对信息存进 settings(单设备),不再有 devices 表。
 
 -- ═══════════ 设置(全局 KV)═══════════
+-- pass_hash + 模型配置(apiUrl/model/apiKey…)
+-- + 单设备配对:device_name / device_secret_hash / device_capabilities
 CREATE TABLE settings (
   key   TEXT PRIMARY KEY,
-  value TEXT NOT NULL DEFAULT ''   -- pass_hash + 模型配置 apiUrl/model/apiKey…
-);
-
--- ═══════════ 设备(这个用户的多台机器)═══════════
-CREATE TABLE devices (
-  id           TEXT PRIMARY KEY,           -- 机器 id
-  name         TEXT NOT NULL DEFAULT '',   -- "MacBook-Air-2"
-  secret_hash  TEXT NOT NULL DEFAULT '',   -- 设备注册密钥哈希
-  capabilities TEXT NOT NULL DEFAULT '[]', -- 能干啥:shell/computer/browser(设备清单派生)
-  last_seen    INTEGER,                    -- 最后心跳(在线状态活在 DO,这里只留痕)
-  created_at   INTEGER NOT NULL
+  value TEXT NOT NULL DEFAULT ''
 );
 
 -- ═══════════ 数据应用 ═══════════
@@ -28,6 +20,32 @@ CREATE TABLE notes (
   updated_at  INTEGER NOT NULL
 );
 CREATE INDEX idx_notes_created ON notes(id DESC);
+
+-- ═══════════ 任务(云端定时 AI)═══════════
+-- 每分钟 cron tick 比对 cron 触发;跑在 DO 里复用 agent。设备可选。
+CREATE TABLE tasks (
+  id              TEXT PRIMARY KEY,
+  name            TEXT NOT NULL DEFAULT '',
+  prompt          TEXT NOT NULL DEFAULT '',        -- 给 agent 的指令
+  cron            TEXT NOT NULL DEFAULT '',         -- 5 段 cron(UTC):分 时 日 月 周
+  enabled         INTEGER NOT NULL DEFAULT 1,
+  needs_device    INTEGER NOT NULL DEFAULT 0,       -- 需要设备在线才跑;离线则跳过
+  last_run_at     INTEGER,
+  last_run_minute INTEGER,                          -- epoch 分钟,同分钟去重
+  created_at      INTEGER NOT NULL,
+  updated_at      INTEGER NOT NULL
+);
+
+CREATE TABLE task_runs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_id     TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  status      TEXT NOT NULL,                        -- running/done/skipped/error
+  summary     TEXT NOT NULL DEFAULT '',             -- AI 结果摘要 或 跳过/报错原因
+  chat_id     TEXT,                                 -- 关联跑出来的对话
+  started_at  INTEGER NOT NULL,
+  finished_at INTEGER
+);
+CREATE INDEX idx_task_runs_task ON task_runs(task_id, id DESC);
 
 -- ═══════════ 对话(直播在 DO,历史在 D1)═══════════
 CREATE TABLE chats (

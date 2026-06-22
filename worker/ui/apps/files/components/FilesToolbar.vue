@@ -6,7 +6,6 @@ import { useWsStore } from '@/system/stores/ws';
 import { useToastStore } from '@/system/stores/toast';
 import { useTerminalStore } from '@/apps/terminal/store';
 import ControlCenter from '@/system/components/ControlCenter.vue';
-import DeviceNav from '@/system/components/DeviceNav.vue';
 
 const files = useFilesStore();
 const ws = useWsStore();
@@ -48,7 +47,7 @@ function openInTerminal() {
         to: 'desktop',
         data: { terminalId: term.activeTerminalId, input: `cd "${escaped}"\r` }
     });
-    router.push(`/devices/${route.params.id}/terminal`);
+    router.push(`/terminal`);
     toast.show('已切到终端');
 }
 
@@ -68,7 +67,6 @@ function pickSort(by) {
     <div class="shrink-0 border-b border-line bg-bg">
         <!-- Row 1: app chrome -->
         <div class="flex min-w-0 items-center gap-3 px-3 py-2.5">
-            <DeviceNav />
             <div class="app-title min-w-0 flex-1">文件</div>
             <ControlCenter />
         </div>

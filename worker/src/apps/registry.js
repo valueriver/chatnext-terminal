@@ -2,11 +2,13 @@
 // apps 区路由读它分发;GET /apps 读它列清单(前端侧边栏可派生于此)。
 // 加一个数据应用 = 这里加一行 + 一个 apps/<name>/ 目录。
 import notes from './notes/api.js';
+import tasks from './tasks/api.js';
 import chats from './chats/api.js';
 import settings from './settings/api.js';
 
 export const APPS = [
     { name: 'chats', label: '对话', icon: '💬', api: chats, nav: false }, // 对话有专门 UI,不进数据应用导航
+    { name: 'tasks', label: '任务', icon: '⏰', api: tasks },
     { name: 'notes', label: '笔记', icon: '📝', api: notes },
     { name: 'settings', label: '设置', icon: '⚙️', api: settings, nav: false },
 ];

@@ -37,23 +37,20 @@ export async function login(ctx, { password = '' }) {
     return { ok: true, token };
 }
 
-// 设备:注册/更新自己 + 声明能力,换 device JWT。
-// 已注册过的设备需密钥匹配;首次注册即设密钥(bootstrap)。
-export async function registerDevice(ctx, { id, name = '', secret: deviceSecret = '', capabilities = [] }) {
-    if (!id) return { ok: false, error: '缺少设备 id' };
-    const existing = await repo.get(ctx.db, id);
+// 单设备:配对/更新这台设备 + 声明能力,换 device JWT。
+// 已配对过需密钥匹配;首次配对即设密钥(bootstrap)。换新机器需先在设置解绑。
+export async function registerDevice(ctx, { name = '', secret: deviceSecret = '', capabilities = [] }) {
+    const existing = await repo.get(ctx.db);
     const incomingHash = deviceSecret ? await sha256(deviceSecret) : '';
     if (existing?.secret_hash && existing.secret_hash !== incomingHash) {
-        return { ok: false, error: '设备密钥不匹配' };
+        return { ok: false, error: '设备密钥不匹配(已配对其它设备,先在设置里解绑)' };
     }
-    await repo.upsert(ctx.db, { id, name, secretHash: incomingHash || existing?.secret_hash || '', capabilities }, Date.now());
-    const token = await signJwt({ role: 'device', id }, secret(ctx));
+    await repo.upsert(ctx.db, { name, secretHash: incomingHash || existing?.secret_hash || '', capabilities }, Date.now());
+    const token = await signJwt({ role: 'device' }, secret(ctx));
     return { ok: true, token };
 }
 
+// 返回这台配对设备(在线状态活在 DO,这里只反映配对与否)。未配对 → null。
 export async function listDevices(ctx) {
-    const rows = await repo.list(ctx.db);
-    return { devices: rows.map((d) => ({ ...d, capabilities: safeParse(d.capabilities) })) };
+    return { device: await repo.get(ctx.db) };
 }
-
-const safeParse = (s) => { try { return JSON.parse(s || '[]'); } catch { return []; } };
