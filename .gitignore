@@ -11,8 +11,8 @@ worker/public/
 # 私密配置 — 复制 worker/wrangler.example.jsonc 到 worker/wrangler.jsonc 后填值
 worker/wrangler.jsonc
 
-# 桌面端本地数据库(和 .one/ 一起在用户 home 下)
+# 桌面端本地数据库(和 .roam/ 一起在用户 home 下)
 /database/
 
-# 本机 server 配置 — 复制 server/config.example.js 到 server/config.js 后填值
-server/config.js
+# 本机 server 配置 — 复制 computer/config.example.js 到 computer/config.js 后填值
+computer/config.js
