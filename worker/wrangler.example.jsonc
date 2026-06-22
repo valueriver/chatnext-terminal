@@ -5,7 +5,7 @@
  * 需要准备:
  *   1) Cloudflare account_id
  *        npx wrangler whoami
- *   2) D1 数据库(账户/对话/笔记/大纲/设置都落这里):
+ *   2) D1 数据库(账户/对话/设置/快捷指令都落这里):
  *        npx wrangler d1 create one
  *        把输出的 database_id 填到下面 d1_databases[0].database_id
  *        建表: npx wrangler d1 execute one --remote --file=schema.sql

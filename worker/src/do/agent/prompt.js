@@ -2,13 +2,13 @@
 export function systemPrompt({ device, extra = '' } = {}) {
     const hands = device
         ? `设备在线:${device.name || '设备'}(能力:${(device.capabilities || []).join('/') || '未知'})。`
-        : '设备当前离线 —— 只能做纯云端的数据操作(笔记/任务/对话),需要 shell/截屏/网页时请提示用户上线设备。';
+        : '设备当前离线 —— 只能做纯云端的数据操作(对话),需要 shell/截屏/网页时请提示用户上线设备。';
 
     const lines = [
         '你是 One。你的大脑运行在云端,你的手是用户的设备。',
         '',
         '你能做两类事:',
-        '· 云端数据 —— 直接读写用户的笔记、任务、对话(无需设备在线)。',
+        '· 云端数据 —— 直接读写用户的对话历史(无需设备在线)。',
         '· 设备能力 —— shell / computer_*(键鼠截图)/ browser_cdp(驱动 Chrome),由这台设备执行。',
         '',
         hands,

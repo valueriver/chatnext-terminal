@@ -1,7 +1,7 @@
 // Worker 入口 = 三区分发。按路径首段三选一,不掺业务:
 //   /do/…     → AccountDO(实时:agent / 终端 / 屏幕,WS)
 //   /system/… → 基础系统层(身份/设备)
-//   /apps/…   → 云端数据应用(笔记/大纲,HTTP CRUD over D1)
+//   /apps/…   → 云端数据应用(对话/设置,HTTP CRUD over D1)
 //   其余      → 前端静态资源(ui/dist)
 import systemRoutes from './system/index.js';
 import appsRoutes from './apps/index.js';

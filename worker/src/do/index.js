@@ -5,8 +5,6 @@
 //   ?role=web      网页端:发聊天、收流式;终端/屏幕等设备消息的转发对端
 //   ?role=device   这台设备:收工具/转发请求,回结果
 //
-// 另有 POST /do/tick:cron(scheduled)触发,跑到点的定时任务。
-//
 // 消息协议:统一用 type 判别,按 app 前缀路由(chat.* / fs.* / terminal.* / …)。
 //   web → DO:    { type:'chat.send', chatId, text } / { type:'chat.abort', chatId }  其余转发给设备
 //   DO → web:    { type:'chat.event', … } 单一直播通道;另有 { type:'device', online, name }

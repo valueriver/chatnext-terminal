@@ -40,7 +40,7 @@ async function runTool({ callId, name, args }) {
 // 生命周期:网页接入事件(worker 转发 web.connected)。app 在 start(ctx) 时订阅。
 const webSubs = [];
 const emitWebConnected = () => { for (const f of webSubs) try { f(); } catch { /* ignore */ } };
-const ctx = { onGrant() { /* 旧授权模型已移除 */ }, onWebConnected(fn) { webSubs.push(fn); } };
+const ctx = { onWebConnected(fn) { webSubs.push(fn); } };
 
 export async function startAll() {
     await bridge.start?.(ctx);

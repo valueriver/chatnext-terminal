@@ -46,13 +46,6 @@ async function handle(message) {
     }
 }
 
-// 暴露给 index.js / guard grant 使用的快照接口
-function sendSnapshotTo(clientId) {
-    sessions.broadcastList(`web:${clientId}`);
-    const active = sessions.get();
-    if (active) sessions.broadcastInit(active, `web:${clientId}`);
-}
-
 function sendSnapshotAll() {
     sessions.broadcastList();
     const active = sessions.get();
@@ -67,10 +60,9 @@ function shutdown() {
     return sessions.killAll();
 }
 
-// 启动：建默认会话 + 订阅生命周期（授权某端→推快照；网页接入→推全部快照）
+// 启动：建默认会话 + 订阅生命周期（网页接入→推全部快照）
 async function start(ctx) {
     await ensureDefault();
-    ctx.onGrant((clientId) => sendSnapshotTo(clientId));
     ctx.onWebConnected(() => sendSnapshotAll());
 }
 

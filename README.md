@@ -4,7 +4,7 @@
 
 > 还有一个**可选**项：内置 AI 助手。不想用 CC/Codex 时，可以接任意 OpenAI 兼容模型（开源模型、coding plan、自建网关都行），让它直接 `shell` / 控制鼠标键盘 / 用 CDP 驱动你登录态的 Chrome —— 多给你一种选择，不替代主线。
 
-机器不暴露公网。本机设备代理主动连 Cloudflare Worker。云端（Worker + D1 + Durable Object）是**账户与大脑**：存对话/笔记/大纲、跑 AI agent、做身份鉴权与实时中继。本机设备只做**一只手**：收到执行请求就跑终端 / 文件 / 屏幕 / 电脑控制 / 浏览器 CDP，结果回传。
+机器不暴露公网。本机设备代理主动连 Cloudflare Worker。云端（Worker + D1 + Durable Object）是**账户与大脑**：存对话、跑 AI agent、做身份鉴权与实时中继。本机设备只做**一只手**：收到执行请求就跑终端 / 文件 / 屏幕 / 电脑控制 / 浏览器 CDP，结果回传。
 
 社区讨论: [LINUX DO](https://linux.do)
 
@@ -18,7 +18,7 @@ one/
 │  ├─ src/
 │  │  ├─ do/      #   OneHub(Durable Object)：实时中继 + AI agent runtime（WS）
 │  │  ├─ system/  #   身份鉴权(JWT)、设备注册、D1 访问
-│  │  └─ apps/    #   云端数据应用(chats/notes/outlines/settings)，HTTP CRUD over D1
+│  │  └─ apps/    #   云端数据应用(chats/settings)，HTTP CRUD over D1
 │  └─ ui/         #   前端(Vue)，构建产物由 Worker 托管
 ├─ computer/      # 本机设备代理(Node)：纯执行器 —— 终端、文件、屏幕、电脑控制、浏览器 CDP 桥
 └─ browser/       # browser-use Chrome 扩展：一条 WS 直通 CDP，驱动真实登录态的浏览器
@@ -48,7 +48,7 @@ one/
 **云端数据应用（落 D1，跨设备、关机可读）**
 
 - **对话** —— AI 对话历史
-- **笔记 / 大纲** —— 纯数据应用，离线也能读
+- **设置** —— 模型配置、访问密码、快捷指令
 
 **可选 —— 内置 AI 助手（你也可以不用，继续走 CC/Codex）**
 
@@ -241,7 +241,7 @@ nssm remove One confirm   # 卸载
 ## 安全边界
 
 - 鉴权统一 Bearer JWT（HS256，签名密钥 `AUTH_SECRET` 走 Worker secret）：网页走访问密码登录，设备走 `DEVICE_SECRET` 注册
-- 云端数据（对话/笔记/大纲/设置）落 D1，按账户隔离
+- 云端数据（对话/设置）落 D1，按账户隔离
 - 模型 API Key 存云端 D1 settings 表（agent 在 Worker 里跑，需读取）
 - CDP 桥只监听 `127.0.0.1`，并用 token 校验，挡掉本机其它进程乱连
 - 不要把真实 `computer/config.js` 和 `worker/wrangler.jsonc` 提交到仓库（已在 `.gitignore`）
