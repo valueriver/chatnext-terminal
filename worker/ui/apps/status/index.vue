@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 import ControlCenter from '@/system/components/ControlCenter.vue';
+import DeviceOffline from '@/system/components/DeviceOffline.vue';
 
 const ws = useWsStore();
 
@@ -11,7 +12,6 @@ let seq = 0;
 let timer = null;
 
 const online = computed(() => ws.deviceOnline);
-const origin = location.origin;
 
 function request() {
     if (!ws.connected || !online.value) return;
@@ -53,14 +53,13 @@ onUnmounted(() => clearInterval(timer));
             <ControlCenter />
         </div>
 
-        <div class="page-wrap">
+        <DeviceOffline v-if="!online" />
+        <div v-else class="page-wrap">
             <div class="home">
                 <!-- 连接状态 -->
-                <div class="conn" :class="online ? 'ok' : 'bad'">
-                    <span class="dot" :class="online ? 'on' : 'off'"></span>
-                    <span v-if="online">设备在线,可操控 —— {{ ws.device.name || '设备' }}</span>
-                    <span v-else-if="ws.device.paired">设备离线 —— 在那台机器上启动 computer 后恢复</span>
-                    <span v-else>还没连接设备 —— 按下方说明把一台电脑连上</span>
+                <div class="conn ok">
+                    <span class="dot on"></span>
+                    <span>设备在线,可操控 —— {{ ws.device.name || '设备' }}</span>
                 </div>
 
                 <!-- 本机状态卡片 -->
@@ -87,18 +86,7 @@ onUnmounted(() => clearInterval(timer));
                 <div v-if="snap" class="host">
                     {{ snap.host?.platform }} · {{ snap.host?.arch }} · 运行 {{ fmtUptime(snap.host?.uptime) }}
                 </div>
-                <div v-else-if="online" class="host">读取本机状态…</div>
-
-                <!-- 未配对:连接说明 -->
-                <div v-if="!ws.device.paired" class="pair">
-                    <div class="pair-title">连接你的电脑</div>
-                    <ol>
-                        <li>克隆仓库,复制 <code>computer/config.example.js</code> 为 <code>config.js</code></li>
-                        <li>填 <code>WORKER_URL</code> = <code>{{ origin }}</code>,设一个 <code>DEVICE_SECRET</code></li>
-                        <li>运行 <code>node computer/index.js</code></li>
-                    </ol>
-                    <p class="pair-note">起来后这里会自动变成"在线"。</p>
-                </div>
+                <div v-else class="host">读取本机状态…</div>
             </div>
         </div>
     </section>
@@ -113,7 +101,6 @@ onUnmounted(() => clearInterval(timer));
 .dot.off { background: var(--color-faint); }
 .conn { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-radius: 13px; font-size: 13px; font-weight: 650; border: 1px solid var(--color-line); }
 .conn.ok { color: var(--color-ink); background: var(--color-bg-elev); }
-.conn.bad { color: var(--color-muted); background: var(--color-bg-elev); }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .stat { padding: 14px; border-radius: 14px; border: 1px solid var(--color-line); background: var(--color-bg-elev); }
 .stat-k { color: var(--color-muted); font-size: 12px; font-weight: 700; }
@@ -123,10 +110,5 @@ onUnmounted(() => clearInterval(timer));
 .bar span { display: block; height: 100%; background: var(--color-accent); border-radius: 999px; }
 .stat-sub { color: var(--color-faint); font-size: 11px; }
 .host { color: var(--color-faint); font-size: 12px; text-align: center; }
-.pair { padding: 16px; border-radius: 14px; border: 1px solid var(--color-line); background: var(--color-bg-elev); font-size: 13px; line-height: 1.7; color: var(--color-ink); }
-.pair-title { font-size: 14px; font-weight: 850; margin-bottom: 8px; }
-.pair ol { padding-left: 18px; display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
-.pair code { background: var(--color-bg); border: 1px solid var(--color-line); border-radius: 5px; padding: 1px 5px; font-size: 12px; }
-.pair-note { color: var(--color-muted); margin-top: 6px; }
 @media (max-width: 560px) { .stats { grid-template-columns: repeat(2, 1fr); } }
 </style>

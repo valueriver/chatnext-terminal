@@ -2,14 +2,12 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useViewStore } from '@/system/stores/view';
-import { useWsStore } from '@/system/stores/ws';
 
 const props = defineProps({ align: { type: String, default: 'right' } });
 
 const route = useRoute();
 const router = useRouter();
 const view = useViewStore();
-const ws = useWsStore();
 
 const open = ref(false);
 const btnRef = ref(null);
@@ -48,13 +46,6 @@ function go(path) { open.value = false; if (route.path !== path) router.push(pat
                             <span class="cc-name">{{ item.label }}</span>
                         </button>
                     </div>
-
-                    <!-- 设备状态(点进状态页管理) -->
-                    <button class="cc-dev-row" @click="go('/status')">
-                        <span class="cc-dot" :class="ws.deviceOnline ? 'on' : 'off'"></span>
-                        <span class="cc-dev-txt">{{ ws.deviceOnline ? `设备在线 · ${ws.device.name || '设备'}` : (ws.device.paired ? '设备离线' : '未连接设备') }}</span>
-                        <span class="cc-dev-go">›</span>
-                    </button>
                 </div>
             </transition>
         </Teleport>
@@ -100,17 +91,6 @@ function go(path) { open.value = false; if (route.path !== path) router.push(pat
     box-shadow: 0 1px 0 #ffffff40 inset, 0 2px 6px #0000000f; transition: transform .14s, box-shadow .14s, background .14s;
 }
 .cc-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 700; }
-.cc-dev-row {
-    display: flex; align-items: center; gap: 9px; width: 100%; margin-top: 10px; padding: 10px 12px;
-    border-radius: 14px; border: 1px solid var(--color-line); background: var(--color-bg-elev);
-    color: var(--color-ink); font-size: 12.5px; font-weight: 700; transition: border-color .14s, background .14s;
-}
-.cc-dev-row:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--color-bg-hi); }
-.cc-dev-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
-.cc-dev-go { color: var(--color-faint); font-size: 16px; }
-.cc-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
-.cc-dot.on { background: var(--win); box-shadow: 0 0 8px color-mix(in srgb, var(--win) 60%, transparent); }
-.cc-dot.off { background: var(--color-faint); }
 .cc-pop-enter-active, .cc-pop-leave-active { transition: opacity .14s, transform .14s; }
 .cc-pop-enter-from, .cc-pop-leave-to { opacity: 0; transform: translateY(-4px) scale(.98); }
 </style>

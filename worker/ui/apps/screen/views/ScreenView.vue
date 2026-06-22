@@ -25,6 +25,7 @@ function ensureBound(ws) {
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useWsStore } from '@/system/stores/ws';
 import ScreenToolbar from '../components/ScreenToolbar.vue';
+import DeviceOffline from '@/system/components/DeviceOffline.vue';
 
 const ws = useWsStore();
 ensureBound(ws);
@@ -102,19 +103,16 @@ onUnmounted(() => {
 <template>
     <div class="flex min-h-0 flex-1 flex-col bg-bg">
         <ScreenToolbar
-            :can-capture="ws.connected"
+            :can-capture="ws.deviceOnline"
             :loading="loading"
             :captured-text="capturedText"
             :size-text="sizeText"
             @capture="capture"
         />
 
-        <main class="relative min-h-0 flex-1 overflow-auto bg-bg">
-            <div v-if="!ws.connected && !(ws.state === 'pending')" class="flex h-full items-center justify-center px-4 text-center text-sm text-muted">
-                等待客户端连接和认证
-            </div>
-
-            <div v-else-if="errorMsg" class="flex h-full items-center justify-center px-4 text-center">
+        <DeviceOffline v-if="!ws.deviceOnline" />
+        <main v-else class="relative min-h-0 flex-1 overflow-auto bg-bg">
+            <div v-if="errorMsg" class="flex h-full items-center justify-center px-4 text-center">
                 <div>
                     <div class="mb-3 text-sm text-bad">{{ errorMsg }}</div>
                     <button

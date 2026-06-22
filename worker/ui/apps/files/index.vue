@@ -7,6 +7,7 @@ import FileList from '@/apps/files/components/FileList.vue';
 import UploadProgress from '@/apps/files/components/UploadProgress.vue';
 import PreviewModal from '@/apps/files/components/PreviewModal.vue';
 import ActionSheet from '@/apps/files/components/ActionSheet.vue';
+import DeviceOffline from '@/system/components/DeviceOffline.vue';
 
 const files = useFilesStore();
 const ws = useWsStore();
@@ -40,15 +41,19 @@ watch(() => ws.connected, (ready, wasReady) => {
          @dragleave="onDragLeave"
          @drop="onDrop">
         <FilesToolbar />
-        <FileList />
-        <UploadProgress />
 
-        <div v-if="files.isDragOver"
-            class="absolute inset-0 pointer-events-none border-2 border-dashed border-accent bg-accent/10 flex items-center justify-center">
-            <div class="text-accent-hi text-sm font-medium">松手上传到当前目录</div>
-        </div>
+        <template v-if="ws.deviceOnline">
+            <FileList />
+            <UploadProgress />
 
-        <PreviewModal />
-        <ActionSheet />
+            <div v-if="files.isDragOver"
+                class="absolute inset-0 pointer-events-none border-2 border-dashed border-accent bg-accent/10 flex items-center justify-center">
+                <div class="text-accent-hi text-sm font-medium">松手上传到当前目录</div>
+            </div>
+
+            <PreviewModal />
+            <ActionSheet />
+        </template>
+        <DeviceOffline v-else />
     </div>
 </template>
