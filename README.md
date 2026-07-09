@@ -1,95 +1,204 @@
 # Roam
 
-掏出手机，给 AI 发一句话，它就在你电脑上干活。
+**在手机上继续使用电脑里的 Claude Code / Codex** —— 把本机的终端 / 文件 / 屏幕带到任意设备的浏览器上。
 
-跑命令、改文件、截屏、点鼠标、操控 Chrome —— 你躺沙发上看着就行。
+机器不暴露公网。本机 Server 主动连 Cloudflare Worker,Worker 只做中继。远程网页只连 Worker,数据不落地。
 
-## 为什么做这个
+| 终端 | 文件管理 | 系统状态 |
+|---|---|---|
+| ![终端](https://pub-5cb9f2ea49ac433aba4c20d46cd886e7.r2.dev/posts/roam-v2/01-terminal.png) | ![文件管理](https://pub-5cb9f2ea49ac433aba4c20d46cd886e7.r2.dev/posts/roam-v2/02-files.png) | ![系统状态](https://pub-5cb9f2ea49ac433aba4c20d46cd886e7.r2.dev/posts/roam-v2/03-status.png) |
 
-你的电脑很强，但你不在电脑前。你的手机随时在手，但它干不了电脑的活。
+社区讨论: [LINUX DO](https://linux.do)
 
-Roam 把两者接起来：**手机是遥控器，AI 是执行者，电脑是工具。**
+> **顺便打个广告**:我目前主力在做的另一个项目是 [AIOS](https://github.com/valueriver/AIOS) —— 用 AI 直接构建一个操作系统,欢迎去看看、Star、提 issue。
 
-你说「把桌面上那个 PDF 里的表格整理成 Excel」，AI 自己去找文件、读内容、跑脚本、生成结果。你说「帮我在 Chrome 上登录那个后台把报表导出来」，AI 直接用你的真实登录态去操作浏览器。
+## 项目组成
 
-不是套壳 ChatGPT。Roam 有自研 Agent 内核 —— 接任意 OpenAI 兼容模型，工具调用循环执行，遇到问题自己重试，直到任务完成。
-
-## 它能干什么
-
-**你在手机上说** → **AI 在电脑上做**
-
-| 你说 | AI 做 |
-|---|---|
-| 帮我跑一下测试 | 打开终端，执行命令，实时返回输出 |
-| 桌面截个屏发给我 | 截屏、点击、打字、滚动，像远程桌面但 AI 在操作 |
-| 去 Chrome 帮我查个东西 | 用你的真实登录态浏览网页、填表、抓数据 |
-| 把下载目录清理一下 | 浏览目录、读写文件、批量操作 |
-| 帮我写个脚本处理这批数据 | 自主规划 → 写代码 → 执行 → 检查结果 → 修复 → 交付 |
-
-关键词：**自研 Agent、工具循环、自主执行、任意模型。**
-
-## 架构
-
-```
-手机 ──wss──▶ 云端大脑（Cloudflare） ──wss──▶ 你的电脑 ──local──▶ Chrome
+```text
+roam/
+├─ worker/               # Cloudflare Worker + Vue 前端 + WebSocket 中继
+└─ server/               # 本机 Server,提供终端 / 文件 / 屏幕
 ```
 
-三个模块，各管一件事：
+运行时链路:
 
-| 模块 | 职责 |
-|---|---|
-| `worker/` | 云端大脑 — Agent 引擎 + 数据 + 鉴权 + 实时中继 |
-| `computer/` | 本机执行器 — 终端 / 文件 / 屏幕 / 鼠标键盘 |
-| `browser/` | Chrome 扩展 — CDP 桥接，驱动真实浏览器 |
+```text
+远程浏览器
+  ↓ https / wss
+Cloudflare Worker (中继,不存数据)
+  ↓ wss
+本机 Roam Server (终端 / 文件 / 屏幕)
+```
 
-电脑不暴露公网，主动外连云端。CDP 只走本机 loopback。
+## 能力
 
-## 快速开始
+- 远程终端
+- 文件浏览、读取、上传、重命名、删除
+- 屏幕截图查看
+- 固定远程连接 session id
 
-需要：Node 20+、Cloudflare 账号。鼠标控制需 macOS + `brew install cliclick`。
+## 前置要求
 
-### 1. 部署云端
+- Node.js 20+
+- Cloudflare 账号
+- 一台运行 Roam Server 的本机电脑
+
+## 部署 Worker
 
 ```bash
-git clone https://github.com/realuckyang/roam
-cd roam/worker && npm install
-cp wrangler.example.jsonc wrangler.jsonc          # 填 account_id、database_id
-npx wrangler d1 create roam                       # 拿到 database_id 填回去
-npx wrangler d1 execute roam --remote --file=schema.sql
-npx wrangler secret put AUTH_SECRET               # openssl rand -hex 32
+git clone https://github.com/valueriver/roam
+cd roam/worker
+npm install
+cp wrangler.example.jsonc wrangler.jsonc
+```
+
+编辑 `worker/wrangler.jsonc`:
+
+- `account_id`:Cloudflare account id,可用 `npx wrangler whoami` 查看
+- `routes`:可选,自定义域名;不用就删掉整个 `routes` 段
+
+部署:
+
+```bash
 npm run deploy
 ```
 
-首次打开网页会让你设置访问密码。
+部署完成后得到 Worker 地址,例如:
 
-### 2. 连上你的电脑
+- `https://roam.<your-subdomain>.workers.dev`
+- `https://i.example.com`
+
+## 配置 Server
 
 ```bash
-cd ../computer && npm install
-cp config.example.js config.js                    # 填 WORKER_URL + DEVICE_SECRET
+cd ../server
+npm install
+cp config.example.js config.js
+```
+
+编辑 `server/config.js`:
+
+```js
+export default {
+    CLOUDFLARE_WORKER_URL: 'https://roam.example.workers.dev',
+    SESSION_ID: '',          // 留空则每次启动随机生成
+    SESSION_PASSWORD: '',    // 留空则不要密码
+    DEBUG: '0',
+};
+```
+
+## 启动 Server
+
+```bash
+cd server
 npm start
 ```
 
-看到 ✅ 就上线了。
+控制台会输出:
 
-### 3. 填模型配置
+- 远程访问入口 URL
+- 访问密码(如果配置了)
 
-网页 **设置 → 模型** 填 API 地址 / Key / 模型名（任意 OpenAI 兼容接口）。
+## 保活运行
 
-然后回对话页面发消息 —— AI 就开始在你电脑上干活了。
+希望关机/重启/网络抖动后 server 自动起来,各平台推荐做法:
 
-### 4. 浏览器控制（可选）
+### macOS
 
-Chrome → 扩展管理 → 开发者模式 → 加载 `roam/browser/`。
+**临时(终端开着才活,关电脑前阻止休眠):**
 
-之后 AI 能直接操控你的 Chrome：跳转页面、跑 JS、截图、模拟输入，用的是你的真实登录态。
+```bash
+caffeinate -dimsu node /path/to/roam/server/index.js
+```
 
-## 安全
+**长期(开机自启,崩了自动拉起):** 用 launchd。新建 `~/Library/LaunchAgents/me.meeem.roam.plist`:
 
-- JWT 鉴权：网页走密码，设备走密钥
-- 电脑主动外连，不开端口
-- CDP 只监听 127.0.0.1 + token 校验
-- 敏感配置已在 .gitignore
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>me.meeem.roam</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/node</string>
+        <string>/Users/YOU/path/to/roam/server/index.js</string>
+    </array>
+    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/server</string>
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+    <key>StandardOutPath</key><string>/tmp/roam.out.log</string>
+    <key>StandardErrorPath</key><string>/tmp/roam.err.log</string>
+</dict>
+</plist>
+```
+
+加载:
+
+```bash
+launchctl load ~/Library/LaunchAgents/me.meeem.roam.plist
+launchctl unload ~/Library/LaunchAgents/me.meeem.roam.plist  # 卸载
+```
+
+`which node` 看下你的 node 路径,nvm 装的话写 nvm 实际路径。
+
+### Linux
+
+用 systemd user service。新建 `~/.config/systemd/user/roam.service`:
+
+```ini
+[Unit]
+Description=Roam Server
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/node /home/YOU/roam/server/index.js
+WorkingDirectory=/home/YOU/roam/server
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+```
+
+启用 + 启动:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now roam
+systemctl --user status roam
+journalctl --user -u roam -f          # 看日志
+```
+
+如果希望未登录也跑(headless 服务器):`sudo loginctl enable-linger $USER`。
+
+### Windows
+
+最省事用 [nssm](https://nssm.cc/) 把 node 注册成 Windows 服务:
+
+```powershell
+nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\server\index.js"
+nssm set Roam AppDirectory "C:\path\to\roam\server"
+nssm start Roam
+nssm remove Roam confirm   # 卸载
+```
+
+或用任务计划程序触发器选"启动时",操作填 `node.exe` + 脚本路径。
+
+## 排障
+
+页面显示未连接:
+
+- 确认 `server` 正在运行
+- 确认 `CLOUDFLARE_WORKER_URL` 是当前部署的 Worker 地址
+- 确认远程 URL 里的 `session` 和 Server 控制台打印的一致
+
+## 安全边界
+
+- Worker 不保存终端输出、文件内容或任何业务数据
+- 真实数据保留在本机 Server
+- `SESSION_PASSWORD` 用于远程网页访问校验
+- 不要把真实 `server/config.js` 和 `worker/wrangler.jsonc` 提交到仓库
 
 ## License
 

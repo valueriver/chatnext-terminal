@@ -1,16 +1,30 @@
 {
-  "name": "roam-worker",
+  "name": "roam",
   "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build:ui": "npm --prefix ui run build",
     "dev": "wrangler dev --port 9506",
-    "predeploy": "npm run build:ui",
+    "dev:web": "vite",
+    "build": "vite build",
+    "predeploy": "npm run build",
     "deploy": "wrangler deploy",
-    "start": "wrangler dev --port 9506"
+    "start": "wrangler dev --port 9506",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/xterm": "^5.5.0",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.0.0",
     "wrangler": "^4.35.0"
   }
 }

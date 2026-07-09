@@ -5,48 +5,36 @@
  * 需要准备:
  *   1) Cloudflare account_id
  *        npx wrangler whoami
- *   2) D1 数据库(账户/对话/设置/快捷指令都落这里):
- *        npx wrangler d1 create roam
- *        把输出的 database_id 填到下面 d1_databases[0].database_id
- *        建表: npx wrangler d1 execute roam --remote --file=schema.sql
- *   3) 鉴权密钥(JWT 签名):
- *        npx wrangler secret put AUTH_SECRET   # 如 openssl rand -hex 32
- *   4) (可选)绑自己的域名 — 先把域名托管进 Cloudflare,再填 routes;
+ *   2) (可选)绑自己的域名 — 先把域名托管进 Cloudflare,再填 routes;
  *        不绑就把整个 "routes" 段删掉,Worker 会自动给一个
  *        roam.<your-subdomain>.workers.dev 的测试地址。
  *
- * Worker = 账户 + 大脑 + 数据:DO(RoamHub) 做实时中继 + AI agent,D1 存所有云端数据。
+ * Worker 自身是无状态中继 — 不需要 D1 / R2 / KV 任何存储。
+ * 所有真实数据都在桌面端 ~/.roam/roam.db 的 SQLite 里。
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "roam",
 	"account_id": "<YOUR_CLOUDFLARE_ACCOUNT_ID>",
-	"main": "src/index.js",
+	"main": "server/index.js",
 	"compatibility_date": "2025-09-12",
 	"assets": {
-		"directory": "ui/dist",
+		"directory": "./public",
 		"binding": "ASSETS",
 		"not_found_handling": "single-page-application"
 	},
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "RoamHub",
-				"name": "HUB"
+				"class_name": "TerminalSessionManager",
+				"name": "TERMINAL_SESSION_MANAGER"
 			}
 		]
 	},
 	"migrations": [
 		{
 			"tag": "v1",
-			"new_sqlite_classes": ["RoamHub"]
-		}
-	],
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "roam",
-			"database_id": "<YOUR_D1_DATABASE_ID>"
+			"new_sqlite_classes": ["TerminalSessionManager"]
 		}
 	],
 	"observability": {

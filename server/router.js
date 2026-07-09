@@ -1,0 +1,47 @@
+import ws from './ws.js';
+import guard from './services/guard/index.js';
+import terminal from './services/terminal/index.js';
+import files from './services/files/index.js';
+import screen from './services/screen/index.js';
+import status from './services/status/index.js';
+
+let onDevicesChanged = () => {};
+
+function bindOnDevicesChanged(fn) {
+    onDevicesChanged = fn;
+}
+
+async function dispatch(message) {
+    const t = message.type || '';
+
+    if (t === 'connection.ping') {
+        ws.send({ type: 'connection.pong', to: 'server', data: {} });
+        return;
+    }
+    if (t === 'connection.devices') {
+        onDevicesChanged(message.data?.devices);
+        return;
+    }
+    if (t === 'connection.ready') return;
+
+    if (t.startsWith('auth.')) {
+        if (await guard.handle(message)) return;
+    }
+    if (t.startsWith('terminal.') || t.startsWith('data.') || t.startsWith('system.')) {
+        if (await terminal.handle(message)) return;
+    }
+    if (t.startsWith('fs.')) {
+        if (await files.handle(message)) return;
+    }
+    if (t.startsWith('screen.')) {
+        if (await screen.handle(message)) return;
+    }
+    if (t.startsWith('status.')) {
+        if (await status.handle(message)) return;
+    }
+
+    console.log('未识别的消息类型:', t);
+}
+
+export { dispatch, bindOnDevicesChanged };
+export default { dispatch, bindOnDevicesChanged };

@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+@import "@xterm/xterm/css/xterm.css";
+
+/* =================================================================
+   单一暖暗主题 —— 取自 chatnext-agent 的视觉语言
+   ================================================================= */
+
+@theme {
+    --color-bg:        #0d0c0a;
+    --color-bg-elev:   #161310;
+    --color-bg-hi:     #1e1a14;
+    --color-line:      #2a241c;
+    --color-line-hi:   #3a3226;
+    --color-ink:       #ede7d8;
+    --color-muted:     #9a9180;
+    --color-faint:     #6a6355;
+    --color-accent:    #e6946b;
+    --color-accent-hi: #f1a57d;
+    --color-good:      #7bcc8b;
+    --color-bad:       #ff6a4a;
+
+    --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    --font-serif: 'Fraunces', Georgia, 'Songti SC', 'STSong', serif;
+    --font-mono:  'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* 兼容老映射层的别名（旧组件里还有 zinc/emerald 类在用） */
+:root {
+    --c-bg:         var(--color-bg);
+    --c-surface:    var(--color-bg-elev);
+    --c-elevated:   var(--color-bg-hi);
+    --c-border:     var(--color-line-hi);
+    --c-border-soft:var(--color-line);
+    --c-text:       var(--color-ink);
+    --c-text-muted: var(--color-muted);
+    --c-text-dim:   var(--color-faint);
+    --c-accent:     var(--color-accent);
+    --c-accent-hov: var(--color-accent-hi);
+    --c-accent-soft:color-mix(in srgb, var(--color-accent) 20%, transparent);
+    --c-accent-fg:  var(--color-bg);
+    --c-danger:     var(--color-bad);
+    --c-warning:    var(--color-accent);
+    --c-scroll:     var(--color-line-hi);
+    --c-scroll-hov: #4a4234;
+    --c-terminal-bg:var(--color-bg);
+}
+
+/* Base */
+html, body {
+    height: 100%;
+    overscroll-behavior: none;
+    overflow: hidden;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+}
+body {
+    margin: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+#app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg);
+}
+input, textarea, button, select { font: inherit; }
+input, textarea { font-size: 16px; }
+header, footer, section, button, [role="tab"] {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.xterm { padding: 8px; }
+.xterm-viewport { overflow-y: auto !important; background: transparent !important; }
+
+.keypad-row::-webkit-scrollbar { display: none; }
+.keypad-row { scrollbar-width: none; }
+
+/* =================================================================
+   动画
+   ================================================================= */
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+.pulse { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+@keyframes pulse-soft {
+    50% { opacity: .35; }
+}
+
+@keyframes dot-bounce {
+    0%, 100% { opacity: .3; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-2px); }
+}
+
+@keyframes toast-in {
+    from { transform: translate(-50%, 8px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+.toast-enter { animation: toast-in 0.18s ease-out; }
+
+@keyframes sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+.sheet-enter { animation: sheet-in 0.2s ease-out; }
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.fade-enter { animation: fade-in 0.15s ease-out; }
+
+@keyframes slide-in-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+.drawer-enter { animation: slide-in-left 0.2s ease-out; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-line-hi); }
+
+.safe-top { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+
+/* =================================================================
+   Markdown prose（assistant 输出用）
+   ================================================================= */
+
+.md { color: var(--color-ink); line-height: 1.7; font-size: 13px; }
+.md p { margin: 0 0 .65em; }
+.md p:last-child { margin-bottom: 0; }
+.md ul, .md ol { margin: .25em 0 .65em; padding-left: 1.4em; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md li { margin: .15em 0; }
+.md li > p { margin: 0; }
+.md code {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: var(--color-accent-hi);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: .88em;
+}
+.md pre {
+    background: #0a0908;
+    padding: 12px 14px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: .5em 0;
+    font-size: .86em;
+    border: 1px solid var(--color-line);
+    line-height: 1.5;
+    font-family: var(--font-mono);
+}
+.md pre code {
+    background: transparent;
+    color: var(--color-ink);
+    padding: 0;
+    font-size: inherit;
+}
+.md a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.md a:hover { color: var(--color-accent-hi); }
+.md strong { font-weight: 700; color: var(--color-ink); }
+.md em { font-style: italic; }
+.md h1, .md h2, .md h3, .md h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    margin: .9em 0 .4em;
+    line-height: 1.3;
+    color: var(--color-ink);
+}
+.md h1 { font-size: 1.35em; }
+.md h2 { font-size: 1.2em; }
+.md h3 { font-size: 1.08em; }
+.md blockquote {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1em;
+    color: var(--color-muted);
+    margin: .5em 0;
+    font-style: italic;
+}
+.md hr { border: 0; border-top: 1px solid var(--color-line); margin: .8em 0; }
+.md table { border-collapse: collapse; font-size: .9em; margin: .5em 0; }
+.md th, .md td { border: 1px solid var(--color-line); padding: .3em .6em; }
+.md th { background: var(--color-bg-elev); }
+
+/* =================================================================
+   兼容层：把现有组件里残留的 zinc / emerald / red / amber 类
+   重定向到新 token，这样组件代码不用全替换也能呈现新视觉。
+   ================================================================= */
+
+/* 背景 */
+.bg-zinc-950 { background-color: var(--color-bg) !important; }
+.bg-zinc-900 { background-color: var(--color-bg-elev) !important; }
+.bg-zinc-900\/80 { background-color: color-mix(in srgb, var(--color-bg-elev) 88%, transparent) !important; }
+.bg-zinc-900\/70 { background-color: color-mix(in srgb, var(--color-bg-elev) 80%, transparent) !important; }
+.bg-zinc-900\/50 { background-color: color-mix(in srgb, var(--color-bg-elev) 60%, transparent) !important; }
+.bg-zinc-800 { background-color: var(--color-bg-hi) !important; }
+.bg-zinc-700 { background-color: var(--color-bg-hi) !important; }
+
+.hover\:bg-zinc-800:hover { background-color: var(--color-bg-hi) !important; }
+.hover\:bg-zinc-700:hover { background-color: color-mix(in srgb, var(--color-bg-hi) 85%, var(--color-line-hi)) !important; }
+.active\:bg-zinc-600:active { background-color: color-mix(in srgb, var(--color-bg-hi) 70%, var(--color-line-hi)) !important; }
+.active\:bg-zinc-700:active { background-color: color-mix(in srgb, var(--color-bg-hi) 80%, var(--color-line-hi)) !important; }
+
+/* 文字 */
+.text-zinc-100 { color: var(--color-ink) !important; }
+.text-zinc-200 { color: var(--color-ink) !important; }
+.text-zinc-300 { color: var(--color-ink) !important; }
+.text-zinc-400 { color: var(--color-muted) !important; }
+.text-zinc-500 { color: var(--color-muted) !important; }
+.text-zinc-600 { color: var(--color-faint) !important; }
+
+.hover\:text-zinc-100:hover { color: var(--color-ink) !important; }
+.hover\:text-zinc-200:hover { color: var(--color-ink) !important; }
+.hover\:text-zinc-300:hover { color: var(--color-ink) !important; }
+
+.placeholder\:text-zinc-500::placeholder { color: var(--color-faint) !important; }
+
+/* 边框 */
+.border-zinc-800 { border-color: var(--color-line) !important; }
+.border-zinc-800\/70 { border-color: color-mix(in srgb, var(--color-line) 70%, transparent) !important; }
+.border-zinc-700 { border-color: var(--color-line-hi) !important; }
+.border-zinc-700\/60 { border-color: color-mix(in srgb, var(--color-line-hi) 60%, transparent) !important; }
+.border-zinc-600 { border-color: var(--color-line-hi) !important; }
+.border-zinc-900\/50 { border-color: color-mix(in srgb, var(--color-line) 50%, transparent) !important; }
+
+/* 强调色（emerald → accent 橙） */
+.bg-emerald-500 { background-color: var(--color-accent) !important; }
+.bg-emerald-600 { background-color: var(--color-accent) !important; }
+.bg-emerald-700 { background-color: var(--color-accent-hi) !important; }
+.hover\:bg-emerald-500:hover { background-color: var(--color-accent-hi) !important; }
+.hover\:bg-emerald-600:hover { background-color: var(--color-accent-hi) !important; }
+.active\:bg-emerald-700:active { background-color: var(--color-accent-hi) !important; }
+
+.bg-emerald-900\/30 { background-color: color-mix(in srgb, var(--color-accent) 18%, transparent) !important; }
+.bg-emerald-900\/50 { background-color: color-mix(in srgb, var(--color-accent) 26%, transparent) !important; }
+.bg-emerald-950\/30 { background-color: color-mix(in srgb, var(--color-accent) 14%, transparent) !important; }
+.hover\:bg-emerald-900\/50:hover { background-color: color-mix(in srgb, var(--color-accent) 26%, transparent) !important; }
+.active\:bg-emerald-900\/70:active { background-color: color-mix(in srgb, var(--color-accent) 34%, transparent) !important; }
+
+.text-emerald-200 { color: var(--color-accent-hi) !important; }
+.text-emerald-300 { color: var(--color-accent-hi) !important; }
+.text-emerald-400 { color: var(--color-accent) !important; }
+.hover\:text-emerald-300:hover { color: var(--color-accent-hi) !important; }
+
+.border-emerald-700 { border-color: color-mix(in srgb, var(--color-accent) 60%, transparent) !important; }
+.border-emerald-800\/40 { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.border-emerald-800\/50 { border-color: color-mix(in srgb, var(--color-accent) 40%, transparent) !important; }
+
+.focus\:border-emerald-500:focus { border-color: var(--color-accent) !important; }
+.focus\:ring-emerald-500\/30:focus { --tw-ring-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.accent-emerald-500 { accent-color: var(--color-accent); }
+
+.shadow-\[0_0_8px_rgba\(16\,185\,129\,0\.6\)\] {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent) !important;
+}
+
+/* 禁用态 */
+.disabled\:bg-zinc-700:disabled { background-color: var(--color-bg-hi) !important; }
+.disabled\:text-zinc-500:disabled { color: var(--color-faint) !important; }
+
+/* 终端容器背景（bg-black 映射到主底色） */
+.bg-black { background-color: var(--color-bg) !important; }
+
+/* 半透明覆盖层 */
+.bg-black\/60 { background-color: rgba(0, 0, 0, 0.55) !important; }
+.bg-black\/70 { background-color: rgba(0, 0, 0, 0.65) !important; }
+
+/* 危险色（删除等） */
+.bg-red-900\/40 { background-color: color-mix(in srgb, var(--color-bad) 18%, transparent) !important; }
+.bg-red-900\/30 { background-color: color-mix(in srgb, var(--color-bad) 14%, transparent) !important; }
+.bg-red-950\/30 { background-color: color-mix(in srgb, var(--color-bad) 14%, transparent) !important; }
+.bg-red-950\/40 { background-color: color-mix(in srgb, var(--color-bad) 18%, transparent) !important; }
+.bg-red-950\/70 { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.hover\:bg-red-900\/50:hover { background-color: color-mix(in srgb, var(--color-bad) 28%, transparent) !important; }
+.hover\:bg-red-900\/60:hover { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.hover\:bg-red-950\/70:hover { background-color: color-mix(in srgb, var(--color-bad) 32%, transparent) !important; }
+.active\:bg-red-900\/70:active { background-color: color-mix(in srgb, var(--color-bad) 40%, transparent) !important; }
+.active\:bg-red-900\/80:active { background-color: color-mix(in srgb, var(--color-bad) 50%, transparent) !important; }
+.text-red-200 { color: var(--color-bad) !important; }
+.text-red-300 { color: var(--color-bad) !important; }
+.text-red-400 { color: var(--color-bad) !important; }
+.border-red-800 { border-color: color-mix(in srgb, var(--color-bad) 45%, transparent) !important; }
+.border-red-900\/40 { border-color: color-mix(in srgb, var(--color-bad) 30%, transparent) !important; }
+.border-red-900\/50 { border-color: color-mix(in srgb, var(--color-bad) 40%, transparent) !important; }
+.border-red-900\/60 { border-color: color-mix(in srgb, var(--color-bad) 50%, transparent) !important; }
+.text-red-300\/70 { color: color-mix(in srgb, var(--color-bad) 70%, transparent) !important; }
+
+/* 警告色（统一成 accent 橙，暖调） */
+.bg-amber-900\/20 { background-color: color-mix(in srgb, var(--color-accent) 12%, transparent) !important; }
+.bg-amber-900\/60 { background-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.bg-amber-950\/20 { background-color: color-mix(in srgb, var(--color-accent) 10%, transparent) !important; }
+.bg-amber-950\/30 { background-color: color-mix(in srgb, var(--color-accent) 14%, transparent) !important; }
+.hover\:bg-amber-900\/40:hover { background-color: color-mix(in srgb, var(--color-accent) 24%, transparent) !important; }
+.active\:bg-amber-900\/60:active { background-color: color-mix(in srgb, var(--color-accent) 36%, transparent) !important; }
+.text-amber-200 { color: var(--color-accent-hi) !important; }
+.text-amber-300\/70 { color: color-mix(in srgb, var(--color-accent) 70%, transparent) !important; }
+.border-amber-900\/40 { border-color: color-mix(in srgb, var(--color-accent) 30%, transparent) !important; }
+.border-amber-900\/60 { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent) !important; }
+.bg-amber-400 { background-color: var(--color-accent) !important; }
