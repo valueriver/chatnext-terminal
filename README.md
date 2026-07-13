@@ -1,8 +1,8 @@
 # Roam
 
-**在手机上继续使用电脑里的 Claude Code / Codex** —— 把本机的终端 / 文件 / 屏幕带到任意设备的浏览器上。
+**在手机上继续使用电脑里的 Claude Code / Codex** —— 把电脑端的终端 / 文件 / 屏幕带到任意设备的浏览器上。
 
-机器不暴露公网。本机 Server 主动连 Cloudflare Worker,Worker 只做中继。远程网页只连 Worker,数据不落地。
+机器不暴露公网。电脑端主动连 Cloudflare Worker,Worker 只做中继。远程网页只连 Worker,数据不落地。
 
 | 终端 | 文件管理 | 系统状态 |
 |---|---|---|
@@ -17,7 +17,7 @@
 ```text
 roam/
 ├─ worker/               # Cloudflare Worker + Vue 前端 + WebSocket 中继
-└─ server/               # 本机 Server,提供终端 / 文件 / 屏幕
+└─ computer/             # 电脑端,提供终端 / 文件 / 屏幕
 ```
 
 运行时链路:
@@ -27,7 +27,7 @@ roam/
   ↓ https / wss
 Cloudflare Worker (中继,不存数据)
   ↓ wss
-本机 Roam Server (终端 / 文件 / 屏幕)
+Roam Computer (终端 / 文件 / 屏幕)
 ```
 
 ## 能力
@@ -41,7 +41,7 @@ Cloudflare Worker (中继,不存数据)
 
 - Node.js 20+
 - Cloudflare 账号
-- 一台运行 Roam Server 的本机电脑
+- 一台运行 Roam Computer 的电脑
 
 ## 部署 Worker
 
@@ -68,15 +68,15 @@ npm run deploy
 - `https://roam.<your-subdomain>.workers.dev`
 - `https://i.example.com`
 
-## 配置 Server
+## 配置 Computer
 
 ```bash
-cd ../server
+cd ../computer
 npm install
 cp config.example.js config.js
 ```
 
-编辑 `server/config.js`:
+编辑 `computer/config.js`:
 
 ```js
 export default {
@@ -87,10 +87,10 @@ export default {
 };
 ```
 
-## 启动 Server
+## 启动 Computer
 
 ```bash
-cd server
+cd computer
 npm start
 ```
 
@@ -101,14 +101,14 @@ npm start
 
 ## 保活运行
 
-希望关机/重启/网络抖动后 server 自动起来,各平台推荐做法:
+希望关机/重启/网络抖动后 computer 自动起来,各平台推荐做法:
 
 ### macOS
 
 **临时(终端开着才活,关电脑前阻止休眠):**
 
 ```bash
-caffeinate -dimsu node /path/to/roam/server/index.js
+caffeinate -dimsu node /path/to/roam/computer/index.js
 ```
 
 **长期(开机自启,崩了自动拉起):** 用 launchd。新建 `~/Library/LaunchAgents/me.meeem.roam.plist`:
@@ -122,9 +122,9 @@ caffeinate -dimsu node /path/to/roam/server/index.js
     <key>ProgramArguments</key>
     <array>
         <string>/usr/local/bin/node</string>
-        <string>/Users/YOU/path/to/roam/server/index.js</string>
+        <string>/Users/YOU/path/to/roam/computer/index.js</string>
     </array>
-    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/server</string>
+    <key>WorkingDirectory</key><string>/Users/YOU/path/to/roam/computer</string>
     <key>RunAtLoad</key><true/>
     <key>KeepAlive</key><true/>
     <key>StandardOutPath</key><string>/tmp/roam.out.log</string>
@@ -148,12 +148,12 @@ launchctl unload ~/Library/LaunchAgents/me.meeem.roam.plist  # 卸载
 
 ```ini
 [Unit]
-Description=Roam Server
+Description=Roam Computer
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/node /home/YOU/roam/server/index.js
-WorkingDirectory=/home/YOU/roam/server
+ExecStart=/usr/bin/node /home/YOU/roam/computer/index.js
+WorkingDirectory=/home/YOU/roam/computer
 Restart=always
 RestartSec=3
 
@@ -177,8 +177,8 @@ journalctl --user -u roam -f          # 看日志
 最省事用 [nssm](https://nssm.cc/) 把 node 注册成 Windows 服务:
 
 ```powershell
-nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\server\index.js"
-nssm set Roam AppDirectory "C:\path\to\roam\server"
+nssm install Roam "C:\Program Files\nodejs\node.exe" "C:\path\to\roam\computer\index.js"
+nssm set Roam AppDirectory "C:\path\to\roam\computer"
 nssm start Roam
 nssm remove Roam confirm   # 卸载
 ```
@@ -189,16 +189,16 @@ nssm remove Roam confirm   # 卸载
 
 页面显示未连接:
 
-- 确认 `server` 正在运行
+- 确认 `computer` 正在运行
 - 确认 `CLOUDFLARE_WORKER_URL` 是当前部署的 Worker 地址
-- 确认远程 URL 里的 `session` 和 Server 控制台打印的一致
+- 确认远程 URL 里的 `session` 和 Computer 控制台打印的一致
 
 ## 安全边界
 
 - Worker 不保存终端输出、文件内容或任何业务数据
-- 真实数据保留在本机 Server
+- 真实数据保留在电脑端
 - `SESSION_PASSWORD` 用于远程网页访问校验
-- 不要把真实 `server/config.js` 和 `worker/wrangler.jsonc` 提交到仓库
+- 不要把真实 `computer/config.js` 和 `worker/wrangler.jsonc` 提交到仓库
 
 ## License
 

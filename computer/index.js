@@ -5,7 +5,7 @@ import guard from './services/guard/index.js';
 import terminal from './services/terminal/index.js';
 
 async function boot() {
-    console.log('🚀 正在启动 Roam Server...');
+    console.log('🚀 正在启动 Roam Computer...');
 
     guard.bindOnGrant((clientId) => {
         terminal.sendSnapshotTo(clientId);
@@ -29,7 +29,7 @@ async function boot() {
     });
 
     process.on('SIGINT', () => {
-        console.log('\n🛑 正在关闭 Roam Server...');
+        console.log('\n🛑 正在关闭 Roam Computer...');
         terminal.shutdown();
         ws.close();
         process.exit(0);
@@ -37,6 +37,6 @@ async function boot() {
 }
 
 boot().catch((err) => {
-    console.error('❌ Roam Server 启动失败:', err.message);
+    console.error('❌ Roam Computer 启动失败:', err.message);
     process.exit(1);
 });
