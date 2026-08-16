@@ -4,7 +4,7 @@ import path from 'path';
 import { createRequire } from 'module';
 import ws from '../../../ws.js';
 import { generateTerminalId } from '../../../core/ids.js';
-import { getDefaultShell, ensureDirectory, getDefaultDirectory } from './shell.js';
+import { getDefaultShell, getDefaultShellArgs, ensureDirectory, getDefaultDirectory } from './shell.js';
 
 const DEFAULT_COLS = 80;
 const DEFAULT_ROWS = 30;
@@ -115,6 +115,7 @@ async function create(options = {}) {
     const cols = options.cols || DEFAULT_COLS;
     const rows = options.rows || DEFAULT_ROWS;
     const shell = getDefaultShell();
+    const shellArgs = getDefaultShellArgs();
     const terminal = {
         id,
         title: options.title || path.basename(cwd) || cwd || 'Terminal',
@@ -126,7 +127,7 @@ async function create(options = {}) {
     };
 
     ensureNodePtyHelperExecutable();
-    const ptyProcess = pty.spawn(shell, [], {
+    const ptyProcess = pty.spawn(shell, shellArgs, {
         name: 'xterm-color', cols, rows, cwd, env: process.env,
     });
     attachPty(terminal, ptyProcess);
@@ -203,8 +204,9 @@ async function restart(terminalId) {
     terminal.ptyProcess?.kill();
 
     const shell = getDefaultShell();
+    const shellArgs = getDefaultShellArgs();
     ensureNodePtyHelperExecutable();
-    const ptyProcess = pty.spawn(shell, [], {
+    const ptyProcess = pty.spawn(shell, shellArgs, {
         name: 'xterm-color',
         cols: terminal.cols,
         rows: terminal.rows,

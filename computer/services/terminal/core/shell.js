@@ -9,6 +9,10 @@ function getDefaultShell() {
         : (process.env.SHELL || 'bash');
 }
 
+function getDefaultShellArgs() {
+    return os.platform() === 'win32' ? [] : ['-l'];
+}
+
 function getDefaultDirectory() {
     const desktop = path.join(os.homedir(), 'Desktop');
     return fs.existsSync(desktop) ? desktop : os.homedir();
@@ -22,5 +26,5 @@ async function ensureDirectory(cwd) {
     return resolved;
 }
 
-export { getDefaultShell, getDefaultDirectory, ensureDirectory };
-export default { getDefaultShell, getDefaultDirectory, ensureDirectory };
+export { getDefaultShell, getDefaultShellArgs, getDefaultDirectory, ensureDirectory };
+export default { getDefaultShell, getDefaultShellArgs, getDefaultDirectory, ensureDirectory };

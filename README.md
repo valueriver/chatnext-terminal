@@ -140,7 +140,9 @@ launchctl load ~/Library/LaunchAgents/me.meeem.roam.plist
 launchctl unload ~/Library/LaunchAgents/me.meeem.roam.plist  # 卸载
 ```
 
-`which node` 看下你的 node 路径,nvm 装的话写 nvm 实际路径。
+`which node` 看下你的 node 路径,nvm 装的话写 nvm 实际路径。Roam 在 macOS / Linux
+上会以登录 shell 启动远程终端,从而加载用户平时使用的 PATH;这也能让 Homebrew、
+Codex 等命令在 `launchd` 启动的 Roam 中保持可用。
 
 ### Linux
 
